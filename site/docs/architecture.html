@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>التصور التقني — DentLegal</title>
+<link rel="stylesheet" href="../assets/tokens.css"><link rel="stylesheet" href="../assets/doc.css">
+<style>
+  .arch { display: grid; gap: 10px; }
+  .layer { display: grid; grid-template-columns: 150px 1fr; gap: 10px; align-items: stretch; }
+  .layer > .lbl { background: var(--navy-900); color: #fff; border-radius: 12px; padding: 12px; font-weight: 700; font-size: 13.5px; display: flex; align-items: center; }
+  .layer > .row { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+  .comp { border: 1.5px solid var(--line-2); border-radius: 12px; padding: 10px 12px; background: var(--surface); font-size: 13px; line-height: 1.6; }
+  .comp b { display: block; font-size: 13.5px; }
+  .comp span { color: var(--muted); font-size: 12px; }
+  .comp.t { background: var(--teal-50); border-color: var(--teal-100); }
+  .comp.v { background: var(--violet-50); border-color: #d9cdf5; }
+  .comp.g { background: var(--gold-100); border-color: #ead9b8; }
+  .comp.b { background: var(--blue-50); border-color: #d6e2fb; }
+  .down { text-align: center; color: var(--faint); font-size: 18px; line-height: 1; }
+  @media (max-width: 640px) { .layer { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body class="doc" data-page="arch" data-root="../">
+<div class="doc-hero"><div class="in">
+  <span class="kicker">المرحلة الأولى · المخرج 10</span>
+  <h1>التصور التقني: Flutter + Laravel + RAG</h1>
+  <p class="lead">المعمارية المقترحة لتحويل النموذج المعتمد إلى نظام إنتاجي آمن وقابل للتوسع: تطبيق Flutter للطبيب، خلفية Laravel، بوابات ويب للمحامي والإدارة، ومحرك ذكاء اصطناعي قائم على الاسترجاع المعزز (RAG) من الأنظمة السعودية.</p>
+  <div class="meta"><span>تصور مبدئي — يُثبَّت في Sprint 0</span><span>لا يتضمن تطويرًا فعليًا في المرحلة الأولى</span></div>
+</div></div>
+
+<div class="doc-wrap"><nav class="toc"></nav><main class="doc-main">
+
+<section><h2 id="overview"><span class="n">1</span>نظرة عامة على المعمارية</h2>
+<div class="arch">
+  <div class="layer"><div class="lbl">الواجهات</div><div class="row">
+    <div class="comp t"><b>تطبيق الطبيب — Flutter</b><span>iOS و Android · عربي RTL</span></div>
+    <div class="comp g"><b>بوابة المحامي — ويب</b><span>مراجعة · تحرير · اعتماد</span></div>
+    <div class="comp"><b>لوحة الإدارة — ويب</b><span>تشغيل · محتوى · حوكمة</span></div></div></div>
+  <div class="down">↓ HTTPS · REST API v1 · Sanctum ↓</div>
+  <div class="layer"><div class="lbl">الخلفية — Laravel 12</div><div class="row">
+    <div class="comp"><b>الهوية والصلاحيات</b><span>Sanctum · Policies · RBAC</span></div>
+    <div class="comp"><b>القضايا وسير العمل</b><span>آلة حالات · إسناد · مهل</span></div>
+    <div class="comp"><b>المستندات</b><span>تشفير · روابط موقّعة · عارض آمن</span></div>
+    <div class="comp"><b>المراجعة والإصدارات</b><span>تتبع تغييرات · توقيع · قفل</span></div>
+    <div class="comp"><b>التنبيهات والاشتراكات</b><span>Push · SMS · بوابة دفع</span></div>
+    <div class="comp"><b>التدقيق</b><span>سجل إلحاقي لكل اطلاع وإجراء</span></div></div></div>
+  <div class="down">↓ قوائم انتظار (Redis + Horizon) ↓</div>
+  <div class="layer"><div class="lbl">خدمة الذكاء الاصطناعي</div><div class="row">
+    <div class="comp v"><b>OCR وتطبيع العربية</b><span>PDF وصور ومسح ضوئي</span></div>
+    <div class="comp v"><b>إخفاء الهوية</b><span>قبل أي استدعاء للنموذج</span></div>
+    <div class="comp v"><b>الاسترجاع الهجين</b><span>متجهي + نصي + إعادة ترتيب</span></div>
+    <div class="comp v"><b>التحليل والصياغة</b><span>مخرجات منظمة بالاستشهادات</span></div>
+    <div class="comp v"><b>التحقق والتقييم</b><span>استشهادات · أمانة · تكلفة</span></div></div></div>
+  <div class="down">↓</div>
+  <div class="layer"><div class="lbl">البيانات</div><div class="row">
+    <div class="comp b"><b>PostgreSQL 17</b><span>بيانات التطبيق + pgvector</span></div>
+    <div class="comp b"><b>Redis</b><span>قوائم · تخزين مؤقت · جلسات</span></div>
+    <div class="comp b"><b>تخزين كائنات مشفّر</b><span>S3-compatible داخل المملكة</span></div>
+    <div class="comp b"><b>نسخ احتياطي</b><span>يومي مشفّر + استعادة لحظية</span></div></div></div>
+  <div class="down">↓</div>
+  <div class="layer"><div class="lbl">خدمات خارجية</div><div class="row">
+    <div class="comp"><b>نموذج لغوي (LLM)</b><span>عبر API بعدم احتفاظ بالبيانات</span></div>
+    <div class="comp"><b>بوابة دفع محلية</b><span>مدى · Apple Pay · بطاقات</span></div>
+    <div class="comp"><b>SMS / FCM / APNs</b><span>OTP والإشعارات</span></div>
+    <div class="comp"><b>النفاذ الوطني</b><span>اختياري حسب الموافقة</span></div></div></div>
+</div>
+</section>
+
+<section><h2 id="flutter"><span class="n">2</span>تطبيق Flutter (الطبيب)</h2>
+<div class="grid g2">
+<div class="box"><h4>البنية</h4><ul class="small">
+<li>تقسيم حسب الميزة (feature-first) مع طبقات: العرض، المنطق، البيانات.</li>
+<li>إدارة الحالة: <b>Riverpod</b> مع توليد الكود، أو BLoC — يُحسم في Sprint 0 حسب الفريق.</li>
+<li>التنقل: <span class="code">go_router</span> مع روابط عميقة من الإشعارات إلى القضية.</li>
+<li>الشبكة: <span class="code">dio</span> مع معترضات للتوثيق وإعادة المحاولة؛ نماذج بيانات غير قابلة للتغيير (<span class="code">freezed</span>).</li>
+<li>بيئات منفصلة (dev / staging / prod) بإعدادات flavors.</li></ul></div>
+<div class="box"><h4>الأمان على الجهاز</h4><ul class="small">
+<li>تخزين الرموز في <span class="code">flutter_secure_storage</span> (Keychain / Keystore).</li>
+<li>دخول حيوي عبر <span class="code">local_auth</span> وقفل تلقائي بعد الخمول.</li>
+<li>منع لقطات الشاشة في شاشات المستندات والمسودات، وإخفاء المحتوى في مبدّل التطبيقات.</li>
+<li>تثبيت الشهادات (certificate pinning) وكشف الأجهزة المعدّلة.</li>
+<li>لا تُخزّن المستندات محليًا إلا مشفرة ومؤقتة.</li></ul></div>
+<div class="box"><h4>تجربة المستخدم</h4><ul class="small">
+<li>واجهة عربية RTL كاملة، خط عربي واضح، أحجام خطوط ديناميكية.</li>
+<li>التاريخ الهجري والميلادي عبر <span class="code">intl</span>.</li>
+<li>مسح المستندات بالكاميرا مع القص والتحسين، ورفع قابل للاستئناف.</li>
+<li>تحديثات فورية لحالة القضية عبر الإشعارات.</li></ul></div>
+<div class="box"><h4>الجودة والنشر</h4><ul class="small">
+<li>اختبارات وحدات وواجهات (widget/golden) واختبارات تكامل للمسار الرئيسي.</li>
+<li>CI لبناء ونشر نسخ TestFlight و Google Play Internal Testing.</li>
+<li>مراقبة الأعطال والأداء (Crashlytics أو Sentry).</li></ul></div>
+</div>
+</section>
+
+<section><h2 id="laravel"><span class="n">3</span>الخلفية: Laravel 12</h2>
+<div class="grid g2">
+<div class="box"><h4>تنظيم الكود</h4><ul class="small">
+<li>PHP 8.3+، وحدات حسب المجال: Auth، Cases، Documents، Reviews، Knowledge، Billing، Audit.</li>
+<li>متحكمات رفيعة، منطق الأعمال في Actions/Services، تحقق عبر Form Requests، استجابات عبر API Resources.</li>
+<li>Enums لحالات القضية والمراحل، وآلة حالات تمنع الانتقالات غير المسموحة.</li>
+<li>واجهة REST بإصدار <span class="code">/api/v1</span> وتوثيق OpenAPI.</li></ul></div>
+<div class="box"><h4>الصلاحيات والتدقيق</h4><ul class="small">
+<li>Sanctum لرموز تطبيق الجوال وجلسات بوابات الويب.</li>
+<li>Policies لكل مورد (القضية، المستند، المسودة) — المحامي يرى المُسند إليه فقط.</li>
+<li>سجل تدقيق إلحاقي لكل اطلاع وتعديل واعتماد، مع عنوان IP والجهاز.</li>
+<li>تحديد معدل الطلبات على الدخول وOTP والرفع.</li></ul></div>
+<div class="box"><h4>المعالجة غير المتزامنة</h4><ul class="small">
+<li>Redis + Horizon لقوائم الانتظار: OCR، التحليل، الإشعارات، الفوترة.</li>
+<li>كل مهمة بعدد محاولات ومهلة ومعالجة فشل، وآمنة لإعادة التنفيذ.</li>
+<li>مجدول المهام لتذكيرات المواعيد والمهل والتصعيد قبل انتهاء SLA.</li></ul></div>
+<div class="box"><h4>بوابات الويب</h4><ul class="small">
+<li>لوحة الإدارة وبوابة المحامي على Laravel (مثل <b>Filament</b> للإدارة، وواجهة مخصصة لمساحة المراجعة).</li>
+<li>محرر نصوص منسق مع تتبع التغييرات بين الإصدارات.</li>
+<li>عارض مستندات آمن بعلامة مائية باسم المستخدم.</li>
+<li>اختبارات Pest للمسارات الحرجة (الإسناد، الاعتماد، الصلاحيات).</li></ul></div>
+</div>
+</section>
+
+<section><h2 id="rag"><span class="n">4</span>محرك الذكاء الاصطناعي (RAG)</h2>
+<h3>أ. بناء قاعدة المعرفة (Ingestion)</h3>
+<div class="flow" data-flow='[["start","رفع المصدر","من لوحة الإدارة"],["ai","OCR وتنظيف","تطبيع الحروف العربية"],["ai","تقسيم هيكلي","مادة ← فقرة ← بند"],["ai","بيانات وصفية","النظام · رقم المادة · الإصدار · الصفحة · السريان"],["ai","التضمين","نموذج متعدد اللغات"],["ok","فهرسة","pgvector + بحث نصي"]]'></div>
+<h3>ب. تحليل القضية وصياغة الرد</h3>
+<div class="flow" data-flow='[["start","مستندات القضية",""],["ai","OCR + استخراج الوقائع","مخرجات منظمة JSON"],["ai","إخفاء الهوية","رموز بدل الأسماء"],["ai","استرجاع هجين","20 مقطعًا ← إعادة ترتيب ← 7"],["ai","التحليل والصياغة","بمعرّفات الاستشهاد"],["dec","التحقق","كل استشهاد موجود ومطابق"],["law","مراجعة المحامي","اعتماد بشري إلزامي"]]'></div>
+<h3>ج. القرارات التقنية المقترحة</h3>
+<div class="tw"><table class="t"><thead><tr><th>المكوّن</th><th>المقترح</th><th>ملاحظات</th></tr></thead><tbody>
+<tr><td>خدمة الذكاء الاصطناعي</td><td>خدمة مستقلة (Python / FastAPI) تستدعيها Laravel عبر مهام الانتظار</td><td>منظومة OCR والتضمين والتقييم أنضج في Python؛ وتبقى Laravel مالكة للبيانات والصلاحيات</td></tr>
+<tr><td>النموذج اللغوي</td><td>نموذج مؤسسي متقدم عبر API (مثل عائلة Claude من Anthropic) بسياسة عدم الاحتفاظ بالبيانات</td><td>نماذج أصغر للمهام البسيطة (التصنيف والاستخراج) لخفض التكلفة؛ يُقارن البديل في Sprint 0</td></tr>
+<tr><td>التضمين (Embeddings)</td><td>نموذج متعدد اللغات يدعم العربية (مستضاف ذاتيًا مثل BGE-M3 أو عبر API)</td><td>الاستضافة الذاتية تعزز الإقامة المحلية للبيانات</td></tr>
+<tr><td>قاعدة المتجهات</td><td>PostgreSQL + pgvector</td><td>قاعدة واحدة أبسط للتشغيل والنسخ الاحتياطي والصلاحيات</td></tr>
+<tr><td>البحث</td><td>هجين: دلالي + نصي (BM25) مع إعادة ترتيب متعدد اللغات</td><td>أرقام المواد والمصطلحات النظامية تحتاج مطابقة نصية دقيقة</td></tr>
+<tr><td>OCR</td><td>مقارنة مزود سحابي يدعم العربية مع بديل مفتوح المصدر</td><td>المعيار: دقة المستندات الممسوحة وخط اليد، وموقع المعالجة</td></tr>
+</tbody></table></div>
+<h3>د. الضوابط والجودة</h3>
+<ul>
+<li>مخرجات بمخطط محدد (JSON Schema) تُرفض إن لم تطابقه، وكل فقرة تحمل معرّفات المقاطع المستشهد بها.</li>
+<li>حد أدنى لدرجة الصلة؛ دونه يرفض المحرك الإجابة ويقترح التحويل لمحامٍ.</li>
+<li>نصوص المستندات تُمرَّر كبيانات معزولة لمنع حقن التعليمات.</li>
+<li>مجموعة تقييم معتمدة من المحامين (قضايا وأسئلة مع الاستشهادات الصحيحة) تُشغَّل قبل كل تحديث: دقة الاستشهاد، الأمانة للمصدر، نسبة التعديل، الزمن والتكلفة لكل قضية.</li>
+<li>تتبع كل تشغيل: النموذج والإصدار، المصادر المسترجعة، الزمن، التكلفة — للمراجعة والتدقيق.</li>
+</ul>
+<div class="callout warn"><svg class="i" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg><div><b>قرار يُحسم في Sprint 0:</b> موقع معالجة النموذج اللغوي. الخيار الافتراضي: إخفاء الهوية قبل الإرسال + اتفاقية عدم احتفاظ بالبيانات. وإن اشترطت متطلبات الامتثال المعالجة داخل المملكة بالكامل، يُعتمد نموذج مستضاف محليًا مع تقييم أثره على الجودة والتكلفة.</div></div>
+</section>
+
+<section><h2 id="security"><span class="n">5</span>الأمان والامتثال</h2>
+<div class="grid g3">
+<div class="box"><h4>حماية البيانات (PDPL)</h4><ul class="small"><li>تقليل البيانات: المريض برمز.</li><li>موافقات صريحة ومسجلة.</li><li>حقوق الوصول والتصحيح والحذف.</li><li>سياسات احتفاظ وإتلاف.</li><li>إجراءات الإبلاغ عن الحوادث.</li></ul></div>
+<div class="box"><h4>التشفير والوصول</h4><ul class="small"><li>TLS 1.2+ و AES-256.</li><li>تشفير على مستوى الحقول الحساسة.</li><li>مفاتيح مُدارة عبر خدمة إدارة المفاتيح.</li><li>RBAC + Policies + MFA للإدارة.</li><li>روابط مؤقتة موقّعة للمستندات.</li></ul></div>
+<div class="box"><h4>الضمان والتحقق</h4><ul class="small"><li>مواءمة مع NCA ECC.</li><li>OWASP ASVS للـ API و MASVS للجوال.</li><li>اختبار اختراق مستقل قبل الإطلاق.</li><li>فحص الاعتماديات آليًا في CI.</li><li>سجل تدقيق إلحاقي.</li></ul></div>
+</div>
+</section>
+
+<section><h2 id="infra"><span class="n">6</span>البنية التحتية والتشغيل</h2>
+<div class="grid g2">
+<div class="box"><h4>الاستضافة</h4><ul class="small"><li>مزود سحابي بمنطقة داخل المملكة (مثل Google Cloud – الدمام، Oracle Cloud – جدة/الرياض، أو STC Cloud) — يُختار في Sprint 0.</li><li>حاويات Docker، وبيئات dev / staging / production منفصلة.</li><li>توافر مستهدف 99.5% مع إمكانية التوسع الأفقي للخدمات وعمال الانتظار.</li></ul></div>
+<div class="box"><h4>التسليم والمراقبة</h4><ul class="small"><li>CI/CD عبر GitHub Actions: اختبارات، فحص أمني، نشر تلقائي لبيئة staging.</li><li>مراقبة الأخطاء والأداء وتنبيهات التشغيل.</li><li>لوحة صحة الخدمات وجودة الذكاء الاصطناعي (كما في نموذج لوحة الإدارة).</li><li>نسخ احتياطي يومي مشفّر واختبار استعادة دوري.</li></ul></div>
+</div>
+</section>
+
+<section><h2 id="stack"><span class="n">7</span>المكدس التقني المقترح</h2>
+<div class="tw"><table class="t"><thead><tr><th>الطبقة</th><th>التقنية</th></tr></thead><tbody>
+<tr><td>تطبيق الجوال</td><td>Flutter 3 · Dart · Riverpod/BLoC · go_router · dio · freezed · flutter_secure_storage · local_auth · Firebase Messaging</td></tr>
+<tr><td>الخلفية</td><td>Laravel 12 · PHP 8.3+ · Sanctum · Horizon · Pest · OpenAPI</td></tr>
+<tr><td>بوابات الويب</td><td>Laravel + Filament (الإدارة) · واجهة مراجعة مخصصة بمحرر نصوص منسق</td></tr>
+<tr><td>الذكاء الاصطناعي</td><td>Python · FastAPI · OCR يدعم العربية · نموذج تضمين متعدد اللغات · LLM مؤسسي عبر API · مُعيد ترتيب</td></tr>
+<tr><td>البيانات</td><td>PostgreSQL 17 + pgvector · Redis · تخزين كائنات S3-compatible مشفّر</td></tr>
+<tr><td>التشغيل</td><td>Docker · GitHub Actions · مراقبة الأخطاء والأداء · نسخ احتياطي مُدار</td></tr>
+</tbody></table></div>
+</section>
+
+<section><h2 id="costs"><span class="n">8</span>محركات التكلفة التشغيلية</h2>
+<p>تُقدَّر الأرقام بعد اعتماد النطاق وحجم الاستخدام المتوقع؛ وهذه البنود الرئيسية:</p>
+<div class="grid g3 small">
+<div class="box"><h4>الاستضافة</h4>الخوادم، قاعدة البيانات، التخزين، النسخ الاحتياطي، الشبكة.</div>
+<div class="box"><h4>الذكاء الاصطناعي</h4>استهلاك النموذج اللغوي لكل قضية/استشارة، التضمين، OCR بعدد الصفحات.</div>
+<div class="box"><h4>الاتصالات</h4>رسائل OTP والتنبيهات النصية، البريد، الإشعارات.</div>
+<div class="box"><h4>المدفوعات</h4>رسوم بوابة الدفع لكل عملية.</div>
+<div class="box"><h4>المتاجر والحسابات</h4>حساب Apple Developer (سنوي) و Google Play (لمرة واحدة).</div>
+<div class="box"><h4>المراقبة والأمان</h4>أدوات المراقبة، الشهادات، اختبارات الاختراق الدورية.</div>
+</div>
+</section>
+
+</main></div>
+<script>
+document.querySelectorAll('[data-flow]').forEach((el) => {
+  const nodes = JSON.parse(el.dataset.flow);
+  el.className = 'flow';
+  el.innerHTML = nodes.map(([c, t, s], i) => `${i ? '<div class="farrow"></div>' : ''}<div class="fnode ${c}"><b>${t}</b>${s ? `<span>${s}</span>` : ''}</div>`).join('');
+});
+</script>
+<script src="../assets/config.js"></script><script src="../assets/doc.js"></script>
+</body></html>

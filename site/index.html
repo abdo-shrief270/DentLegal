@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DentLegal — حزمة المرحلة الأولى</title>
+<meta name="description" content="DentLegal: الحماية القانونية لأطباء الأسنان — النموذج التفاعلي والعرض التقديمي ووثائق المرحلة الأولى">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%2312806f'/%3E%3Cpath d='M12 5.5c-1.4-1-2.6-1.7-4.3-1.7C5 3.8 3.5 5.9 3.5 8.6c0 2 .8 3.4 1.3 5 .6 2 .7 6.6 2.4 6.6 1.6 0 1.6-3.2 2.4-5 .4-.9.9-1.4 2.4-1.4s2 .5 2.4 1.4c.8 1.8.8 5 2.4 5 1.7 0 1.8-4.6 2.4-6.6.5-1.6 1.3-3 1.3-5 0-2.7-1.5-4.8-4.2-4.8-1.7 0-2.9.7-4.3 1.7Z' fill='none' stroke='white' stroke-width='1.6'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/tokens.css"><link rel="stylesheet" href="assets/doc.css">
+<style>
+  .hub-hero .in { display: grid; grid-template-columns: 1.1fr .9fr; gap: 30px; align-items: center; padding-top: 52px; padding-bottom: 52px; }
+  .hub-hero .cta { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 22px; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 18px; border-radius: 13px; font-weight: 700; text-decoration: none; font-size: 15px; }
+  .btn.p { background: var(--teal-600); color: #fff; }
+  .btn.p:hover { background: var(--teal-700); }
+  .btn.s { background: rgba(255,255,255,.1); color: #fff; border: 1px solid rgba(255,255,255,.2); }
+  .phones { display: flex; justify-content: center; gap: 14px; }
+  .phones img { width: 46%; max-width: 230px; border-radius: 28px; border: 6px solid #0b1418; box-shadow: 0 30px 60px rgba(0,0,0,.35); }
+  .phones img:last-child { margin-top: 40px; }
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 30px 20px 10px; }
+  .sec-h { display: flex; align-items: end; justify-content: space-between; gap: 10px; margin: 26px 0 14px; }
+  .sec-h h2 { margin: 0; font-size: 24px; }
+  .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 18px; text-decoration: none; color: inherit; display: flex; flex-direction: column; gap: 6px; transition: box-shadow .15s, transform .15s; }
+  .card:hover { box-shadow: var(--shadow); transform: translateY(-2px); }
+  .card .no { font-size: 12px; color: var(--muted); font-weight: 600; }
+  .card h3 { margin: 0; font-size: 16px; }
+  .card p { margin: 0; font-size: 13px; color: var(--muted); line-height: 1.7; }
+  .card.feat { background: var(--navy-900); color: #fff; border-color: var(--navy-900); }
+  .card.feat p, .card.feat .no { color: #a9c3ca; }
+  .tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tabs button { border: 1px solid var(--line-2); background: var(--surface); border-radius: 999px; padding: 6px 14px; font-family: inherit; cursor: pointer; font-weight: 600; font-size: 13px; }
+  .tabs button.on { background: var(--teal-600); color: #fff; border-color: var(--teal-600); }
+  .gal { display: grid; gap: 14px; }
+  .gal.m { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); }
+  .gal.w { grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); }
+  .gal figure { margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 8px; cursor: zoom-in; }
+  .gal img { width: 100%; display: block; border-radius: 10px; }
+  .gal figcaption { font-size: 12.5px; font-weight: 600; padding: 8px 4px 2px; }
+  .lb { position: fixed; inset: 0; background: rgba(6,31,40,.88); display: none; place-items: center; z-index: 90; padding: 20px; cursor: zoom-out; }
+  .lb.on { display: grid; }
+  .lb img { max-width: 100%; max-height: 88vh; border-radius: 14px; box-shadow: var(--shadow-lg); }
+  .lb div { color: #fff; text-align: center; margin-top: 10px; font-weight: 600; }
+  .dl { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .dl a { display: flex; gap: 12px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 14px; text-decoration: none; color: inherit; }
+  .dl .ic { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; font-weight: 700; font-size: 12px; color: #fff; flex: none; }
+  .phase { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 980px) { .hub-hero .in { grid-template-columns: 1fr; } .cards { grid-template-columns: repeat(2, 1fr); } .dl { grid-template-columns: 1fr; } .phase { grid-template-columns: 1fr; } }
+  @media (max-width: 560px) { .cards { grid-template-columns: 1fr; } .gal.w { grid-template-columns: 1fr; } .phones img:last-child { display: none; } .phones img { width: 70%; } }
+</style>
+</head>
+<body class="doc" data-page="home" data-root="./">
+
+<div class="doc-hero hub-hero"><div class="in">
+  <div>
+    <span class="kicker">حزمة المرحلة الأولى · Product Discovery & Prototype</span>
+    <h1>DentLegal<br>الحماية القانونية لأطباء الأسنان</h1>
+    <p class="lead">منصة تساعد طبيب الأسنان في المملكة على مواجهة الشكاوى الطبية بثقة: تحليل ذكي مبني على الأنظمة السعودية، ومسودات ردود موثّقة بالمصادر، واعتماد نهائي من محامٍ مرخّص.</p>
+    <div class="cta"><a class="btn p" href="prototype/index.html">▶ جرّب النموذج التفاعلي</a><a class="btn s" href="presentation/index.html">شاهد العرض التقديمي</a></div>
+  </div>
+  <div class="phones"><img src="screenshots/m03-home.png" alt="الرئيسية في تطبيق الطبيب"><img src="screenshots/m10-draft.png" alt="مسودة الرد مع الاستشهادات"></div>
+</div></div>
+
+<div class="wrap">
+  <div class="sec-h"><h2>المخرجات</h2><span class="muted small">جميعها قابلة للفتح والتجربة والمراجعة</span></div>
+  <div class="cards">
+    <a class="card feat" href="prototype/index.html"><span class="no">المخرجات 5–8</span><h3>النموذج التفاعلي</h3><p>3 أدوار، 33 شاشة، وجولة موجهة تحاكي دورة القضية حتى اعتماد المحامي — على الجوال والكمبيوتر.</p></a>
+    <a class="card" href="presentation/index.html"><span class="no">المخرج 11</span><h3>العرض التقديمي</h3><p>فكرة المنتج، المرحلة الأولى، والمرحلة الثانية في عرض واحد (HTML + PDF + PowerPoint).</p></a>
+    <a class="card" href="docs/prd.html"><span class="no">المخرجات 1–3</span><h3>وثيقة المتطلبات (PRD)</h3><p>المشكلة، الفئات، 12 وحدة، الأدوار والصلاحيات، دورة حياة القضية، والمتطلبات.</p></a>
+    <a class="card" href="docs/user-flows.html"><span class="no">المخرج 4</span><h3>مسارات المستخدم</h3><p>7 مسارات بينها المسار الرئيسي بين الأدوار، وخريطة كاملة للشاشات.</p></a>
+    <a class="card" href="docs/architecture.html"><span class="no">المخرج 10</span><h3>التصور التقني</h3><p>Flutter + Laravel + RAG، الأمان والامتثال، البنية التحتية ومحركات التكلفة.</p></a>
+    <a class="card" href="#gallery"><span class="no">المخرج 9</span><h3>لقطات الشاشة</h3><p>32 لقطة حقيقية من التصميمات بدقة عالية للجوال والويب.</p></a>
+    <a class="card" href="docs/phase1.html"><span class="no">المرحلة الأولى</span><h3>النطاق والاعتماد</h3><p>المخرجات، آلية التعديلات، معايير الاستلام، ونموذج الاعتماد.</p></a>
+    <a class="card" href="docs/phase2.html"><span class="no">المخرج 12</span><h3>عرض المرحلة الثانية</h3><p>نطاق التطوير، الجدول الزمني، خطة الدفعات المرتبطة بالاستلام، والدعم.</p></a>
+  </div>
+
+  <div class="sec-h"><h2>مرحلتان مستقلتان</h2></div>
+  <div class="phase">
+    <div class="box tint"><h4>المرحلة الأولى — الاستكشاف والتصميم والنموذج</h4><p class="small">تصور متكامل قابل للتجربة لاعتماد المنتج قبل الالتزام بتكلفة التطوير. <b>مقدّمة دون تكلفة</b> ضمن هذا العرض.</p><a href="docs/phase1.html" class="small">التفاصيل ←</a></div>
+    <div class="box"><h4>المرحلة الثانية — التطوير الإنتاجي</h4><p class="small">تطبيق Flutter، خلفية Laravel، محرك RAG، بوابة المحامي ولوحة الإدارة — <b>3 أسابيع حتى التسليم</b> بثلاث دفعات مرتبطة بالاستلام. يُسعّر بعد اعتماد المرحلة الأولى.</p><a href="docs/phase2.html" class="small">التفاصيل ←</a></div>
+  </div>
+
+  <div class="sec-h" id="gallery"><h2>لقطات من التصميمات</h2><div class="tabs"><button class="on" data-g="m">تطبيق الطبيب</button><button data-g="w">بوابات الويب</button></div></div>
+  <div class="gal m" id="gal"></div>
+
+  <div class="sec-h"><h2>ملفات للتنزيل</h2></div>
+  <div class="dl">
+    <a href="downloads/DentLegal-Presentation.pdf"><span class="ic" style="background:#c43c3c">PDF</span><div><b>العرض التقديمي</b><div class="small muted">نسخة PDF للإرسال والطباعة</div></div></a>
+    <a href="downloads/DentLegal-Presentation.pptx"><span class="ic" style="background:#c4572a">PPTX</span><div><b>العرض التقديمي</b><div class="small muted">PowerPoint قابل للتعديل</div></div></a>
+    <a href="downloads/DentLegal-PRD.pdf"><span class="ic" style="background:#16505f">PDF</span><div><b>وثيقة المتطلبات</b><div class="small muted">PRD كاملة</div></div></a>
+    <a href="downloads/DentLegal-Phase1-Scope.pdf"><span class="ic" style="background:#12806f">PDF</span><div><b>المرحلة الأولى</b><div class="small muted">النطاق ومعايير الاستلام ونموذج الاعتماد</div></div></a>
+    <a href="downloads/DentLegal-Phase2-Proposal.pdf"><span class="ic" style="background:#b8924f">PDF</span><div><b>عرض المرحلة الثانية</b><div class="small muted">النطاق والجدول والدفعات</div></div></a>
+  </div>
+</div>
+
+<div class="lb" id="lb"><div><img id="lb-img" alt=""><div id="lb-cap"></div></div></div>
+
+<script src="screenshots/manifest.js"></script>
+<script>
+(function () {
+  const shots = window.DL_SHOTS || [];
+  const gal = document.getElementById('gal');
+  function show(kind) {
+    gal.className = 'gal ' + kind;
+    gal.innerHTML = shots.filter((s) => (kind === 'm' ? s.mobile : !s.mobile)).map((s) => `<figure data-src="screenshots/${s.file}" data-cap="${s.title}"><img loading="lazy" src="screenshots/${s.file}" alt="${s.title}"><figcaption>${s.title}</figcaption></figure>`).join('');
+  }
+  document.querySelectorAll('.tabs button').forEach((b) => b.addEventListener('click', () => {
+    document.querySelectorAll('.tabs button').forEach((x) => x.classList.toggle('on', x === b)); show(b.dataset.g);
+  }));
+  gal.addEventListener('click', (e) => { const f = e.target.closest('figure'); if (!f) return; document.getElementById('lb-img').src = f.dataset.src; document.getElementById('lb-cap').textContent = f.dataset.cap; document.getElementById('lb').classList.add('on'); });
+  document.getElementById('lb').addEventListener('click', () => document.getElementById('lb').classList.remove('on'));
+  show('m');
+})();
+</script>
+<script src="assets/config.js"></script><script src="assets/doc.js"></script>
+</body></html>

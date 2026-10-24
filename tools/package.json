@@ -1,0 +1,17 @@
+{
+  "name": "dentlegal-tools",
+  "private": true,
+  "description": "Build tooling for DentLegal Phase 1 deliverables (screenshots, PDF, PowerPoint)",
+  "scripts": {
+    "serve": "node serve.js 5173",
+    "shots": "node screenshots.js",
+    "pdf": "node deck-pdf.js",
+    "pptx": "node build-pptx.js"
+  },
+  "dependencies": {
+    "jszip": "^3.10.1",
+    "pptxgenjs": "3.12.0",
+    "puppeteer-core": "23.11.1",
+    "qrcode-generator": "^1.4.4"
+  }
+}

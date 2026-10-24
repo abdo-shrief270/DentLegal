@@ -1,0 +1,492 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DentLegal — العرض التقديمي</title>
+<link rel="stylesheet" href="../assets/tokens.css">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: #04161d; font-family: var(--font); color: var(--ink); overflow: hidden; -webkit-font-smoothing: antialiased; }
+  svg.i { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+  .stage { position: fixed; inset: 0; display: grid; place-items: center; }
+  .deck { position: relative; width: 1280px; height: 720px; transform-origin: center center; }
+  .slide { position: absolute; inset: 0; width: 1280px; height: 720px; background: #fff; overflow: hidden; display: none; padding: 54px 70px 64px; }
+  .slide.on { display: block; }
+  .slide.dark { background: radial-gradient(900px 500px at 85% -10%, rgba(22,160,138,.35), transparent 60%), linear-gradient(155deg, var(--navy-950), var(--navy-800)); color: #fff; }
+  .slide.tint { background: linear-gradient(180deg, #fff, var(--teal-50)); }
+  .kick { display: inline-flex; align-items: center; gap: 8px; font-size: 17px; font-weight: 700; color: var(--teal-600); }
+  .dark .kick { color: #8fe3d3; }
+  h1 { font-size: 58px; line-height: 1.25; margin: 14px 0 10px; }
+  h2 { font-size: 42px; line-height: 1.3; margin: 8px 0 28px; }
+  .lead { font-size: 21px; color: var(--ink-2); line-height: 1.8; margin: 0; }
+  .dark .lead { color: #b7cfd5; }
+  .foot { position: absolute; bottom: 22px; left: 64px; right: 64px; display: flex; justify-content: space-between; font-size: 13px; color: var(--faint); }
+  .dark .foot { color: #6f949d; }
+  .row { display: flex; gap: 18px; }
+  .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .g3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .g4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .card { background: #fff; border: 1px solid var(--line); border-radius: 22px; padding: 24px; box-shadow: var(--shadow-sm); }
+  .card h3 { margin: 14px 0 8px; font-size: 23px; }
+  .card p { margin: 0; font-size: 17.5px; color: var(--muted); line-height: 1.75; }
+  .dark .card { background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.12); box-shadow: none; }
+  .dark .card p { color: #b7cfd5; }
+  .ic { width: 58px; height: 58px; border-radius: 15px; display: grid; place-items: center; background: var(--teal-50); color: var(--teal-700); }
+  .ic svg { width: 30px; height: 30px; }
+  .ic.gold { background: var(--gold-100); color: var(--gold-600); }
+  .ic.violet { background: var(--violet-50); color: var(--violet-600); }
+  .ic.navy { background: var(--navy-900); color: #8fe3d3; }
+  .dark .ic { background: rgba(22,160,138,.22); color: #8fe3d3; }
+  .phone { width: 220px; border-radius: 30px; border: 7px solid #0b1418; overflow: hidden; box-shadow: 0 24px 50px rgba(6,31,40,.28); background: #fff; flex: none; }
+  .phone img { width: 100%; display: block; }
+  .shot { border-radius: 14px; overflow: hidden; border: 1px solid var(--line); box-shadow: 0 20px 44px rgba(6,31,40,.18); }
+  .shot img { width: 100%; display: block; }
+  .cap { text-align: center; font-size: 16px; font-weight: 600; color: var(--ink-2); margin-top: 10px; }
+  .pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 16px; border-radius: 999px; font-size: 16px; font-weight: 600; background: var(--teal-50); color: var(--teal-700); }
+  .pill.gold { background: var(--gold-100); color: var(--gold-600); }
+  .pill.dark { background: rgba(255,255,255,.1); color: #e3eef0; }
+  .flow { display: flex; align-items: stretch; gap: 8px; }
+  .step { flex: 1; background: #fff; border: 1.5px solid var(--line-2); border-radius: 20px; padding: 22px 16px; position: relative; }
+  .step .n { width: 40px; height: 40px; border-radius: 50%; background: var(--navy-900); color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 15px; margin-bottom: 10px; }
+  .step b { display: block; font-size: 20px; margin-bottom: 6px; }
+  .step span { font-size: 16.5px; color: var(--muted); line-height: 1.65; display: block; }
+  .step.ai { background: var(--violet-50); border-color: #d9cdf5; }
+  .step.law { background: var(--gold-100); border-color: #ead9b8; }
+  .step.ok { background: var(--teal-50); border-color: var(--teal-100); }
+  .arrow { align-self: center; color: var(--faint); font-size: 24px; }
+  table { width: 100%; border-collapse: collapse; font-size: 17.5px; }
+  th { background: var(--bg); text-align: right; padding: 13px 18px; font-weight: 700; color: var(--ink-2); border-bottom: 1px solid var(--line-2); }
+  td { padding: 13px 18px; border-bottom: 1px solid var(--line); }
+  .tw { border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+  .badge { display: inline-block; padding: 3px 13px; border-radius: 999px; font-size: 15px; font-weight: 700; }
+  .b-blue { background: var(--blue-50); color: var(--blue-600); } .b-violet { background: var(--violet-50); color: var(--violet-600); }
+  .b-teal { background: var(--teal-50); color: var(--teal-700); } .b-gray { background: var(--bg-2); color: var(--ink-2); }
+  .chk { display: flex; gap: 12px; align-items: flex-start; font-size: 19px; line-height: 1.55; }
+  .chk svg { color: var(--teal-600); margin-top: 2px; }
+  .big { font-size: 52px; font-weight: 700; color: var(--teal-600); line-height: 1; }
+  .divider-n { font-size: 150px; font-weight: 700; color: rgba(143,227,211,.16); position: absolute; left: 64px; bottom: 30px; line-height: 1; }
+  .gantt { display: grid; grid-template-columns: 280px 1fr; font-size: 16.5px; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+  .gantt .h { background: var(--bg); padding: 8px 12px; font-weight: 700; border-bottom: 1px solid var(--line); }
+  .gantt .wk { display: grid; grid-template-columns: repeat(15, 1fr); background: var(--bg); border-bottom: 1px solid var(--line); }
+  .gantt .wk span { text-align: center; font-size: 11px; color: var(--muted); padding: 9px 0; }
+  .gantt .l { padding: 8px 14px; border-bottom: 1px solid var(--line); font-weight: 600; }
+  .gantt .r { display: grid; grid-template-columns: repeat(15, 1fr); border-bottom: 1px solid var(--line); align-items: center; }
+  .gantt .bar { height: 22px; border-radius: 6px; background: var(--teal-500); grid-row: 1; }
+  .gantt .ms { width: 18px; height: 18px; background: var(--gold-500); transform: rotate(45deg); grid-row: 1; justify-self: center; z-index: 1; border-radius: 2px; }
+  .thumb { height: 120px; border-radius: 12px; overflow: hidden; margin-top: 14px; border: 1px solid var(--line); }
+  .thumb img { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; }
+  .qr { background: #fff; padding: 12px; border-radius: 16px; display: inline-block; }
+  /* controls */
+  .ui { position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; align-items: center; background: rgba(6,31,40,.82); color: #cfe0e4; padding: 6px 10px; border-radius: 999px; z-index: 10; font-size: 13px; backdrop-filter: blur(6px); }
+  .ui button, .ui a { background: transparent; border: 0; color: #fff; cursor: pointer; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; text-decoration: none; }
+  .ui button:hover, .ui a:hover { background: rgba(255,255,255,.12); }
+  .ui svg { width: 18px; height: 18px; }
+  .prog { position: fixed; top: 0; right: 0; height: 3px; background: var(--teal-500); z-index: 10; transition: width .2s; }
+  /* stacked (phones, portrait) */
+  body.stack { overflow: auto; background: var(--bg-2); }
+  body.stack .stage { position: static; display: block !important; padding: 10px 0 70px; }
+  body.stack .deck { width: 100% !important; height: auto; transform: none !important; }
+  body.stack .frame { width: 100%; overflow: hidden; margin-bottom: 10px; position: relative; }
+  body.stack .slide { display: block; position: absolute; top: 0; left: 0; right: auto; transform-origin: top left; }
+  body.stack .ui { display: none; }
+  /* print */
+  body.print { overflow: visible; background: #fff; }
+  body.print .stage { position: static; display: block; }
+  body.print .deck { width: 1280px; height: auto; transform: none !important; }
+  body.print .slide { display: block; position: relative; page-break-after: always; break-after: page; }
+  body.print .ui, body.print .prog { display: none; }
+  @page { size: 1280px 720px; margin: 0; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+</style>
+</head>
+<body>
+<div class="prog" id="prog"></div>
+<div class="stage"><div class="deck" id="deck">
+
+<!-- ========== القسم الأول: فكرة المنتج ========== -->
+<section class="slide dark" data-t="الغلاف">
+  <div class="row" style="align-items:center;height:100%;gap:40px">
+    <div style="flex:1.2">
+      <div class="row" style="align-items:center;gap:14px"><span class="ic" style="width:64px;height:64px;border-radius:18px;background:linear-gradient(140deg,var(--teal-500),var(--navy-800));color:#fff"><svg class="i" viewBox="0 0 24 24" style="width:40px;height:40px;stroke-width:1.6"><path d="M12 5.5c-1.4-1-2.6-1.7-4.3-1.7C5 3.8 3.5 5.9 3.5 8.6c0 2 .8 3.4 1.3 5 .6 2 .7 6.6 2.4 6.6 1.6 0 1.6-3.2 2.4-5 .4-.9.9-1.4 2.4-1.4s2 .5 2.4 1.4c.8 1.8.8 5 2.4 5 1.7 0 1.8-4.6 2.4-6.6.5-1.6 1.3-3 1.3-5 0-2.7-1.5-4.8-4.2-4.8-1.7 0-2.9.7-4.3 1.7Z"/><path d="M12 7.6v4.6"/><path d="M9.2 8.6h5.6"/></svg></span><b style="font-size:30px">DentLegal</b></div>
+      <h1>الحماية القانونية<br>لأطباء الأسنان</h1>
+      <p class="lead">فكرة المنتج · المرحلة الأولى (الاستكشاف والتصميم والنموذج) · المرحلة الثانية (التطوير الكامل)</p>
+      <div class="row" style="margin-top:28px;gap:10px"><span class="pill dark" data-cfg="provider">[اسم مقدّم العرض]</span><span class="pill dark" data-cfg="docDateLabel">24 أكتوبر 2026</span></div>
+    </div>
+    <div class="row" style="flex:.9;justify-content:center;gap:16px"><div class="phone"><img src="../screenshots/m03-home.png" alt=""></div><div class="phone" style="margin-top:60px"><img src="../screenshots/m13-approved.png" alt=""></div></div>
+  </div>
+</section>
+
+<section class="slide" data-t="المشكلة">
+  <span class="kick" data-i="alert">القسم الأول · فكرة المنتج</span>
+  <h2>الشكوى الطبية لحظة حرجة… والطبيب يواجهها وحده</h2>
+  <div class="g4" style="margin-top:10px">
+    <div class="card"><span class="ic" data-i="clock"></span><h3>مهل قصيرة</h3><p>إفادة رسمية مطلوبة قبل موعد التحقيق، ومهلة 60 يومًا للتظلم من قرار الهيئة.</p></div>
+    <div class="card"><span class="ic" data-i="scale"></span><h3>مسار نظامي معقّد</h3><p>شكوى، تحقيق، إحالة للهيئة الصحية الشرعية، جلسات وقرار — بمصطلحات قانونية.</p></div>
+    <div class="card"><span class="ic" data-i="lock"></span><h3>خصوصية المريض</h3><p>ما الذي يجوز الإفصاح عنه للدفاع؟ وكيف تُرسل المستندات بأمان؟</p></div>
+    <div class="card"><span class="ic" data-i="briefcase"></span><h3>استشارة بطيئة ومكلفة</h3><p>قليل من المحامين متخصص في طب الأسنان، والتواصل عبر رسائل ومرفقات متفرقة.</p></div>
+  </div>
+  <div class="row" style="margin-top:24px;gap:8px;align-items:center;flex-wrap:wrap"><b style="color:var(--muted);font-size:17px;margin-left:6px">المسار النظامي للشكوى:</b><span class="pill">تقديم الشكوى</span><span style="color:var(--faint)">←</span><span class="pill">التحقيق الأولي</span><span style="color:var(--faint)">←</span><span class="pill">التحقيق التفصيلي</span><span style="color:var(--faint)">←</span><span class="pill">الإحالة للهيئة الصحية الشرعية</span><span style="color:var(--faint)">←</span><span class="pill">نظر الدعوى</span><span style="color:var(--faint)">←</span><span class="pill">صدور القرار والتظلم</span></div><div class="card" style="margin-top:22px;background:var(--bg);box-shadow:none"><p style="font-size:19px;color:var(--ink-2)"><b>في المقابل:</b> التأمين ضد الأخطاء المهنية <b>إلزامي</b> على جميع أطباء الأسنان (المادة 41 من نظام مزاولة المهن الصحية) — الوعي بالمخاطر موجود، والحل المتخصص غائب.</p></div>
+  <div class="foot"><span>DentLegal</span><span class="pn"></span></div>
+</section>
+
+<section class="slide tint" data-t="الحل">
+  <div class="row" style="gap:44px;height:100%;align-items:center">
+    <div style="flex:1.3">
+      <span class="kick" data-i="sparkles">الحل</span>
+      <h2>من الشكوى إلى ردٍّ معتمد قانونيًا — خلال ساعات لا أسابيع</h2>
+      <div style="display:grid;gap:14px">
+        <div class="row" style="align-items:center"><span class="ic violet" data-i="sparkles"></span><div><b style="font-size:21px">تحليل ذكي مبني على الأنظمة السعودية</b><div style="color:var(--muted);font-size:17.5px">قوة الموقف، المخاطر، الإجراءات العاجلة — وكل نقطة بمصدرها النظامي.</div></div></div>
+        <div class="row" style="align-items:center"><span class="ic gold" data-i="stamp"></span><div><b style="font-size:21px">اعتماد من محامٍ مرخّص</b><div style="color:var(--muted);font-size:17.5px">الذكاء الاصطناعي يصيغ، والمحامي يراجع ويعدّل ويوقّع — لا رد دون اعتماد.</div></div></div>
+        <div class="row" style="align-items:center"><span class="ic" data-i="lock"></span><div><b style="font-size:21px">خصوصية وأمان من البداية</b><div style="color:var(--muted);font-size:17.5px">المريض برمز، المستندات مشفّرة، وكل اطلاع مسجّل.</div></div></div>
+      </div>
+    </div>
+    <div class="phone" style="width:250px"><img src="../screenshots/m09-analysis.png" alt=""></div>
+  </div>
+  <div class="foot"><span>DentLegal</span><span class="pn"></span></div>
+</section>
+
+<section class="slide" data-t="الفئات المستهدفة">
+  <span class="kick" data-i="users">الفئات المستهدفة</span>
+  <h2>ثلاثة أدوار، تجربة مصممة لكل منها</h2>
+  <div class="g3">
+    <div class="card"><span class="ic" data-i="stethoscope"></span><h3>طبيب الأسنان</h3><p>المشترك الأساسي. تطبيق جوال لتسجيل القضايا، ورفع المستندات، والتحليل الذكي، والمستشار، والنماذج، ومتابعة الجلسات.</p><div class="thumb"><img src="../screenshots/m03-home.png" alt=""></div><div style="margin-top:12px"><span class="pill">تطبيق iOS و Android</span></div></div>
+    <div class="card"><span class="ic gold" data-i="scale"></span><h3>المحامي المراجِع</h3><p>بوابة ويب: قائمة مراجعة بمهل، مساحة عمل بجوار المصادر، تعديل بتتبع التغييرات، اعتماد وتوقيع.</p><div class="thumb"><img src="../screenshots/w04-lawyer-review.png" alt=""></div><div style="margin-top:12px"><span class="pill gold">بوابة ويب</span></div></div>
+    <div class="card"><span class="ic violet" data-i="settings"></span><h3>مدير المنصة</h3><p>لوحة تحكم: توثيق الأطباء، إسناد المحامين، قاعدة المعرفة، الصلاحيات، وسجل التدقيق.</p><div class="thumb"><img src="../screenshots/w06-admin-overview.png" alt=""></div><div style="margin-top:12px"><span class="pill" style="background:var(--violet-50);color:var(--violet-600)">لوحة ويب</span></div></div>
+  </div>
+  <p style="margin-top:16px;color:var(--muted);font-size:17px">السوق: أطباء الأسنان الممارسون في القطاعين العام والخاص بالمملكة — مع قابلية التوسع لاحقًا للعيادات وتخصصات صحية أخرى.</p>
+  <div class="foot"><span>DentLegal</span><span class="pn"></span></div>
+</section>
+
+<section class="slide" data-t="أهم المميزات">
+  <span class="kick" data-i="grid">أهم المميزات</span>
+  <h2>كل ما يحتاجه الطبيب في قضيته — في مكان واحد</h2>
+  <div class="g4">
+    <div class="card"><span class="ic" data-i="briefcase"></span><h3>إدارة القضايا</h3><p>6 مراحل نظامية، مواعيد، وسجل زمني.</p></div>
+    <div class="card"><span class="ic" data-i="scan"></span><h3>مستندات + OCR</h3><p>رفع ومسح وتشفير واستخراج تلقائي للبيانات.</p></div>
+    <div class="card"><span class="ic violet" data-i="sparkles"></span><h3>تحليل ذكي</h3><p>قوة الموقف والمخاطر والإجراءات.</p></div>
+    <div class="card"><span class="ic violet" data-i="file"></span><h3>مسودة رد مُسندة</h3><p>صياغة رسمية مع استشهادات قابلة للتحقق.</p></div>
+    <div class="card"><span class="ic gold" data-i="stamp"></span><h3>اعتماد المحامي</h3><p>مراجعة، إصدارات، توقيع ورمز تحقق.</p></div>
+    <div class="card"><span class="ic" data-i="chat"></span><h3>المستشار الذكي</h3><p>إجابات بالمصادر وتحويل لمحامٍ.</p></div>
+    <div class="card"><span class="ic" data-i="clipboard"></span><h3>النماذج والإقرارات</h3><p>إقرارات موافقة مصاغة قانونيًا.</p></div>
+    <div class="card"><span class="ic" data-i="bell"></span><h3>تنبيهات ذكية</h3><p>الجلسات، المهل، التأمين والاشتراك.</p></div>
+  </div>
+  <div class="foot"><span>DentLegal</span><span class="pn"></span></div>
+</section>
+
+<section class="slide" data-t="دورة القضية">
+  <span class="kick" data-i="refresh">User Flow</span>
+  <h2>دورة القضية: من تسجيلها حتى اعتماد رد المحامي</h2>
+  <div class="flow">
+    <div class="step"><div class="n">1</div><b>تسجيل القضية</b><span>معالج من 4 خطوات — المريض برمز فقط</span></div><div class="arrow">←</div>
+    <div class="step"><div class="n">2</div><b>المستندات</b><span>رفع أو مسح، تشفير، واستخراج OCR</span></div><div class="arrow">←</div>
+    <div class="step ai"><div class="n">3</div><b>التحليل الذكي</b><span>إخفاء الهوية، استرجاع المواد، التقييم</span></div><div class="arrow">←</div>
+    <div class="step ai"><div class="n">4</div><b>مسودة مُسندة</b><span>إفادة رسمية مع الاستشهادات</span></div><div class="arrow">←</div>
+    <div class="step law"><div class="n">5</div><b>مراجعة المحامي</b><span>تعديل، أو طلب معلومات، ثم توقيع</span></div><div class="arrow">←</div>
+    <div class="step ok"><div class="n">6</div><b>رد معتمد</b><span>إشعار، PDF موقّع، تقديم للجهة</span></div>
+  </div>
+  <div class="card" style="margin-top:26px;background:var(--bg);box-shadow:none;display:flex;gap:14px;align-items:center"><span class="ic navy" data-i="history"></span><p style="font-size:18.5px;color:var(--ink-2);margin:0">ومع كل مرحلة نظامية جديدة (التحقيق التفصيلي، الإحالة للهيئة الصحية الشرعية، التظلم) تبدأ دورة رد جديدة داخل القضية نفسها — وكل خطوة مسجلة في سجل التدقيق.</p></div>
+  <div class="foot"><span>DentLegal</span><span class="pn"></span></div>
+</section>
+
+<section class="slide tint" data-t="لقطات: تطبيق الطبيب">
+  <span class="kick" data-i="phone">Screenshots · تطبيق الطبيب</span>
+  <h2 style="margin-bottom:18px">تجربة عربية واضحة على الجوال</h2>
+  <div class="row" style="justify-content:space-between">
+    <div><div class="phone" style="width:200px"><img src="../screenshots/m03-home.png" alt=""></div><div class="cap">الرئيسية والمواعيد</div></div>
+    <div><div class="phone" style="width:200px"><img src="../screenshots/m07-upload.png" alt=""></div><div class="cap">المستندات و OCR</div></div>
+    <div><div class="phone" style="width:200px"><img src="../screenshots/m08-processing.png" alt=""></div><div class="cap">المعالجة الذكية</div></div>
+    <div><div class="phone" style="width:200px"><img src="../screenshots/m10-draft.png" alt=""></div><div class="cap">مسودة مع استشهادات</div></div>
+    <div><div class="phone" style="width:200px"><img src="../screenshots/m15-consult.png" alt=""></div><div class="cap">المستشار الذكي</div></div>
+  </div>
+</section>
+
+<section class="slide" data-t="لقطات: المحامي والإدارة">
+  <span class="kick" data-i="monitor">Screenshots · بوابات الويب</span>
+  <h2 style="margin-bottom:18px">مساحة عمل المحامي ولوحة الإدارة</h2>
+  <div class="g2">
+    <div><div class="shot"><img src="../screenshots/w04-lawyer-review.png" alt=""></div><div class="cap">مراجعة المسودة بجوار المصادر وفحوصات الجودة</div></div>
+    <div><div class="shot"><img src="../screenshots/w06-admin-overview.png" alt=""></div><div class="cap">مؤشرات المنصة وصحة الذكاء الاصطناعي</div></div>
+  </div>
+  <div class="foot"><span>DentLegal</span><span class="pn"></span></div>
+</section>
+
+<section class="slide" data-t="ذكاء اصطناعي موثوق">
+  <span class="kick" data-i="shield">ذكاء اصطناعي موثوق</span>
+  <h2>لا ادعاء دون مصدر، ولا رد دون محامٍ</h2>
+  <div class="g2" style="gap:26px">
+    <div style="display:grid;gap:12px">
+      <div class="chk"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><div><b>استرجاع معزز (RAG)</b> من الأنظمة واللوائح المفهرسة فقط، بإصداراتها السارية.</div></div>
+      <div class="chk"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><div><b>استشهادات قابلة للتحقق</b> — نقرة تعرض نص المادة، وتحقق آلي من كل استشهاد.</div></div>
+      <div class="chk"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><div><b>إخفاء هوية المريض</b> قبل أي معالجة بالنموذج اللغوي.</div></div>
+      <div class="chk"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><div><b>يرفض التخمين</b> عند ضعف المصادر ويقترح التحويل لمحامٍ.</div></div>
+      <div class="chk"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><div><b>اعتماد بشري إلزامي</b> مع إصدارات وتتبع تغييرات وسجل تدقيق.</div></div>
+    </div>
+    <div class="shot"><img src="../screenshots/w08-admin-kb.png" alt=""></div>
+  </div>
+  <div class="foot"><span>DentLegal</span><span class="pn"></span></div>
+</section>
+
+<section class="slide dark" data-t="جرّب النموذج">
+  <div class="row" style="align-items:center;height:100%;gap:50px">
+    <div style="flex:1">
+      <span class="kick" data-i="play">رابط تجربة Prototype</span>
+      <h2 style="font-size:44px">جرّب دورة القضية بنفسك</h2>
+      <p class="lead">النموذج التفاعلي يعمل على الجوال والكمبيوتر، بثلاثة أدوار وجولة موجهة من 10 خطوات — ببيانات تجريبية بالكامل.</p>
+      <div style="margin-top:22px;font-size:22px;direction:ltr;text-align:right;color:#8fe3d3" id="demo-link">prototype/index.html</div>
+    </div>
+    <div style="text-align:center"><div class="qr" id="qr"></div><div style="margin-top:10px;color:#b7cfd5;font-size:16px" id="qr-cap">امسح الرمز للفتح على الجوال</div></div>
+  </div>
+</section>
+
+<!-- ========== القسم الثاني: المرحلة الأولى ========== -->
+<section class="slide dark" data-t="المرحلة الأولى">
+  <span class="kick">القسم الثاني</span>
+  <h1 style="margin-top:150px">المرحلة الأولى</h1>
+  <p class="lead" style="font-size:24px">Product Discovery · UI/UX · Interactive Prototype</p>
+  <div class="divider-n">01</div>
+</section>
+
+<section class="slide" data-t="نطاق ومخرجات المرحلة الأولى">
+  <span class="kick" data-i="list">نطاق Discovery & Design والمخرجات</span>
+  <h2>12 مخرجًا — جميعها قابلة للفتح والتجربة</h2>
+  <div class="g3" style="gap:24px 30px">
+    <div class="chk"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>تحليل شامل للفكرة والمتطلبات (PRD)</div>
+    <div class="chk"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>تحديد المميزات والوحدات (12 وحدة)</div>
+    <div class="chk"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>أدوار المستخدمين والصلاحيات</div>
+    <div class="chk"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>User Flow لجميع السيناريوهات</div>
+    <div class="chk"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>تصميم UI/UX عربي للسوق السعودي</div>
+    <div class="chk"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>تصميم الشاشات الأساسية (33 شاشة)</div>
+    <div class="chk"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>نموذج HTML تفاعلي للجوال والكمبيوتر</div>
+    <div class="chk"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>محاكاة دورة القضية حتى الاعتماد</div>
+    <div class="chk"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>لقطات شاشة حقيقية (32 لقطة)</div>
+    <div class="chk"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>تصور تقني Flutter + Laravel + RAG</div>
+    <div class="chk"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>هذا العرض التقديمي (HTML · PDF · PPTX)</div>
+    <div class="chk"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>عرض المرحلة الثانية (نطاق، جدول، دفعات)</div>
+  </div>
+  <div class="card" style="margin-top:26px;background:var(--bg);box-shadow:none"><p style="font-size:18px;color:var(--ink-2);margin:0">ضوابط المرحلة: لا Backend فعلي، ولا نماذج ذكاء اصطناعي حقيقية، ولا بيانات مرضى حقيقية — تجربة HTML ببيانات تجريبية قابلة للنشر على استضافة مجانية.</p></div>
+  <div class="foot"><span>DentLegal</span><span class="pn"></span></div>
+</section>
+
+<section class="slide" data-t="المدة والتكلفة والاستلام">
+  <span class="kick" data-i="calendar">المدة · التكلفة · الاستلام والتعديلات</span>
+  <h2>تعاقد مستقل — يُعتمد قبل أي التزام بالتطوير</h2>
+  <div class="g3">
+    <div class="card"><span class="ic" data-i="calendar"></span><h3>مدة التنفيذ</h3><p><b style="color:var(--ink)">مكتملة:</b> الاستكشاف ← التصميم والنموذج ← التصور التقني والعرض — جاهزة للمراجعة الآن.</p></div>
+    <div class="card" style="border-color:var(--teal-300);background:var(--teal-50)"><span class="ic" data-i="gift"></span><h3>التكلفة</h3><p><b style="color:var(--teal-700);font-size:22px">دون تكلفة</b><br>مقدّمة ضمن تجهيز العرض، واعتمادها لا يُلزم بالتعاقد على المرحلة الثانية.</p></div>
+    <div class="card"><span class="ic" data-i="pen"></span><h3>التعديلات والاستلام</h3><p><b style="color:var(--ink)">جولتا تعديل</b>، ملاحظات مجمّعة خلال 5 أيام عمل، تنفيذ خلال 3–5 أيام، ثم توقيع نموذج الاعتماد.</p></div>
+  </div>
+  <div class="card" style="margin-top:20px"><b style="font-size:19px">شروط الانتقال للمرحلة الثانية:</b>
+    <div class="g3" style="gap:6px 20px;margin-top:10px;font-size:17.5px;color:var(--ink-2)"><span>① الموافقة على نطاق العمل</span><span>② اعتماد التصميمات وتجربة المستخدم</span><span>③ اعتماد مواصفات النظام</span><span>④ الاتفاق على السعر النهائي</span><span>⑤ الاتفاق على الجدول والدفعات</span><span>⑥ إبرام اتفاق المرحلة الثانية</span></div></div>
+  <div class="foot"><span>DentLegal</span><span class="pn"></span></div>
+</section>
+
+<!-- ========== القسم الثالث: المرحلة الثانية ========== -->
+<section class="slide dark" data-t="المرحلة الثانية">
+  <span class="kick">القسم الثالث</span>
+  <h1 style="margin-top:150px">المرحلة الثانية</h1>
+  <p class="lead" style="font-size:24px">Full Production Development — تعاقد مستقل</p>
+  <div class="divider-n">02</div>
+</section>
+
+<section class="slide" data-t="نطاق التطوير">
+  <span class="kick" data-i="layers">نطاق التطوير الفعلي</span>
+  <h2>تحويل النموذج المعتمد إلى نظام تجاري حقيقي</h2>
+  <div class="g4">
+    <div class="card"><span class="ic" data-i="phone"></span><h3>Flutter</h3><p>Android و iOS · جميع الشاشات المعتمدة · التكامل مع API · حماية البيانات · الإشعارات والجلسات.</p></div>
+    <div class="card"><span class="ic navy" data-i="database"></span><h3>Laravel</h3><p>الصلاحيات · القضايا · سجلات المرضى المرمّزة · المستندات · سير اعتماد المحامي · API · التدقيق.</p></div>
+    <div class="card"><span class="ic violet" data-i="sparkles"></span><h3>AI و RAG</h3><p>OCR وذكاء المستندات · قاعدة متجهات · الاسترجاع · مسودات بالاستشهادات · الإصدارات.</p></div>
+    <div class="card"><span class="ic gold" data-i="shield"></span><h3>الجودة والنشر</h3><p>اختبارات وحدات وتكامل · أمان واختراق · أداء · استضافة ومراقبة · توثيق وتدريب.</p></div>
+  </div>
+  <div class="card" style="margin-top:18px;display:flex;gap:14px;align-items:center"><span class="ic gold" data-i="scale"></span><p style="font-size:18.5px;margin:0;color:var(--ink-2)"><b>بوابة المحامي ولوحة الإدارة:</b> مساحة المراجعة والاعتماد، الإسناد والمهل، توثيق الأطباء، قاعدة المعرفة، الصلاحيات، والتقارير.</p></div>
+  <div class="foot"><span>DentLegal</span><span class="pn"></span></div>
+</section>
+
+<section class="slide" data-t="المكونات التقنية">
+  <span class="kick" data-i="cpu">المكونات التقنية</span>
+  <h2>معمارية آمنة وقابلة للتوسع</h2>
+  <div style="display:grid;gap:10px;font-size:17px">
+    <div class="row" style="gap:10px"><div class="card" style="flex:none;width:170px;background:var(--navy-900);color:#fff;padding:20px 18px"><b>الواجهات</b></div><div class="card" style="flex:1;padding:14px;background:var(--teal-50)"><b>تطبيق Flutter</b> للطبيب</div><div class="card" style="flex:1;padding:14px;background:var(--gold-100)"><b>بوابة المحامي</b> (ويب)</div><div class="card" style="flex:1;padding:20px 18px"><b>لوحة الإدارة</b> (ويب)</div></div>
+    <div class="row" style="gap:10px"><div class="card" style="flex:none;width:170px;background:var(--navy-900);color:#fff;padding:20px 18px"><b>Laravel 12 API</b></div><div class="card" style="flex:1;padding:20px 18px">Sanctum · Policies (RBAC) · آلة حالات القضية · المستندات المشفّرة · الإصدارات · التدقيق · Horizon</div></div>
+    <div class="row" style="gap:10px"><div class="card" style="flex:none;width:170px;background:var(--navy-900);color:#fff;padding:20px 18px"><b>خدمة AI</b></div><div class="card" style="flex:1;padding:14px;background:var(--violet-50)">OCR عربي · إخفاء الهوية · استرجاع هجين (pgvector + نصي) · صياغة بمخرجات منظمة · تحقق من الاستشهادات · مجموعة تقييم</div></div>
+    <div class="row" style="gap:10px"><div class="card" style="flex:none;width:170px;background:var(--navy-900);color:#fff;padding:20px 18px"><b>البيانات</b></div><div class="card" style="flex:1;padding:14px;background:var(--blue-50)">PostgreSQL 17 + pgvector · Redis · تخزين كائنات مشفّر · نسخ احتياطي — <b>استضافة داخل المملكة</b></div></div>
+    <div class="row" style="gap:10px"><div class="card" style="flex:none;width:170px;background:var(--navy-900);color:#fff;padding:20px 18px"><b>التكاملات</b></div><div class="card" style="flex:1;padding:20px 18px">نموذج لغوي مؤسسي عبر API · بوابة دفع محلية · SMS و Push · النفاذ الوطني (اختياري)</div></div>
+  </div>
+  <div class="foot"><span>DentLegal</span><span class="pn"></span></div>
+</section>
+
+<section class="slide" data-t="التكلفة التقديرية">
+  <span class="kick" data-i="chart">التكلفة التقديرية</span>
+  <h2>هيكل التكلفة — تُستكمل الأسعار بعد اعتماد المرحلة الأولى</h2>
+  <div class="tw"><table><thead><tr><th>البند</th><th>حجم الجهد</th><th>التكلفة</th></tr></thead><tbody>
+    <tr><td><b>تطبيق Flutter</b> — شاشات الطبيب، التكامل، الأمان، النشر</td><td><span class="badge b-blue">كبير</span></td><td style="color:var(--muted)">يُحدد</td></tr>
+    <tr><td><b>Laravel و API</b> — الصلاحيات، القضايا، المستندات، الاعتماد، التدقيق</td><td><span class="badge b-blue">كبير</span></td><td style="color:var(--muted)">يُحدد</td></tr>
+    <tr><td><b>AI / RAG</b> — OCR، الفهرسة، الاسترجاع، الصياغة، التحقق، التقييم</td><td><span class="badge b-violet">كبير جدًا</span></td><td style="color:var(--muted)">يُحدد</td></tr>
+    <tr><td><b>لوحة الإدارة وبوابة المحامي</b></td><td><span class="badge b-teal">متوسط–كبير</span></td><td style="color:var(--muted)">يُحدد</td></tr>
+    <tr><td><b>الاختبارات والأمان والنشر</b></td><td><span class="badge b-teal">متوسط</span></td><td style="color:var(--muted)">يُحدد</td></tr>
+    <tr><td><b>التكاليف التشغيلية المتكررة</b> — استضافة، AI، OCR، SMS، دفع، متاجر</td><td><span class="badge b-gray">شهري</span></td><td style="color:var(--muted)">حسب الاستخدام</td></tr>
+    <tr><td><b>الدعم الفني والصيانة</b> — ضمان + باقات شهرية اختيارية</td><td><span class="badge b-gray">اختياري</span></td><td style="color:var(--muted)">يُحدد</td></tr>
+  </tbody></table></div>
+  <p style="margin:14px 0 0;color:var(--muted);font-size:17px">كل مرحلة تُسعّر كتعاقد مستقل، ولا تُدمج أسعار المرحلتين في إجمالي إلزامي واحد. أي تغيير خارج النطاق المعتمد يُوثّق ويُسعّر منفصلًا.</p>
+  <div class="foot"><span>DentLegal</span><span class="pn"></span></div>
+</section>
+
+<section class="slide" data-t="الجدول الزمني">
+  <span class="kick" data-i="calendar">الجدول الزمني المقترح</span>
+  <h2>3 أسابيع حتى التسليم — بثلاث مراحل استلام</h2>
+  <div class="gantt" id="gantt"></div>
+  <p style="margin:12px 0 0;color:var(--muted);font-size:16px">◆ مرحلة استلام مرتبطة بدفعة · 15 يوم عمل من توقيع الاتفاق · مراجعة المتاجر خارج المدة وتخضع لـ Apple و Google.</p>
+  <div class="foot"><span>DentLegal</span><span class="pn"></span></div>
+</section>
+
+<section class="slide" data-t="خطة الدفعات">
+  <span class="kick" data-i="check">خطة الدفعات</span>
+  <h2>دفعات مرتبطة بالإنجاز والاستلام — لا بالتواريخ فقط</h2>
+  <div class="tw"><table><thead><tr><th>المرحلة</th><th>معيار الاستلام</th><th style="width:90px">النسبة</th></tr></thead><tbody>
+    <tr><td><b>M0</b> التعاقد والانطلاق<div style="font-size:14px;color:var(--muted)">اليوم 1</div></td><td>توقيع الاتفاق واعتماد خطة التنفيذ ووثيقة المواصفات</td><td><b>40%</b></td></tr>
+    <tr><td><b>M1</b> دورة القضية كاملة<div style="font-size:14px;color:var(--muted)">نهاية الأسبوع 2</div></td><td>التسجيل والقضايا والمستندات والتحليل والمسودة بالاستشهادات ومراجعة المحامي والاعتماد تعمل من البداية للنهاية، مع تحقيق حد دقة الاستشهادات</td><td><b>30%</b></td></tr>
+    <tr><td><b>M2</b> القبول والتسليم<div style="font-size:14px;color:var(--muted)">نهاية الأسبوع 3</div></td><td>لا عيوب حرجة أو عالية + توقيع UAT + النشر والرفع للمتاجر + تسليم الكود والوثائق والتدريب</td><td><b>30%</b></td></tr>
+  </tbody></table></div>
+  <div class="foot"><span>DentLegal</span><span class="pn"></span></div>
+</section>
+
+<section class="slide" data-t="الدعم والتكاليف التشغيلية">
+  <span class="kick" data-i="shield">الدعم والتكاليف التشغيلية</span>
+  <h2>تشغيل مستقر بعد الإطلاق</h2>
+  <div class="g2" style="gap:26px">
+    <div class="card"><h3 style="margin-top:0">التكاليف التشغيلية المتكررة</h3>
+      <div style="display:grid;gap:14px;font-size:19px;color:var(--ink-2);margin-top:6px"><span>• استضافة سحابية داخل المملكة</span><span>• استهلاك النموذج اللغوي والتضمين لكل قضية</span><span>• OCR حسب عدد الصفحات</span><span>• الرسائل النصية والإشعارات</span><span>• رسوم بوابة الدفع وحسابات المتاجر</span><span>• المراقبة والنطاق والشهادات</span></div>
+      <p style="margin-top:10px">تُدفع لمزودي الخدمات باسم العميل، وتُقدَّر بعد تحديد حجم الاستخدام.</p></div>
+    <div class="card"><h3 style="margin-top:0">الدعم الفني والصيانة</h3>
+      <p><b style="color:var(--ink)">فترة ضمان</b> لإصلاح العيوب بعد الإطلاق، ثم باقات اختيارية:</p>
+      <div style="display:grid;gap:16px;margin-top:16px;font-size:18.5px">
+        <div><span class="badge b-gray">أساسية</span> إصلاح الأعطال والتحديثات الأمنية</div>
+        <div><span class="badge b-teal">قياسية</span> + توافق إصدارات iOS/Android ومراقبة استباقية</div>
+        <div><span class="badge b-violet">متقدمة</span> + ساعات تطوير وتحديث قاعدة المعرفة</div></div></div>
+  </div>
+  <div class="foot"><span>DentLegal</span><span class="pn"></span></div>
+</section>
+
+<section class="slide dark" data-t="الخطوات التالية">
+  <span class="kick">الخطوات التالية</span>
+  <h2 style="font-size:44px;margin-top:20px">من النموذج إلى المنتج</h2>
+  <div class="g4" style="margin-top:20px">
+    <div class="card"><div class="big" style="color:#8fe3d3">1</div><h3>التجربة والملاحظات</h3><p>تجربة النموذج ومشاركته مع المحامين وتجميع الملاحظات.</p></div>
+    <div class="card"><div class="big" style="color:#8fe3d3">2</div><h3>جولتا تعديل</h3><p>تنفيذ الملاحظات على التصميمات والمسارات والوثائق.</p></div>
+    <div class="card"><div class="big" style="color:#8fe3d3">3</div><h3>اعتماد المرحلة الأولى</h3><p>توقيع نموذج الاعتماد وتثبيت النطاق.</p></div>
+    <div class="card"><div class="big" style="color:#8fe3d3">4</div><h3>اتفاق المرحلة الثانية</h3><p>السعر النهائي والدفعات، ثم التنفيذ والتسليم خلال 3 أسابيع.</p></div>
+  </div>
+  <div class="row" style="margin-top:36px;gap:10px"><span class="pill dark" data-cfg="provider">[اسم مقدّم العرض]</span><span class="pill dark" data-cfg="providerContact">[البريد · الجوال]</span></div>
+</section>
+
+</div></div>
+
+<div class="ui"><button id="next" aria-label="التالي"><svg class="i" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button><span id="count">1 / 1</span><button id="prev" aria-label="السابق"><svg class="i" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></button>
+<button id="fs" aria-label="ملء الشاشة"><svg class="i" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg></button><a href="../index.html" aria-label="الرئيسية"><svg class="i" viewBox="0 0 24 24"><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></a></div>
+
+<script src="../assets/config.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script>
+(function () {
+  const I = {
+    alert: '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
+    clock: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+    scale: '<path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/>',
+    lock: '<rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+    briefcase: '<path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><rect width="20" height="14" x="2" y="6" rx="2"/>',
+    sparkles: '<path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/>',
+    stamp: '<path d="M5 22h14"/><path d="M19.27 13.73A2.5 2.5 0 0 0 17.5 13h-11A2.5 2.5 0 0 0 4 15.5V17a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-1.5c0-.66-.26-1.3-.73-1.77Z"/><path d="M14 13V8.5C14 7 15 7 15 5a3 3 0 0 0-3-3c-1.69 0-3 1-3 3s1 2 1 3.5V13"/>',
+    users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+    stethoscope: '<path d="M11 2v2"/><path d="M5 2v2"/><path d="M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1"/><path d="M8 15a6 6 0 0 0 12 0v-3"/><circle cx="20" cy="10" r="2"/>',
+    settings: '<path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/>',
+    grid: '<rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/>',
+    scan: '<path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 8h8"/><path d="M7 12h10"/><path d="M7 16h6"/>',
+    file: '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M16 13H8"/><path d="M16 17H8"/>',
+    chat: '<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>',
+    clipboard: '<rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/>',
+    bell: '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
+    refresh: '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>',
+    history: '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>',
+    phone: '<rect width="14" height="20" x="5" y="2" rx="2"/><path d="M12 18h.01"/>',
+    monitor: '<rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/>',
+    shield: '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>',
+    play: '<polygon points="6 3 20 12 6 21 6 3"/>',
+    list: '<path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/>',
+    calendar: '<rect width="18" height="18" x="3" y="4" rx="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/>',
+    gift: '<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"/>',
+    pen: '<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>',
+    layers: '<path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/>',
+    database: '<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/>',
+    cpu: '<rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M2 9h2"/><path d="M20 15h2"/><path d="M20 9h2"/><path d="M9 2v2"/><path d="M9 20v2"/>',
+    chart: '<path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>',
+    check: '<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>',
+  };
+  document.querySelectorAll('[data-i]').forEach((el) => {
+    const svg = `<svg class="i" viewBox="0 0 24 24">${I[el.dataset.i] || ''}</svg>`;
+    if (el.classList.contains('ic')) el.innerHTML = svg; else el.insertAdjacentHTML('afterbegin', svg);
+  });
+  const C = window.DL_CONFIG || {};
+  document.querySelectorAll('[data-cfg]').forEach((el) => { if (C[el.dataset.cfg]) el.textContent = C[el.dataset.cfg]; });
+
+  // gantt
+  const rows = [['الانطلاق: المواصفات والبيئات', 1, 2, '#16505f', 1], ['خلفية Laravel و API', 1, 7, '#16a08a'], ['تطبيق Flutter', 2, 12, '#16a08a'], ['محرك الذكاء الاصطناعي (RAG)', 3, 10, '#7d5cd1', 10], ['بوابة المحامي ولوحة الإدارة', 5, 11, '#b8924f'], ['التكاملات', 7, 11, '#16505f'], ['الاختبارات والأمان والأداء', 9, 13, '#8a9aa1'], ['اختبار القبول (UAT)', 12, 14, '#8a9aa1'], ['الإطلاق والتسليم', 14, 15, '#16505f', 15]];
+  let g = `<div class="h"></div><div class="wk" style="grid-template-columns:repeat(3,1fr)">${['الأسبوع 1', 'الأسبوع 2', 'الأسبوع 3'].map((w) => `<span style="font-size:14px;font-weight:700;color:var(--ink-2)">${w}</span>`).join('')}</div>`;
+  g += `<div class="h">المسار / يوم العمل</div><div class="wk">${Array.from({ length: 15 }, (_, i) => `<span>${i + 1}</span>`).join('')}</div>`;
+  rows.forEach(([n, s, e, c, m]) => { g += `<div class="l">${n}</div><div class="r"><div class="bar" style="grid-column:${s} / ${e + 1};background:${c}"></div>${m ? `<div class="ms" style="grid-column:${m}"></div>` : ''}</div>`; });
+  document.getElementById('gantt').innerHTML = g;
+
+  // demo link + QR
+  const url = C.demoUrl ? C.demoUrl.replace(/\/$/, '') + '/prototype/' : new URL('../prototype/index.html', location.href).href;
+  document.getElementById('demo-link').textContent = url;
+  if (window.qrcode && /^https?:/.test(url) && !/localhost|127\.0\.0\.1/.test(url)) {
+    const q = qrcode(0, 'M'); q.addData(url); q.make();
+    document.getElementById('qr').innerHTML = q.createSvgTag({ cellSize: 6, margin: 0 });
+  } else {
+    document.getElementById('qr').style.display = 'none';
+    document.getElementById('qr-cap').textContent = 'يظهر رمز QR تلقائيًا بعد نشر الرابط';
+  }
+
+  // navigation
+  const slides = [...document.querySelectorAll('.slide')];
+  const total = slides.length;
+  slides.forEach((s, i) => { const pn = s.querySelector('.pn'); if (pn) pn.textContent = `${i + 1} / ${total}`; });
+  const params = new URLSearchParams(location.search);
+  if (params.has('print')) { document.body.classList.add('print'); slides.forEach((s) => s.classList.add('on')); return; }
+  let cur = Math.min(total - 1, Math.max(0, (parseInt(location.hash.slice(1), 10) || 1) - 1));
+  const deck = document.getElementById('deck');
+  function go(i) {
+    cur = Math.max(0, Math.min(total - 1, i));
+    slides.forEach((s, k) => s.classList.toggle('on', k === cur));
+    document.getElementById('count').textContent = `${cur + 1} / ${total}`;
+    document.getElementById('prog').style.width = `${((cur + 1) / total) * 100}%`;
+    history.replaceState(null, '', '#' + (cur + 1));
+  }
+  function fit() {
+    const stack = innerWidth < 700 && innerHeight > innerWidth;
+    document.body.classList.toggle('stack', stack);
+    if (stack) {
+      if (!deck.dataset.wrapped) { slides.forEach((s) => { const f = document.createElement('div'); f.className = 'frame'; s.parentNode.insertBefore(f, s); f.appendChild(s); }); deck.dataset.wrapped = '1'; }
+      const sc = innerWidth / 1280;
+      document.querySelectorAll('.frame').forEach((f) => { f.style.height = 720 * sc + 'px'; });
+      slides.forEach((s) => { s.style.transform = `scale(${sc})`; });
+    } else {
+      slides.forEach((s) => { s.style.transform = ''; });
+      deck.style.transform = `scale(${Math.min(innerWidth / 1280, innerHeight / 720)})`;
+    }
+  }
+  document.getElementById('next').onclick = () => go(cur + 1);
+  document.getElementById('prev').onclick = () => go(cur - 1);
+  document.getElementById('fs').onclick = () => (document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen());
+  addEventListener('keydown', (e) => {
+    if (['ArrowLeft', 'PageDown', ' ', 'Enter'].includes(e.key)) go(cur + 1);
+    if (['ArrowRight', 'PageUp', 'Backspace'].includes(e.key)) go(cur - 1);
+    if (e.key === 'Home') go(0);
+    if (e.key === 'End') go(total - 1);
+  });
+  let tx = null;
+  addEventListener('touchstart', (e) => { tx = e.touches[0].clientX; }, { passive: true });
+  addEventListener('touchend', (e) => { if (tx === null || document.body.classList.contains('stack')) return; const dx = e.changedTouches[0].clientX - tx; if (Math.abs(dx) > 50) go(dx > 0 ? cur + 1 : cur - 1); tx = null; });
+  addEventListener('resize', fit);
+  fit(); go(cur);
+})();
+</script>
+</body></html>
