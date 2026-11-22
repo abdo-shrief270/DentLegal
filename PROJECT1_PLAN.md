@@ -3,8 +3,8 @@
 | | |
 |---|---|
 | **Status** | Draft for approval by Abdelrahman. Planning only: no production code, repos, issues or cloud resources until approved. |
-| **Version / date** | v0.3 · 22 Nov 2026. v0.3: PrimeVue confirmed for the dashboard; a Nuxt marketing landing page added (S9.7). v0.2: the lawyer portal and admin dashboard move from Filament to a Vue 3 dashboard (Nuxt 4, SPA mode); the mobile app stays Flutter. Estimates and schedule updated (§11.1, D27). |
-| **Contract** | Project 1 (A1): 7,000 SAR · 8 weeks from start of work · M0 2,000 / M1 3,000 / M2 2,000 SAR |
+| **Version / date** | v0.4 · 22 Nov 2026. v0.4: schedule extended to 9 weeks (D27 option B), pending client approval. v0.3: PrimeVue confirmed for the dashboard; a Nuxt marketing landing page added (S9.7). v0.2: the lawyer portal and admin dashboard move from Filament to a Vue 3 dashboard (Nuxt 4, SPA mode); the mobile app stays Flutter. Estimates and schedule updated (§11.1, D27). |
+| **Contract** | Project 1 (A1): 7,000 SAR · 8 weeks from start of work (**9 weeks proposed** in this plan, pending the client's approval; price unchanged) · M0 2,000 / M1 3,000 / M2 2,000 SAR |
 | **Sources of truth** | The planning brief (authoritative for price, timeline, payments and scope), then `site/docs/prd.html`, `site/docs/user-flows.html`, `site/docs/architecture.html` and the prototype in `site/prototype/`. |
 | **Known stale file** | `proposals/project1.html` still says 2 weeks, 50/50 payments and "sources until day 3". This plan follows the brief instead: 8 weeks, M0/M1/M2, sources by end of week 1. |
 
@@ -20,12 +20,12 @@
 - **Two findings that shape the AI work** (details in §5.2):
   1. The supplied PDFs have damaged text layers. The dental-services regulation is unusable as extracted, so ingestion includes a transcription and human spot-check step.
   2. Anthropic offers no in-KSA inference (`inference_geo` is only `global` or `us`). De-identification before every LLM call is therefore mandatory, and the client's lawyer must sign off the cross-border transfer of de-identified text (**Decision needed: D4**).
-- **Effort:** 347 h of Must stories against 320 h of capacity (8 weeks × 40 h). The Vue dashboard adds about 32 h over the Filament version (every lawyer and admin screen now needs its own API endpoints, UI and login/two-factor flow), and the landing page adds 8 h. **This no longer fits at 40 h/week.** The recommended fix (D27) is cut lists A and B (−21 h, no contract scope touched) plus about 42 h/week, giving 326 h of work and about 10 h of buffer.
-- **Milestones (illustrative start Sun 22 Nov 2026):**
-  - M1 prototype demo: Thu 31 Dec 2026 (end of W6).
-  - Store submission: Thu 7 Jan 2027.
-  - M2 launch: Thu 14 Jan 2027, subject to store review.
-  - Pilot: 17 Jan – 4 Feb 2027, finishing before Ramadan 1448 (expected around 8 Feb).
+- **Effort:** 347 h of Must stories against 320 h of capacity (8 weeks × 40 h). The Vue dashboard adds about 32 h over the Filament version (every lawyer and admin screen now needs its own API endpoints, UI and login/two-factor flow), and the landing page adds 8 h. **This no longer fits in 8 weeks.** Decided (D27): ask the client for **9 weeks** (360 h at 40 h/week), keeping every feature and all polish, with 13 h of buffer. The price and payment amounts don't change. Fallback if the client refuses: 8 weeks with cuts and about 42 h/week (§11.1).
+- **Milestones (9 weeks, illustrative start Sun 29 Nov 2026):**
+  - M1 prototype demo: Thu 14 Jan 2027 (end of W7).
+  - Store submission: Thu 21 Jan 2027.
+  - M2 launch: Thu 28 Jan 2027, subject to store review.
+  - Pilot: from Sun 31 Jan 2027. It now overlaps the start of Ramadan 1448 (expected around 8 Feb); see D28.
 
 ### Questions that block planning
 
@@ -33,10 +33,11 @@ None block writing this plan; every non-blocking unknown is stated as an assumpt
 
 | # | Question | For | Why it blocks |
 |---|---|---|---|
-| B1 | Does the client have a legal entity (Saudi CR or another company) to publish under? Does it have a D-U-N-S number? | Client | Apple says apps that "require sensitive user information should be submitted by a legal entity". A Google Play organisation account needs D-U-N-S. A personal Play account created after Nov 2023 must run a 12-tester, 14-day closed test, which collides with W7–8. The SMS sender ID registration also needs a company. |
+| B1 | Does the client have a legal entity (Saudi CR or another company) to publish under? Does it have a D-U-N-S number? | Client | Apple says apps that "require sensitive user information should be submitted by a legal entity". A Google Play organisation account needs D-U-N-S. A personal Play account created after Nov 2023 must run a 12-tester, 14-day closed test, which collides with W8–9. The SMS sender ID registration also needs a company. |
 | B2 | Who is the pilot lawyer? Can they give about 10 h during the build and about 1 h per working day in the pilot? | Client | Source spot-checks (W2), the gold citations for the eval set (W3–5), the M1 demo, and pilot reviews. |
 | B3 | Will the client's lawyer approve sending **de-identified** case text to Anthropic (processed in the US or globally)? | Client | There is no KSA inference option. If the answer is no, Project 1 needs a self-hosted LLM, which changes price and timeline. |
 | B4 | What is the start date (M0 received)? | Client | Every calendar date in §10 shifts with it. |
+| B5 | Does the client agree to **9 weeks instead of 8**, at the same price and payment amounts? | Client | The schedule in §10 needs it. If not, the 8-week fallback (§11.1) applies. |
 
 ---
 
@@ -83,7 +84,7 @@ Any new request during the build is logged in a change log, then either added to
 ### 1.3 Assumptions (non-blocking)
 
 1. **Team and capacity:** one full-stack developer (Abdelrahman) at about 40 focused hours a week, Sun–Thu.
-2. **Calendar:** dates in §10 assume W1 starts Sun 22 Nov 2026 and shift day-for-day with M0.
+2. **Calendar:** dates in §10 assume a 9-week build starting Sun 29 Nov 2026 and shift day-for-day with M0.
 3. **Pilot size:** 10–20 dentists, 1–2 lawyers, 1 admin (client staff).
 4. **Language:** the app is Arabic only, with English allowed for medical terms. Dates are shown in both Hijri (Umm al-Qura) and Gregorian.
 5. **Synthetic data:** used everywhere before go-live (dev, staging, evals, demos). Real pilot data exists only in production after M2 and after consent.
@@ -100,14 +101,15 @@ Any new request during the build is logged in a change log, then either added to
 
 | # | Question | Needed by |
 |---|---|---|
-| Q-C1 | Blockers B1–B4 above | W1 day 1 |
+| Q-C1 | Blockers B1–B5 above | Before M0 / W1 day 1 |
 | Q-C2 | Any additional sources to index? For example, the PDPL law and regulation, or the Sharia health board procedures guide (both shown as «مخطط» in the prototype KB). | End of W1 |
 | Q-C3 | App name and seller name on the stores, logo files, short description text | W3 |
-| Q-C4 | Public store listing, or Apple "Unlisted" distribution (irreversible once approved) (**Decision needed: D11**)? | W6 |
-| Q-C5 | Should the lawyer see the original uploaded files, or masked text only (**Decision needed: D10**)? | W5 |
-| Q-C6 | The pilot dentist list (name + mobile), 10–20 people | W7 |
-| Q-C7 | How long should pilot data be kept after the pilot (**Decision needed: D18**)? | W7 |
-| Q-C8 | **Payment terms:** if store review delays the launch beyond W8 for reasons outside the app (no rejection attributable to the build), how is M2 handled? I am not proposing a change. This needs the client's and Abdelrahman's agreement. | Before M0 |
+| Q-C4 | Public store listing, or Apple "Unlisted" distribution (irreversible once approved) (**Decision needed: D11**)? | W7 |
+| Q-C5 | Should the lawyer see the original uploaded files, or masked text only (**Decision needed: D10**)? | W6 |
+| Q-C6 | The pilot dentist list (name + mobile), 10–20 people | W8 |
+| Q-C7 | How long should pilot data be kept after the pilot (**Decision needed: D18**)? | W8 |
+| Q-C11 | Pilot timing around Ramadan (**Decision needed: D28**): accept the overlap, start earlier, or pilot after Eid? | W8 |
+| Q-C8 | **Payment terms:** if store review delays the launch beyond W9 for reasons outside the app (no rejection attributable to the build), how is M2 handled? I am not proposing a change. This needs the client's and Abdelrahman's agreement. | Before M0 |
 | Q-C9 | Legal disclaimer text approved by the client's lawyer, for the consultant, drafts and the store listing | W5 |
 | Q-C10 | A blank template or a fully fictionalised sample of a formal إفادة in the lawyer's preferred style, used as a style reference. No real cases. | W3 |
 
@@ -118,7 +120,7 @@ Any new request during the build is logged in a change log, then either added to
 | Q-A1 | Is 40 focused h/week realistic? If not, approve cut list A plus B (§11.1). |
 | Q-A2 | Do you have a Mac for iOS builds? Otherwise Codemagic's free tier (**Decision needed: D15**). |
 | Q-A3 | Do you agree with D1 (separate FastAPI service), D2 (Riverpod 3), and D3 (OCI)? (D26 PrimeVue: decided.) |
-| Q-A6 | How do we absorb the extra 40 h (D27)? |
+| Q-A6 | ~~How do we absorb the extra 40 h (D27)?~~ Decided: ask the client for 9 weeks. |
 | Q-A4 | Sentry SaaS with scrubbing, or self-hosted GlitchTip in KSA (**Decision needed: D14**)? |
 | Q-A5 | Repo: a new private repo in a client-owned GitHub organisation (**Decision needed: D21**)? |
 
@@ -715,7 +717,7 @@ The results are unioned and reranked against the facts summary. This avoids an e
 | `kb_transcribe` (ingestion, public sources only) | `claude-opus-5-5` | `low` | 8,000 | Plain text per page | stream | — |
 | `eval_judge` (optional; synthetic data only) | `claude-opus-5-5` | `medium` | 4,000 | `JudgeVerdict` schema | non-stream | System block |
 
-Effort levels per route are a **Decision needed (D8)**: the table holds the starting values, confirmed by eval runs #1 (W6) and #2 (W8).
+Effort levels per route are a **Decision needed (D8)**: the table holds the starting values, confirmed by eval runs #1 (W7) and #2 (W9).
 
 **API facts this design relies on** (verified against the live docs on 15 Nov 2026):
 
@@ -977,7 +979,7 @@ For each run, ai-svc keeps a **manifest** mapping local refs to real IDs: `S3 �
 
 **Harness:**
 - `ai-svc eval run --set consult_v1 --route consult --effort low` writes `eval/reports/<date>-<set>.md` with metrics and failures.
-- Run #1 lands in W6 (results shown at M1). Run #2 in W8 (before go-live). Weekly runs during the pilot.
+- Run #1 lands in W7 (results shown at M1). Run #2 in W9 (before go-live). Weekly runs during the pilot.
 - Synthetic data allows the Batches API for 50% cheaper eval runs.
 
 **How each pilot KPI is measured:**
@@ -999,7 +1001,7 @@ For each run, ai-svc keeps a **manifest** mapping local refs to real IDs: `S3 �
   4. Never use Batches or the Files API with case data.
   5. Get written sign-off from the client's lawyer before any real case data is processed (before M2).
 - **If the client's lawyer requires in-KSA processing only:** P1 would need a self-hosted open model on a GPU in KSA. That is a price, timeline and quality change, so it goes back to the client as a scope question and is not absorbed.
-- **Cheaper models** (**Decision needed: D7**): PII detection will **never** use an API model, because that would send unmasked text out. Routing the consultant to `claude-sonnet-5-5` is evaluated in W8 or the pilot and presented to Abdelrahman as a decision, with an eval table. It is never switched silently.
+- **Cheaper models** (**Decision needed: D7**): PII detection will **never** use an API model, because that would send unmasked text out. Routing the consultant to `claude-sonnet-5-5` is evaluated in W9 or the pilot and presented to Abdelrahman as a decision, with an eval table. It is never switched silently.
 
 ---
 
@@ -1244,7 +1246,7 @@ Dependency scanning: Dependabot, plus `composer audit`, `pip-audit`, `pnpm audit
 
 - **Database:** nightly `pg_dump -Fc`, encrypted with `age` (the key is kept offline by the client and Abdelrahman), uploaded to an **OCI Jeddah** bucket with a 30-day lifecycle.
 - **Documents:** cross-region replication of the documents bucket from Riyadh to Jeddah, plus a daily block-volume backup policy (7 days).
-- **Restore test:** in W8 before go-live, a dump is restored into staging and verified. Restores are then repeated monthly in the pilot.
+- **Restore test:** in W9 before go-live, a dump is restored into staging and verified. Restores are then repeated monthly in the pilot.
 - **Targets (P1):** RPO 24 h, RTO 4 h. WAL archiving and PITR are P2.
 
 ### 8.6 Monitoring
@@ -1281,7 +1283,7 @@ Dependency scanning: Dependabot, plus `composer audit`, `pip-audit`, `pnpm audit
 - **Until the sender ID is live:** staging uses the log driver and a whitelisted test number. Apple's reviewer gets a dedicated demo number with a fixed code, enabled only for that number, logged, and disabled after review.
 - **Email** (**Decision needed: D17**): Amazon SES in Bahrain (`me-south-1`) or ZeptoMail. It is used only for lawyer/admin invites and MFA backup codes, and carries no case content.
 
-### 8.10 Store developer accounts (started in W1; review time is outside the 8 weeks)
+### 8.10 Store developer accounts (started in W1; review time is outside the build weeks)
 
 **Apple:**
 1. Confirm the legal entity and D-U-N-S number (Apple's D-U-N-S lookup tool; issuing one can take up to about 30 days).
@@ -1423,42 +1425,57 @@ Contacts and steps live in `docs/runbook.md`.
 
 ---
 
-## 10. 8-week schedule
+## 10. Schedule: 9 weeks proposed (contract says 8; pending client approval)
 
-### 10.1 Calendar and milestones (illustrative: W1 starts the Sunday after M0)
+**Why 9 weeks (D27, decided by Abdelrahman: option B):** the Vue dashboard and the landing page raised the Must work to 347 h. 8 weeks × 40 h = 320 h is not enough; **9 weeks × 40 h = 360 h** fits all 347 h with every feature and all polish kept, plus 13 h of buffer. A further 9 h of internal-only shortcuts is held in reserve (§11.1). The price (7,000 SAR) and the M0/M1/M2 amounts do not change; only the duration does. **The client must approve the extra week before M0** (blocker B5). If the client refuses, the fallback is option A from v0.3: 8 weeks with cut lists A + B and about 42 h/week (§11.1).
+
+### 10.1 Calendar and milestones (illustrative: W1 starts Sun 29 Nov 2026, the Sunday after M0)
 
 | Week | Dates (Sun–Thu) | Focus | Milestone |
 |---|---|---|---|
-| W1 | 22–26 Nov 2026 | Foundations, cloud, extraction bake-off | **M0** received before day 1 |
-| W2 | 29 Nov – 3 Dec | Ingestion + indexing, retrieval, Claude wrapper, OTP API | Sources indexed on staging |
-| W3 | 6–10 Dec | Consultant engine + API, mobile auth, RBAC, case API | — |
-| W4 | 13–17 Dec | Mobile consultant, uploads, OCR, PII masking, eval harness, deploy pipeline | Consultant usable on staging |
-| W5 | 20–24 Dec | Analysis + draft routes, pipeline, case wizard, lawyer panel | — |
-| W6 | 27–31 Dec | Mobile case screens, lawyer review + approve, push | **M1 demo Thu 31 Dec** |
-| W7 | 3–7 Jan 2027 | Feedback, admin, security basics, PDPL items, store submission | **Store submission Thu 7 Jan** |
-| W8 | 10–14 Jan | KB admin UI, final evals and tuning, hardening, prod go-live | **M2 target Thu 14 Jan** (subject to store review) |
-| Pilot | 17 Jan – 4 Feb | 2–3 weeks (client sets the length), quick fixes and tuning | Pilot report within 5 working days after the pilot ends |
+| W1 | 29 Nov – 3 Dec 2026 | Foundations, cloud, extraction bake-off | **M0** received before day 1 |
+| W2 | 6–10 Dec | Ingestion + indexing, retrieval, Claude wrapper, OTP API | Sources indexed on staging |
+| W3 | 13–17 Dec | Consultant engine + API, mobile auth, RBAC, case API | — |
+| W4 | 20–24 Dec | Mobile consultant, Vue dashboard shell, deploy pipeline, uploads, OCR, eval harness | Consultant usable on staging |
+| W5 | 27–31 Dec | PII masking, dashboard login + 2FA, analysis + draft routes | — |
+| W6 | 3–7 Jan 2027 | Pipeline orchestration, case wizard, mobile home/cases, lawyer queue, admin invites | — |
+| W7 | 10–14 Jan | Mobile analysis/draft screens, lawyer review workspace + approve, ratings | **M1 demo Thu 14 Jan** |
+| W8 | 17–21 Jan | Feedback, usage stats, landing page, security basics, PDPL items, store submission | **Store submission Thu 21 Jan** |
+| W9 | 24–28 Jan | KB admin UI, final evals and tuning, hardening, prod go-live | **M2 target Thu 28 Jan** (subject to store review) |
+| Pilot | from Sun 31 Jan | 2–3 weeks (client sets the length), quick fixes and tuning | Pilot report within 5 working days after the pilot ends |
+
+**Ramadan:** Ramadan 1448 is expected to start around 8 Feb 2027 (moon sighting decides). With a 29 Nov start, a 2-week pilot runs 31 Jan – 11 Feb and its second week falls in Ramadan; a 3-week pilot runs into the middle of it. Dentists work shorter hours in Ramadan, so usage may drop. Options for the client: start earlier (each week M0 arrives before 29 Nov moves everything back one week), accept the overlap, or run the pilot after Eid al-Fitr (around 10 Mar 2027). **Decision needed (D28).**
+
+**Proposed contract tracks for 9 weeks** (to replace the 8-week track table in the contract):
+
+| Track | Weeks (8-week contract) | Weeks (9-week proposal) |
+|---|---|---|
+| Setup and source indexing | 1–2 | 1–2 |
+| RAG engine and consultant | 2–5 | 2–5 |
+| Case, documents and draft | 3–6 | 3–7 |
+| Lawyer review, admin and feedback | 5–7 | 6–9 |
+| Testing and publishing | 7–8 | 8–9 |
 
 ### 10.2 Gantt (contract tracks)
 
 ```mermaid
 gantt
-  title Project 1 - 8 weeks (illustrative start Sun 22 Nov 2026)
+  title Project 1 - 9 weeks proposed (illustrative start Sun 29 Nov 2026)
   dateFormat YYYY-MM-DD
   axisFormat %d %b
   section Contract tracks
-  Setup and source indexing (W1-2)        :a1, 2026-11-22, 12d
-  RAG engine and consultant (W2-5)        :a2, 2026-11-29, 26d
-  Case, documents and draft (W3-6)        :a3, 2026-12-06, 26d
-  Lawyer review, admin, feedback (W5-7)   :a4, 2026-12-20, 19d
-  Testing and publishing (W7-8)           :a5, 2027-01-03, 12d
+  Setup and source indexing (W1-2)        :a1, 2026-11-29, 12d
+  RAG engine and consultant (W2-5)        :a2, 2026-12-06, 26d
+  Case, documents and draft (W3-7)        :a3, 2026-12-13, 33d
+  Lawyer review, admin, feedback (W6-9)   :a4, 2027-01-03, 26d
+  Testing and publishing (W8-9)           :a5, 2027-01-17, 12d
   section Milestones
-  M0 received                             :milestone, m0, 2026-11-22, 0d
-  M1 prototype demo                       :milestone, m1, 2026-12-31, 0d
-  Store submission                        :milestone, s1, 2027-01-07, 0d
-  M2 launch (store review permitting)     :milestone, m2, 2027-01-14, 0d
+  M0 received                             :milestone, m0, 2026-11-29, 0d
+  M1 prototype demo                       :milestone, m1, 2027-01-14, 0d
+  Store submission                        :milestone, s1, 2027-01-21, 0d
+  M2 launch (store review permitting)     :milestone, m2, 2027-01-28, 0d
   section After delivery
-  Doctor pilot (2-3 weeks)                :p1, 2027-01-17, 19d
+  Doctor pilot (2-3 weeks)                :p1, 2027-01-31, 19d
   Pilot report                            :p2, after p1, 5d
 ```
 
@@ -1466,20 +1483,21 @@ gantt
 
 | Week | Developer tasks (h) | Depends on | Client inputs due this week |
 |---|---|---|---|
-| **W1** (41 h) | S0.1 monorepo + compose (6), S0.2 CI (5), S0.3 OCI provisioning (6), S0.6 Laravel skeleton (4), S0.7 Flutter shell (8), S0.8 ai-svc skeleton (3), S1.1 extraction bake-off on the 4 PDFs (5), S1.2 Arabic normaliser (4) | M0; OCI tenancy for S0.3 | **Day 1:** confirm B1–B4; open OCI tenancy (Riyadh home), Anthropic org, Apple + Google **organization** enrolment (D-U-N-S), Firebase project; add Abdelrahman. **By Thu:** any additional sources (end of W1 cut-off); domain purchase; SMS provider account + **sender ID request**; name the pilot lawyer; decisions D3, D4 (start legal review), D12, D13, D16 |
-| **W2** (43 h) | S1.3 parser + chunker (9), S1.4 KB schema + embeddings (4), S1.5 ingestion lifecycle (5), S1.6 index sources + lawyer spot-check (3), S2.1 hybrid retrieval (5), S2.3 Claude wrapper spike: structured + stream + fallback + geo (7), S5.1 OTP API (6), S5.6 RBAC + audit (4) | S1.1–S1.2; Anthropic key | Lawyer: **2 h** spot-check of 30 chunks. ZDR request sent to Anthropic. Email provider (**Decision needed: D17**). |
-| **W3** (43 h) | S2.2 reranker + thresholds (4), S2.4 citation verifier (5), S2.5 consultant route (5), S2.6 consult API (5), S5.2 invitations + consents (4), S5.3 mobile auth screens (7), S3.1 case API (5), S0.9 Vue dashboard shell (8) | S2.1, S2.3, S5.1 | Lawyer: **3 h** validating 50 eval questions + gold articles. App name, logo and store text draft (Q-C3). Style reference (Q-C10). D22. |
-| **W4** (43 h) | S2.7 mobile consultant (9), S0.4 deploy pipeline (5), S3.2 upload API (4), S3.3 OCR pipeline (7), S3.4 PII masking + test set (9), S5.7 dashboard auth + 2FA (9) | S2.6, S0.3, S3.1 | Lawyer: **1 h** reviewing the case-type playbook queries. Client tries the consultant on staging (feedback by Thu). Client's lawyer: comments on privacy notice/consent drafts. |
-| **W5** (43 h) | S3.5 case retrieval (3), S3.6 analysis route (5), S3.7 draft route (7), S3.8 pipeline orchestration (5), S3.9 mobile case wizard (11), S4.1 lawyer area (2), S8.1 eval harness (5), S8.2a eval set part 1 (5) | S3.2–S3.4, S2.4 | Lawyer: **2 h** gold labels for 10 synthetic cases. **Apple and Google accounts must be active by Thu** (TestFlight / internal builds in W6). Decisions D9, D10. Disclaimer text (Q-C9). |
-| **W6** (46 h) | S3.10 mobile processing/analysis/draft/send (11), S3.11 home/cases/details (6), S4.2 review queue (5), S4.3 review workspace (14), S4.4 approve + push + approved view (7), S5.5 FCM setup (3). Eval run #1. **M1 demo Thu.** | All of W5; Apple APNs key | **M1 demo** (client + lawyer, 90 min); written acceptance within 3 working days; **M1 payment 3,000 SAR**. D11 (listing type). Landing page texts approved (by Thu). |
-| **W7** (41 h) | S7.1 admin users + invites (6), S6.1 ratings (4), S6.2 feedback form (2), S9.7 landing page (8), S5.4 biometric lock (3), S9.1 screenshot protection (2), S9.2 PDPL artefacts + account deletion + retention jobs (5), S9.4a RC QA pass (4), S9.5 store listings + submission (7) | M1 feedback | Approve store listing texts and screenshots (Tue). Final privacy policy and terms (Tue). **Pilot dentist list** (10–20, names + mobiles). Sender ID live. D18, D20. |
-| **W8** (47 h) | S0.5 prod backups + monitoring (6), S6.3 usage stats (6), S7.3 ratings/feedback views (4), S7.2 KB admin UI (8), S8.2b eval set part 2 (4), S8.3 tuning + decisions memo (5), S9.3 security hardening (3), S9.4b QA + fixes (6), S9.6 prod go-live, runbook, handover (5). Eval run #2. | Store review outcome | Client's prod smoke test with Abdelrahman. Lawyer account active for the pilot. **M2 acceptance** once both stores are live → **M2 payment 2,000 SAR**. |
+| **W1** (41 h) | S0.1 monorepo + compose (6), S0.2 CI (5), S0.3 OCI provisioning (6), S0.6 Laravel skeleton (4), S0.7 Flutter shell (8), S0.8 ai-svc skeleton (3), S1.1 extraction bake-off on the 4 PDFs (5), S1.2 Arabic normaliser (4) | M0; 9-week approval; OCI tenancy for S0.3 | **Day 1:** confirm B1–B5; open OCI tenancy (Riyadh home), Anthropic org, Apple + Google **organization** enrolment (D-U-N-S), Firebase project; add Abdelrahman. **By Thu:** any additional sources (end of W1 cut-off); domain purchase; SMS provider account + **sender ID request**; name the pilot lawyer; decisions D3, D4 (start legal review), D12, D13, D16 |
+| **W2** (39 h) | S1.3 parser + chunker (9), S1.4 KB schema + embeddings (4), S1.5 ingestion lifecycle (5), S1.6 index sources + lawyer spot-check (3), S2.1 hybrid retrieval (5), S2.3 Claude wrapper spike: structured + stream + fallback + geo (7), S5.1 OTP API (6) | S1.1–S1.2; Anthropic key | Lawyer: **2 h** spot-check of 30 chunks. ZDR request sent to Anthropic. Email provider (D17). |
+| **W3** (39 h) | S2.2 reranker + thresholds (4), S2.4 citation verifier (5), S2.5 consultant route (5), S2.6 consult API (5), S5.2 invitations + consents (4), S5.3 mobile auth screens (7), S5.6 RBAC + audit (4), S3.1 case API (5) | S2.1, S2.3, S5.1 | Lawyer: **3 h** validating 50 eval questions + gold articles. App name, logo and store text draft (Q-C3). Style reference (Q-C10). D22. |
+| **W4** (38 h) | S2.7 mobile consultant (9), S0.9 Vue dashboard shell (8), S0.4 deploy pipeline (5), S3.2 upload API (4), S3.3 OCR pipeline (7), S8.1 eval harness (5) | S2.6, S0.3, S3.1 | Lawyer: **1 h** reviewing the case-type playbook queries. Client's lawyer: comments on privacy notice/consent drafts. |
+| **W5** (38 h) | S3.4 PII masking + test set (9), S5.7 dashboard auth + 2FA (9), S3.5 case retrieval (3), S3.6 analysis route (5), S3.7 draft route (7), S8.2a eval set part 1 (5) | S3.2–S3.3, S2.4, S0.9 | Client tries the consultant on staging (feedback by Thu). Lawyer: **2 h** gold labels for 10 synthetic cases. Disclaimer text (Q-C9). |
+| **W6** (38 h) | S3.8 pipeline orchestration (5), S3.9 mobile case wizard (11), S4.1 lawyer area (2), S4.2 review queue (5), S3.11 home/cases/details (6), S5.5 FCM setup (3), S7.1 admin users + invites (6) | S3.4–S3.7, S5.7 | **Apple and Google accounts must be active by Thu** (TestFlight / internal builds in W7). Decisions D9, D10. |
+| **W7** (36 h) | S3.10 mobile processing/analysis/draft/send (11), S4.3 review workspace (14), S4.4 approve + push + approved view (7), S6.1 ratings (4). Eval run #1. **M1 demo Thu.** | All of W6; Apple APNs key | **M1 demo** (client + lawyer, 90 min); written acceptance within 3 working days; **M1 payment 3,000 SAR**. D11 (listing type). Landing page texts approved (by Thu). |
+| **W8** (41 h) | S6.2 feedback form (2), S6.3 usage stats (6), S7.3 ratings/feedback views (4), S5.4 biometric lock (3), S9.1 screenshot protection (2), S9.2 PDPL artefacts + account deletion + retention jobs (5), S9.7 landing page (8), S9.4a RC QA pass (4), S9.5 store listings + submission (7) | M1 feedback | Approve store listing texts and screenshots (Tue). Final privacy policy and terms (Tue). **Pilot dentist list** (10–20, names + mobiles). Sender ID live. D18, D20, D28. |
+| **W9** (37 h) | S0.5 prod backups + monitoring (6), S7.2 KB admin UI (8), S8.2b eval set part 2 (4), S8.3 tuning + decisions memo (5), S9.3 security hardening (3), S9.4b QA + fixes (6), S9.6 prod go-live, runbook, handover (5). Eval run #2. | Store review outcome | Client's prod smoke test with Abdelrahman. Lawyer account active for the pilot. **M2 acceptance** once both stores are live → **M2 payment 2,000 SAR**. |
 
-The weeks show the raw Must hours: 347 h, an average of 43.4 h/week. W8 (47 h) and W6 (46 h) are the heaviest. With cut lists A and B applied (recommended, D27), the total drops to 326 h: W1 39, W2 43, W3 43, W4 43, W5 41, W6 39, W7 40, W8 38. At about 42 h/week that leaves roughly 10 h of contingency. Should and Could items are taken only if contingency is unused.
+The weeks sum to 347 h (all Must stories, an average of 38.6 h/week). The remaining 13 h of the 360 h capacity is contingency, with cut list A′ (§11.1) as a further 9 h reserve. Should and Could items are taken only if contingency is unused.
 
 If a client input arrives late, its dependent tasks move. When that affects a milestone date, Abdelrahman raises it with the client in writing; this plan doesn't change contract dates by itself.
 
-### 10.4 After W8: pilot and report (inside the contract, outside the 8 weeks)
+### 10.4 After W9: pilot and report (inside the contract, outside the build weeks)
 
 - **Onboarding:** day 1 sends invitations and a 1-page Arabic guide, then a 30-minute onboarding call for dentists and the lawyer.
 - **Daily:** triage of feedback and errors, with quick fixes released as patch builds (Android quickly; iOS through review).
@@ -1530,39 +1548,37 @@ If a client input arrives late, its dependent tasks move. When that affects a mi
   | v0.3: Nuxt marketing landing page (S9.7) | +8 |
   | **Total Must vs v0.1** | **+40** |
 
-- **Capacity:** 8 weeks × 40 h = 320 h. Must is now **27 h over** capacity before any contingency.
-- **How to absorb it (**Decision needed: D27**):**
+- **Capacity:** 8 weeks × 40 h = 320 h, which is 27 h short. **Decided (D27, option B): ask the client for 9 weeks.** 9 weeks × 40 h = 360 h, so all 347 h of Must work fits with 13 h of buffer and nothing is cut.
 
-  | Option | Result | Trade-off |
+  | Option considered | Result | Status |
   |---|---|---|
-  | **1. Cut lists A + B, and plan about 42 h/week (recommended)** | 326 h of work vs 336 h capacity: about 10 h (3%) buffer | Less polish (merged analysis tab, simpler lawyer editor, stats as cards + table); no contract scope removed; slightly longer weeks |
-  | 2. Cut lists A + B at 40 h/week | 326 h vs 320 h: 6 h short | Does not fit |
-  | 3. Extend the timeline | Keep all polish | Changes the contracted 8 weeks: needs the client's agreement first |
-  | 4. Filament for P1, Vue dashboard in P2 | Back to 315 h (with the landing page) | Contradicts your choice; P2 would rebuild the web screens |
+  | A. Cut lists A + B, about 42 h/week, 8 weeks | 326 h of work vs 336 h capacity, about 10 h buffer, less polish | **Fallback** if the client refuses the extra week |
+  | **B. Extend to 9 weeks** | 347 h vs 360 h, 13 h buffer + 9 h reserve, all polish kept | **Chosen** (pending client approval, B5) |
+  | C. Filament for P1, Vue in P2 | 315 h | Rejected |
 
-- **Cut list A** (**Decision needed: D24**, recommended): none of these touches the contract scope.
+- **Cut list A′ (reserve, internal only, used only if the buffer runs out):** nothing the client or users would see.
 
   | Cut | Saves |
   |---|---|
-  | Merge «نتيجة التحليل» into the draft screen as a second tab (S3.10) | 3 h |
   | Eval consult set 50 → 40 questions (30 + 10), still within the brief's 40–60 (S8.2) | 2 h |
   | Monitoring on free SaaS only, no OCI alarm tuning (S0.5) | 2 h |
   | Staging on the same OCI VM shape as dev compose, without separate hardening (S0.3) | 2 h |
   | Admin «إعادة إرسال الدعوة» becomes "delete invite and re-invite" (S7.1) | 1 h |
   | Mobile integration test replaced by a manual script (S0.7/S9.4) | 2 h |
 
-  Cut list A saves 12 h.
-- **Cut list B (part of option 1):** cuts that reduce P1 polish.
+  Cut list A′ saves 9 h.
+- **Fallback only (if the client keeps 8 weeks):** cut list A′ plus these visible cuts, and about 42 h/week.
 
   | Cut | Saves |
   |---|---|
-  | Native document scanner → camera photo + PDF only | 2 h |
+  | Merge «نتيجة التحليل» into the draft screen as a second tab (S3.10) | 3 h |
+  | Native document scanner → camera photo + PDF only (S3.9) | 2 h |
   | Lawyer paragraph editor → single textarea per section, citations kept per section (S4.3) | 4 h |
   | Usage-stats charts → cards + one table (S6.3) | 3 h |
 
-  Cut list B saves 9 h. A + B together save 21 h: 347 → 326 h.
+  All fallback cuts together save 21 h: 347 → 326 h. The 8-week week-by-week table is in plan v0.3 (git commit `de29f2f`).
 
-- **Should items (14 h)** are done only if contingency is unused by W7: S3.12 document viewer, S4.5 PDF, S4.6 citation sample review, S4.7 lawyer original view. S4.6's fallback is a CSV export of a random citation sample plus a shared sheet (1 h), so the pilot KPI stays measurable either way.
+- **Should items (14 h)** are done only if contingency is unused by W8: S3.12 document viewer, S4.5 PDF, S4.6 citation sample review, S4.7 lawyer original view. S4.6's fallback is a CSV export of a random citation sample plus a shared sheet (1 h), so the pilot KPI stays measurable either way.
 
 ### 11.2 Stories
 
@@ -1627,7 +1643,7 @@ Priority uses MoSCoW: M = Must, S = Should, C = Could. "Deps" lists stories or c
 | ID | Story | Acceptance criteria | h | P | Deps |
 |---|---|---|---|---|---|
 | S4.1 | Lawyer area | `/lawyer` routes, navigation and role guard in the dashboard; `/api/v1/lawyer/*` route group with policies | 2 | M | S0.9, S5.7 |
-| S4.2 | Review queue + claim | Queue API + DataTable with three tabs; atomic claim («استلام»; 409 if already taken); claimed cases visible only to the claimer | 5 | M | S4.1, S3.10 |
+| S4.2 | Review queue + claim | Queue API + DataTable with three tabs; atomic claim («استلام»; 409 if already taken); claimed cases visible only to the claimer; built in W6 against seeded drafts, wired to real submissions in W7 | 5 | M | S4.1, S3.1 |
 | S4.3 | Review workspace | Workspace API (case file, masked pages, version, sources, checks, notes) + three-pane Vue page per §7.1; paragraph editor keeps citation links; «حفظ كإصدار» creates an immutable version; flags and checks visible; internal notes; unsaved-changes guard | 14 | M | S4.2 |
 | S4.4 | Approve + notify | Approve API + confirm dialog; locks the version; case → approved; audit entry; FCM push «رد معتمد جاهز» deep-links to the approved view (m13/m14) within 1 min | 7 | M | S4.3, S5.5 |
 | S4.5 | Approved response PDF | Arabic PDF via Gotenberg with Hijri + Gregorian date and lawyer name; available to the dentist and lawyer only after approval | 4 | S | S4.4 |
@@ -1679,7 +1695,7 @@ Priority uses MoSCoW: M = Must, S = Should, C = Could. "Deps" lists stories or c
 | S9.2 | PDPL artefacts | Privacy notice + terms drafts (Arabic) for the client's lawyer; consent texts; «حذف الحساب»; `PurgeExpiredData` job per §9.7 | 5 | M | — |
 | S9.3 | Security hardening | OWASP API Top-10 checklist done; headers (HSTS, strict CSP for the dashboard), CORS limited to `portal.<domain>` with credentials, rate limits verified, secrets review, dependency audit clean | 3 | M | S0.4 |
 | S9.4 | QA pass + fixes | Test matrix §6.8 passed; dashboard Cypress smoke test green; full flow on staging and prod; p90 submit → draft < 10 min on 5 runs; no open critical/high defects | 10 | M | All features |
-| S9.5 | Store submission | Arabic listings, screenshots, privacy labels / data safety, content rating, review notes + demo account; both apps submitted by Thu W7 | 7 | M | Store accounts, S9.2 |
+| S9.5 | Store submission | Arabic listings, screenshots, privacy labels / data safety, content rating, review notes + demo account; both apps submitted by Thu W8 | 7 | M | Store accounts, S9.2 |
 | S9.7 | Marketing landing page | Nuxt pages `/`, `/privacy`, `/terms`, `/support` per §7.3, pre-rendered; Arabic RTL with the prototype look; SEO meta, Open Graph image, sitemap; store badges switch on after launch; Lighthouse ≥ 90 on mobile; live at `<domain>` before store submission | 8 | M | S0.9, S9.2, client texts |
 | S9.6 | Production go-live + handover | Prod deployed, sources indexed, smoke test passed, runbook + short Arabic admin guide, credentials handed to the client and rotated | 5 | M | S0.5, S9.4 |
 
@@ -1689,8 +1705,8 @@ Priority uses MoSCoW: M = Must, S = Should, C = Could. "Deps" lists stories or c
 
 | # | Risk | Likelihood / impact | Mitigation |
 |---|---|---|---|
-| R1 | **Store review rejection** of a legal-advice and AI app handling sensitive documents (Apple 5.1.1(ix) legal-entity expectation, 5.1.2(i) third-party AI disclosure, 2.1 demo access, "beta" wording; Play AI-content and data-safety rules) | Medium / High | Organisation accounts; disclaimers; consent screen naming third-party AI processing; demo account + fixed-OTP review number; account deletion; privacy policy; no pilot/beta wording; submit by W7 Thu with a buffer; pre-submission checklist against the guidelines; review notes explaining that lawyers approve every response |
-| R2 | **Organisation developer accounts need D-U-N-S** (issuing can take up to about 30 days). A personal Google account would trigger the 12-tester / 14-day closed test. | High if not started day 1 / High | Start Apple + Google org enrolment and the D-U-N-S lookup on W1 day 1 (blocker B1); TestFlight and internal testing ready by W5; if blocked, M1 demo runs on Android direct install + iOS dev build; escalate in writing in W2 |
+| R1 | **Store review rejection** of a legal-advice and AI app handling sensitive documents (Apple 5.1.1(ix) legal-entity expectation, 5.1.2(i) third-party AI disclosure, 2.1 demo access, "beta" wording; Play AI-content and data-safety rules) | Medium / High | Organisation accounts; disclaimers; consent screen naming third-party AI processing; demo account + fixed-OTP review number; account deletion; privacy policy; no pilot/beta wording; submit by W8 Thu with a buffer; pre-submission checklist against the guidelines; review notes explaining that lawyers approve every response |
+| R2 | **Organisation developer accounts need D-U-N-S** (issuing can take up to about 30 days). A personal Google account would trigger the 12-tester / 14-day closed test. | High if not started day 1 / High | Start Apple + Google org enrolment and the D-U-N-S lookup on W1 day 1 (blocker B1); TestFlight and internal testing ready by W6; if blocked, M1 demo runs on Android direct install + iOS dev build; escalate in writing in W2 |
 | R3 | **Arabic OCR quality** on scanned and photographed documents and handwriting | High / Medium | Text layer first (many letters are digital PDFs); bake-off in W1 and W4; native scanner with edge detection; per-page confidence + «جودة منخفضة» prompt to re-scan or type facts; typed facts are mandatory; handwriting declared best-effort; P2 option: GPU-hosted Arabic vision OCR in KSA |
 | R4 | **Client delays** (sources by end of W1, accounts, sender ID, lawyer, domain, pilot list) | Medium / High | Weekly input table (§10.3) sent each Sunday; synthetic substitutes keep dev moving (log SMS driver, staging domain); late inputs move dependent tasks, and milestone impacts are raised in writing |
 | R5 | **LLM data location:** no KSA inference; PDPL cross-border concerns | Medium / High | Fail-closed de-identification; `us` geo pinned per workspace; ZDR requested in W1; no Batches/Files with case data; lawyer sign-off before real data (B3, D4); if refused, escalate as a scope change rather than absorb |
@@ -1698,7 +1714,7 @@ Priority uses MoSCoW: M = Must, S = Should, C = Could. "Deps" lists stories or c
 | R7 | **Source text quality** (as found: lam-alef reversal, font-encoding corruption) causing wrong quotes or failed verification | High / Medium | Bake-off + transcription for corrupted sources; normaliser tests from real errors; lawyer spot-check; fuzzy quote matching on normalised text |
 | R8 | **SMS sender ID registration** (about 20 business days) delays real OTP | High / Medium | Request in W1; log driver + test numbers until then; fallback: the provider's pre-approved generic sender if available |
 | R9 | **AI quality or safety:** wrong legal reasoning, weak drafts, or classifier false-positive refusals | Medium / High | Retrieval threshold + `answerable`; citation verification + repair; mandatory lawyer approval; server-side fallback `default`; eval runs before M1 and M2, weekly in the pilot; prompts versioned |
-| R10 | **Single developer, tight capacity, scope creep** toward P2 features (stages, notifications, revisions). Capacity is tighter since v0.2: the Vue dashboard adds 32 h and the landing page 8 h. | High / High | D27 option 1 (cut lists A + B, about 42 h/week); drift table (§1.2) and change log; weekly demo; Must-only plan; if W3 ends more than 6 h behind, escalate option 3 to the client early |
+| R10 | **Single developer, tight capacity, scope creep** toward P2 features (stages, notifications, revisions). The Vue dashboard (+32 h) and landing page (+8 h) are absorbed by a 9th week, which the client may refuse. | Medium / High | Ask for the 9th week before M0 (B5); 13 h buffer + 9 h reserve (cut list A′); drift table (§1.2) and change log; weekly demo; if the client refuses, apply the 8-week fallback (§11.1) |
 | R11 | **KSA cloud onboarding friction** (card verification, home-region availability) | Low–Medium / Medium | OCI signup on day 1; fallback to Jeddah as home region; GCP via CNTXT or STC as alternatives (§8.1) |
 | R12 | **Runaway LLM spend** (abuse or loops) | Low / Medium | Per-user rate limits, `max_tokens` caps, one repair retry only, workspace spend limits, daily cost digest |
 
@@ -1754,7 +1770,7 @@ Prices are list prices at the time of writing, at 1 USD = 3.75 SAR. They must be
 
 ## 14. M1 and M2 acceptance checklists
 
-### 14.1 M1: "prototype of the program finished and demonstrated" (3,000 SAR), target Thu 31 Dec 2026 (end of W6)
+### 14.1 M1: "prototype of the program finished and demonstrated" (3,000 SAR), target Thu 14 Jan 2027 (end of W7)
 
 **Format:** a 90-minute live demo (video call or in person) on **staging with synthetic data**, attended by the client and the pilot lawyer. Devices: TestFlight (iOS) and Play internal testing (Android) builds; web panels on `portal.<staging-domain>`. If store accounts are delayed by the client, the demo uses a direct Android install and an iOS developer build, and M1 is not held back.
 
@@ -1775,7 +1791,7 @@ Prices are list prices at the time of writing, at 1 USD = 3.75 SAR. They must be
 
 **Acceptance:** the client confirms in writing (email or WhatsApp) within 3 working days. Minor defects are listed but do not block M1. Items 1–10 must pass.
 
-### 14.2 M2: "published, officially launched and actually running" (2,000 SAR), target Thu 14 Jan 2027 (end of W8), store review permitting
+### 14.2 M2: "published, officially launched and actually running" (2,000 SAR), target Thu 28 Jan 2027 (end of W9), store review permitting
 
 | # | Item | Pass condition |
 |---|---|---|
@@ -1803,30 +1819,31 @@ Every row below is a **Decision needed**. Body text marks each one where it aris
 | D1 | AI service: separate FastAPI vs inside Laravel | Separate, stateless ai-svc called from Horizon jobs | Abdelrahman | Plan approval |
 | D2 | Flutter state management | Riverpod 3 + codegen | Abdelrahman | Plan approval |
 | D3 | KSA hosting | OCI Riyadh (+ Jeddah backups) | Client + Abdelrahman | W1 day 1 |
-| D4 | LLM processing location | De-identify; `us` geo pinned; request ZDR; client's lawyer sign-off before real data | Client | W2 (sign-off before W7) |
+| D4 | LLM processing location | De-identify; `us` geo pinned; request ZDR; client's lawyer sign-off before real data | Client | W2 (sign-off before W8) |
 | D5 | Source extraction method | Text layer + fixes for the law; Claude page transcription for the corrupted dental regulation; human spot-check | Abdelrahman (client informed) | W1 |
 | D6 | OCR engine for case documents | Bake-off Tesseract vs PaddleOCR; text layer first; handwriting best-effort | Abdelrahman | W4 |
-| D7 | Cheaper model on any route | None by default; evaluate Sonnet 5.5 for the consultant with an eval table; PII detection never via API | Abdelrahman | W8 / pilot |
-| D8 | Effort per route | consult `low`, analysis/draft `high`; confirm by eval | Abdelrahman | W6, W8 |
-| D9 | Lawyer queue model | Shared queue + claim | Client | W5 |
-| D10 | Lawyer access to original files | Masked text by default + audited original view (Should) | Client + their lawyer | W5 |
-| D11 | App Store distribution | Public listing with invite-only login (simplest); Unlisted only if discoverability must be avoided (irreversible) | Client | W6 |
+| D7 | Cheaper model on any route | None by default; evaluate Sonnet 5.5 for the consultant with an eval table; PII detection never via API | Abdelrahman | W9 / pilot |
+| D8 | Effort per route | consult `low`, analysis/draft `high`; confirm by eval | Abdelrahman | W7, W9 |
+| D9 | Lawyer queue model | Shared queue + claim | Client | W6 |
+| D10 | Lawyer access to original files | Masked text by default + audited original view (Should) | Client + their lawyer | W6 |
+| D11 | App Store distribution | Public listing with invite-only login (simplest); Unlisted only if discoverability must be avoided (irreversible) | Client | W7 |
 | D12 | Developer account type | Organisation accounts for both stores | Client | W1 day 1 |
 | D13 | SMS provider | Taqnyat or Authentica for low volume; Unifonic if the client prefers enterprise | Client | W1 |
 | D14 | Error tracking | Sentry SaaS with scrubbing (fast); GlitchTip in KSA if the client prefers no telemetry abroad | Abdelrahman + client | W1 |
 | D15 | iOS build pipeline | Own Mac + fastlane; else Codemagic free tier | Abdelrahman | W1 |
 | D16 | Domain | `.com` now (`.sa` if a CR exists and the client prefers it) | Client | W1 |
 | D17 | Email provider | Amazon SES (Bahrain) or ZeptoMail; content-free emails | Client | W2 |
-| D18 | Pilot data retention | End of pilot + 90 days, then delete or migrate with consent | Client | W7 |
+| D18 | Pilot data retention | End of pilot + 90 days, then delete or migrate with consent | Client | W8 |
 | D19 | Staging hosting | Small paid VM, stopped off-hours; Always Free Ampere if available in the KSA home region | Abdelrahman | W1 |
-| D20 | PDF of the approved response | Build if contingency allows (Should) | Client + Abdelrahman | W7 |
+| D20 | PDF of the approved response | Build if contingency allows (Should) | Client + Abdelrahman | W8 |
 | D21 | Repository ownership | New private repo in a client-owned GitHub organisation; Abdelrahman admin | Client | After plan approval |
 | D22 | Consultant "talk to a lawyer" | Suggestion text only (default); Could: record request for admin | Client | W3 |
 | D23 | Server-side refusal fallback | Enable `fallbacks: "default"`, logged and visible in `ai_runs` | Abdelrahman | W2 |
 | D24 | Cut list A | Approve (now part of D27 option 1) | Abdelrahman | Plan approval |
 | D25 | Older law edition | Index as archived (versioning proof), never retrieved | Abdelrahman | W2 |
 | D26 | Dashboard UI kit | **Decided: PrimeVue 4 + Tailwind** | Abdelrahman | Done |
-| D27 | Absorbing the extra hours (+32 h Vue dashboard, +8 h landing page) | Option 1: cut lists A + B and about 42 h/week; option 3 (timeline) needs the client | Abdelrahman (client for option 3) | Plan approval |
+| D27 | Absorbing the extra hours (+32 h Vue dashboard, +8 h landing page) | **Decided by Abdelrahman: ask the client for 9 weeks** (same price); fallback is 8 weeks with cuts | Client approval (B5) | Before M0 |
+| D28 | Pilot timing around Ramadan | Accept a short overlap, start earlier, or pilot after Eid al-Fitr | Client | W8 |
 
 ## Appendix B: After plan approval (waiting for explicit OK)
 
