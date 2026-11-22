@@ -4,6 +4,7 @@ Legal-protection platform for dentists in Saudi Arabia. This repository holds **
 
 - **Plan:** [`PROJECT1_PLAN.md`](PROJECT1_PLAN.md) (approved, 9 weeks).
 - **Web dashboard (lawyer + admin):** [`web/`](web/README.md) — UI built with fake data; the backend comes next.
+- **Dentist app (Flutter):** [`mobile/`](mobile/README.md) — UI built with fake data; the backend comes next.
 
 ## Reference material (approved by the client)
 
