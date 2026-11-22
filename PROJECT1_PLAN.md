@@ -26,6 +26,7 @@
   - Store submission: Thu 21 Jan 2027.
   - M2 launch: Thu 28 Jan 2027, subject to store review.
   - Pilot: from Sun 31 Jan 2027. It now overlaps the start of Ramadan 1448 (expected around 8 Feb); see D28.
+  - The GitHub milestones carry earlier **internal target dates** (M1 15 Dec 2026, M2 30 Dec 2026). They are Abdelrahman's own goals, not client commitments; the dates above stay the ones agreed with the client (§10.1).
 
 ### Questions that block planning
 
@@ -1444,6 +1445,8 @@ Contacts and steps live in `docs/runbook.md`.
 | W9 | 24–28 Jan | KB admin UI, final evals and tuning, hardening, prod go-live | **M2 target Thu 28 Jan** (subject to store review) |
 | Pilot | from Sun 31 Jan | 2–3 weeks (client sets the length), quick fixes and tuning | Pilot report within 5 working days after the pilot ends |
 
+**Internal targets vs client dates (22 Nov 2026):** the GitHub milestones are due earlier than this table: **M1 – Prototype demo 15 Dec 2026** and **M2 – Launch 30 Dec 2026** (M0 – Kickoff stays 29 Nov 2026). These are Abdelrahman's internal targets, to finish ahead of schedule where possible. They are not communicated to the client as commitments and change nothing in the contract: the client-facing dates, the 9 weeks, the price and the M1/M2 acceptance checklists (§14) stay as above. At 40 h/week the internal targets are not reachable for the full M1/M2 scope (M1 holds about 269 h of work, about 100 h of capacity exist by 15 Dec), so missing an internal target is expected and does not move the client dates.
+
 **Ramadan:** Ramadan 1448 is expected to start around 8 Feb 2027 (moon sighting decides). With a 29 Nov start, a 2-week pilot runs 31 Jan – 11 Feb and its second week falls in Ramadan; a 3-week pilot runs into the middle of it. Dentists work shorter hours in Ramadan, so usage may drop. Options for the client: start earlier (each week M0 arrives before 29 Nov moves everything back one week), accept the overlap, or run the pilot after Eid al-Fitr (around 10 Mar 2027). **Decision needed (D28).**
 
 **Proposed contract tracks for 9 weeks** (to replace the 8-week track table in the contract):
@@ -1849,4 +1852,4 @@ Every row below is a **Decision needed**. Body text marks each one where it aris
 
 - **Repository:** this repository (D21). The monorepo structure from S0.1 is added here as work starts.
 - **Build order (Abdelrahman, 22 Nov 2026):** start with the **UI of the web dashboard** (lawyer and admin), keeping the look of the approved prototype. The screens are built first against mock data shaped like the planned API (§4.2), then wired to the real API in the weeks shown in §10.3. Calendar and milestones are unchanged; the mock layer (about 3 h) comes out of the 13 h buffer. Before coding, the target screens are confirmed with Abdelrahman using screenshots of the prototype.
-- **Still waiting for an explicit OK:** creating GitHub milestones **M0 – Kickoff**, **M1 – Prototype demo**, **M2 – Launch**, and one issue per story in §11.2.
+- **GitHub tracking (done 22 Nov 2026):** milestones **M0 – Kickoff**, **M1 – Prototype demo** and **M2 – Launch** (with internal target dates, see §10.1), issue #1 for the client's kickoff inputs, and one issue per story in §11.2 (#2–#66). Labels: epic (`E0`–`E9`), priority (`must`/`should`/`could`), week (`W1`–`W9`) and milestone.
