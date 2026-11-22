@@ -2,11 +2,11 @@
 
 | | |
 |---|---|
-| **Status** | Draft for approval by Abdelrahman. Planning only: no production code, repos, issues or cloud resources until approved. |
-| **Version / date** | v0.4 · 22 Nov 2026. v0.4: schedule extended to 9 weeks (D27 option B), pending client approval. v0.3: PrimeVue confirmed for the dashboard; a Nuxt marketing landing page added (S9.7). v0.2: the lawyer portal and admin dashboard move from Filament to a Vue 3 dashboard (Nuxt 4, SPA mode); the mobile app stays Flutter. Estimates and schedule updated (§11.1, D27). |
-| **Contract** | Project 1 (A1): 7,000 SAR · 8 weeks from start of work (**9 weeks proposed** in this plan, pending the client's approval; price unchanged) · M0 2,000 / M1 3,000 / M2 2,000 SAR |
+| **Status** | **Approved** by Abdelrahman on 22 Nov 2026. The client agreed to 9 weeks at the same price and payment amounts. Build starts with the web dashboard UI (§10.3, build order). |
+| **Version / date** | v1.0 · 22 Nov 2026. v1.0: plan approved; 9 weeks agreed by the client; old proposals removed from the repo. v0.4: schedule extended to 9 weeks (D27 option B), pending client approval. v0.3: PrimeVue confirmed for the dashboard; a Nuxt marketing landing page added (S9.7). v0.2: the lawyer portal and admin dashboard move from Filament to a Vue 3 dashboard (Nuxt 4, SPA mode); the mobile app stays Flutter. Estimates and schedule updated (§11.1, D27). |
+| **Contract** | Project 1 (A1): 7,000 SAR · 8 weeks from start of work (**extended to 9 weeks**, agreed by the client; price unchanged) · M0 2,000 / M1 3,000 / M2 2,000 SAR |
 | **Sources of truth** | The planning brief (authoritative for price, timeline, payments and scope), then `site/docs/prd.html`, `site/docs/user-flows.html`, `site/docs/architecture.html` and the prototype in `site/prototype/`. |
-| **Known stale file** | `proposals/project1.html` still says 2 weeks, 50/50 payments and "sources until day 3". This plan follows the brief instead: 8 weeks, M0/M1/M2, sources by end of week 1. |
+| **Repo cleanup** | The old proposals, price quote, Phase 1/Phase 2 offer pages and the sales presentation were removed from the repo on 22 Nov 2026 (they remain in git history). The approved prototype, screenshots, PRD, user flows, architecture doc and regulation sources stay as the reference for Project 1. |
 
 ---
 
@@ -37,7 +37,7 @@ None block writing this plan; every non-blocking unknown is stated as an assumpt
 | B2 | Who is the pilot lawyer? Can they give about 10 h during the build and about 1 h per working day in the pilot? | Client | Source spot-checks (W2), the gold citations for the eval set (W3–5), the M1 demo, and pilot reviews. |
 | B3 | Will the client's lawyer approve sending **de-identified** case text to Anthropic (processed in the US or globally)? | Client | There is no KSA inference option. If the answer is no, Project 1 needs a self-hosted LLM, which changes price and timeline. |
 | B4 | What is the start date (M0 received)? | Client | Every calendar date in §10 shifts with it. |
-| B5 | Does the client agree to **9 weeks instead of 8**, at the same price and payment amounts? | Client | The schedule in §10 needs it. If not, the 8-week fallback (§11.1) applies. |
+| B5 | ~~Does the client agree to 9 weeks instead of 8?~~ **Resolved: the client agreed** (same price and payment amounts). | Client | — |
 
 ---
 
@@ -1188,7 +1188,7 @@ Admin sees **metadata only** for cases: no document text, no draft content. This
 
 **Pages:**
 
-| Route | Content (Arabic, texts adapted from the prototype and presentation; client approves) |
+| Route | Content (Arabic, texts adapted from the prototype and PRD; client approves) |
 |---|---|
 | `/` | Hero «الحماية القانونية لأطباء الأسنان» with the three value messages from the onboarding screen; «كيف يعمل» in 3 steps (سجّل قضيتك ← تحليل ذكي بالمصادر النظامية ← اعتماد من محامٍ مرخّص); features (المستشار القانوني الذكي، تحليل القضية ومسودة الرد، مراجعة المحامي، الخصوصية والتشفير); short FAQ; App Store and Google Play badges (shown once the apps are live); «تواصل معنا» |
 | `/privacy` | «سياسة الخصوصية» (from S9.2, approved by the client's lawyer); the store listings link here |
@@ -1425,9 +1425,9 @@ Contacts and steps live in `docs/runbook.md`.
 
 ---
 
-## 10. Schedule: 9 weeks proposed (contract says 8; pending client approval)
+## 10. Schedule: 9 weeks (agreed with the client)
 
-**Why 9 weeks (D27, decided by Abdelrahman: option B):** the Vue dashboard and the landing page raised the Must work to 347 h. 8 weeks × 40 h = 320 h is not enough; **9 weeks × 40 h = 360 h** fits all 347 h with every feature and all polish kept, plus 13 h of buffer. A further 9 h of internal-only shortcuts is held in reserve (§11.1). The price (7,000 SAR) and the M0/M1/M2 amounts do not change; only the duration does. **The client must approve the extra week before M0** (blocker B5). If the client refuses, the fallback is option A from v0.3: 8 weeks with cut lists A + B and about 42 h/week (§11.1).
+**Why 9 weeks (D27, agreed by the client on 22 Nov 2026):** the Vue dashboard and the landing page raised the Must work to 347 h. 8 weeks × 40 h = 320 h is not enough; **9 weeks × 40 h = 360 h** fits all 347 h with every feature and all polish kept, plus 13 h of buffer. A further 9 h of internal-only shortcuts is held in reserve (§11.1). The price (7,000 SAR) and the M0/M1/M2 amounts do not change; only the duration does. The client has approved the extra week.
 
 ### 10.1 Calendar and milestones (illustrative: W1 starts Sun 29 Nov 2026, the Sunday after M0)
 
@@ -1836,19 +1836,17 @@ Every row below is a **Decision needed**. Body text marks each one where it aris
 | D18 | Pilot data retention | End of pilot + 90 days, then delete or migrate with consent | Client | W8 |
 | D19 | Staging hosting | Small paid VM, stopped off-hours; Always Free Ampere if available in the KSA home region | Abdelrahman | W1 |
 | D20 | PDF of the approved response | Build if contingency allows (Should) | Client + Abdelrahman | W8 |
-| D21 | Repository ownership | New private repo in a client-owned GitHub organisation; Abdelrahman admin | Client | After plan approval |
+| D21 | Repository ownership | **Decided: build in this repository** (`abdo-shrief270/DentLegal`); transfer to the client after full payment, as in the contract | Abdelrahman | Done |
 | D22 | Consultant "talk to a lawyer" | Suggestion text only (default); Could: record request for admin | Client | W3 |
 | D23 | Server-side refusal fallback | Enable `fallbacks: "default"`, logged and visible in `ai_runs` | Abdelrahman | W2 |
 | D24 | Cut list A | Approve (now part of D27 option 1) | Abdelrahman | Plan approval |
 | D25 | Older law edition | Index as archived (versioning proof), never retrieved | Abdelrahman | W2 |
 | D26 | Dashboard UI kit | **Decided: PrimeVue 4 + Tailwind** | Abdelrahman | Done |
-| D27 | Absorbing the extra hours (+32 h Vue dashboard, +8 h landing page) | **Decided by Abdelrahman: ask the client for 9 weeks** (same price); fallback is 8 weeks with cuts | Client approval (B5) | Before M0 |
+| D27 | Absorbing the extra hours (+32 h Vue dashboard, +8 h landing page) | **Decided: 9 weeks, agreed by the client** (same price) | Done | Done |
 | D28 | Pilot timing around Ramadan | Accept a short overlap, start earlier, or pilot after Eid al-Fitr | Client | W8 |
 
-## Appendix B: After plan approval (waiting for explicit OK)
+## Appendix B: After approval
 
-Once this plan is approved, I'll propose and wait for an explicit OK before doing any of these:
-
-1. Creating the repository (structure in S0.1), ideally in a client-owned GitHub organisation (**Decision needed: D21**).
-2. Creating milestones **M0 – Kickoff**, **M1 – Prototype demo**, **M2 – Launch**.
-3. Creating one GitHub issue per story in §11.2, with acceptance criteria, estimate, priority and dependency labels, linked to the milestones by week.
+- **Repository:** this repository (D21). The monorepo structure from S0.1 is added here as work starts.
+- **Build order (Abdelrahman, 22 Nov 2026):** start with the **UI of the web dashboard** (lawyer and admin), keeping the look of the approved prototype. The screens are built first against mock data shaped like the planned API (§4.2), then wired to the real API in the weeks shown in §10.3. Calendar and milestones are unchanged; the mock layer (about 3 h) comes out of the 13 h buffer. Before coding, the target screens are confirmed with Abdelrahman using screenshots of the prototype.
+- **Still waiting for an explicit OK:** creating GitHub milestones **M0 – Kickoff**, **M1 – Prototype demo**, **M2 – Launch**, and one issue per story in §11.2.

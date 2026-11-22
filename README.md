@@ -1,55 +1,28 @@
-# DentLegal — حزمة المرحلة الأولى
+# DentLegal — Project 1
 
-الحماية القانونية لأطباء الأسنان: النموذج التفاعلي، العرض التقديمي، ووثائق المرحلة الأولى.
-كل ما يُسلَّم للعميل موجود في مجلد `site/` وهو موقع ثابت (HTML/CSS/JS) يُنشر كما هو على أي استضافة مجانية.
+Legal-protection platform for dentists in Saudi Arabia. This repository holds **Project 1**: the AI core (RAG over Saudi regulations) and the simplified release (Flutter dentist app, Vue web dashboard for lawyers and admins, Nuxt landing page).
 
-## محتويات `site/`
+- **Plan:** [`PROJECT1_PLAN.md`](PROJECT1_PLAN.md) (approved, 9 weeks).
 
-| المسار | المخرج |
+## Reference material (approved by the client)
+
+| Path | What it is |
 |---|---|
-| `index.html` | الصفحة الرئيسية للعميل: المخرجات، معرض اللقطات، ملفات التنزيل |
-| `prototype/` | النموذج التفاعلي (الطبيب · المحامي · الإدارة) + الجولة الموجهة لدورة القضية |
-| `presentation/` | العرض التقديمي (HTML، يعمل بالأسهم واللمس، ويتحول لعرض عمودي على الجوال) |
-| `docs/prd.html` | وثيقة متطلبات المنتج (المميزات، الوحدات، الأدوار والصلاحيات، المتطلبات) |
-| `docs/user-flows.html` | مسارات المستخدم وخريطة الشاشات |
-| `docs/architecture.html` | التصور التقني Flutter + Laravel + RAG |
-| `docs/phase1.html` | نطاق المرحلة الأولى، معايير الاستلام، نموذج الاعتماد |
-| `docs/phase2.html` | عرض المرحلة الثانية (النطاق، الجدول، الدفعات، الدعم) — دون أسعار |
-| `screenshots/` | 32 لقطة PNG حقيقية من النموذج |
-| `downloads/` | PDF للعرض والوثائق + ملف PowerPoint قابل للتعديل |
+| `site/prototype/` | Interactive HTML prototype: the approved UI for the dentist app, lawyer portal and admin. Open `site/prototype/index.html`. |
+| `site/screenshots/` | Screenshots of every prototype screen (`m*` mobile, `w*` web) |
+| `site/docs/prd.html` | Product requirements |
+| `site/docs/user-flows.html` | User flows and screen map |
+| `site/docs/architecture.html` | Technical direction |
+| `site/assets/tokens.css` | Design tokens (colours, font) used by the prototype |
+| `*.pdf` (repo root) | Regulatory sources to index: نظام مزاولة المهن الصحية ولائحته التنفيذية (current + previous edition), اللائحة التنظيمية لخدمات طب الأسنان, الوصف الوظيفي |
+| `1.jpeg`, `2.jpeg` | The client's original concept images |
 
-## قبل الإرسال للعميل
+The prototype uses fictional data only. No real patient data belongs in this repository.
 
-عدّل `site/assets/config.js`:
-
-- `provider` و `providerContact`: اسمك/شركتك ووسيلة التواصل (تظهر في العرض والوثائق).
-- `demoUrl`: رابط الموقع بعد النشر (يولّد رمز QR في العرض التقديمي وملف PowerPoint).
-
-ثم أعد توليد الملفات المشتقة (الخطوات أدناه).
-
-## إعادة توليد اللقطات والـ PDF و PowerPoint
-
-يتطلب Node.js و Google Chrome مثبتًا (المسار الافتراضي `C:/Program Files/Google/Chrome/Application/chrome.exe`، أو حدده بالمتغير `CHROME_PATH`).
+## Previewing the prototype
 
 ```bash
-cd tools
-npm install
-npm run serve          # في نافذة منفصلة: يشغّل الموقع على http://localhost:5173
-npm run shots          # لقطات الشاشة → site/screenshots
-npm run pdf            # PDF للعرض والوثائق → site/downloads
-npm run pptx           # PowerPoint → site/downloads/DentLegal-Presentation.pptx
+cd tools && npm install && npm run serve
 ```
 
-## النشر المجاني
-
-الموقع ثابت بالكامل؛ يكفي رفع محتوى `site/`:
-
-- **GitHub Pages**: ارفع محتوى `site/` إلى مستودع، ثم Settings ← Pages ← النشر من الفرع الرئيسي.
-- **Netlify / Cloudflare Pages**: اسحب مجلد `site/` إلى لوحة التحكم (Drag & Drop).
-
-## ملاحظات المرحلة الأولى
-
-- لا يوجد Backend فعلي ولا ذكاء اصطناعي حقيقي: التحليل والمسودات محاكاة ببيانات تجريبية.
-- لا توجد أي بيانات مرضى حقيقية؛ كل الأسماء والقضايا خيالية.
-- حالة النموذج تُحفظ في متصفح كل زائر (localStorage)، وزر «إعادة الضبط» يعيدها لحالتها الأولى.
-- المراجع النظامية في النموذج مأخوذة من ملفات العميل الموجودة في جذر المجلد (PDF).
+Then open http://localhost:5173/prototype/. `npm run shots` regenerates `site/screenshots/` (needs Chrome; set `CHROME_PATH`).
