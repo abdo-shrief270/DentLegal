@@ -1,0 +1,7 @@
+packages:
+  - base
+  - dashboard
+
+onlyBuiltDependencies:
+  - '@parcel/watcher'
+  - esbuild

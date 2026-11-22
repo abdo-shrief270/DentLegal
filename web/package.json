@@ -1,0 +1,12 @@
+{
+  "name": "dentlegal-web",
+  "private": true,
+  "packageManager": "pnpm@10.28.0",
+  "scripts": {
+    "dev": "pnpm --filter @dentlegal/dashboard dev",
+    "build": "pnpm --filter @dentlegal/dashboard generate",
+    "preview": "pnpm --filter @dentlegal/dashboard preview",
+    "typecheck": "pnpm --filter @dentlegal/dashboard typecheck",
+    "test": "pnpm -r --if-present test"
+  }
+}

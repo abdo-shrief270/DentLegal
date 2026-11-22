@@ -1,0 +1,82 @@
+/* Layer order: Tailwind utilities must win over PrimeVue component styles. */
+@layer theme, base, primevue, components, utilities;
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "IBM Plex Sans Arabic", "Segoe UI", Tahoma, system-ui, sans-serif;
+  --color-navy-900: #0a2e3b;
+  --color-teal-600: #12806f;
+  --color-muted: #5d7079;
+  --color-line: #e2e9eb;
+}
+
+@layer base {
+  body { font-size: 14px; line-height: 1.7; }
+  h1, h2, h3, h4 { line-height: 1.4; }
+}
+
+/* Visual language of the approved prototype (site/prototype/css/app.css), reused as components. */
+@layer components {
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 18px; box-shadow: var(--shadow-sm); }
+  .card-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+  .card-head h3 { margin: 0; font-size: 15px; font-weight: 700; }
+  .muted { color: var(--muted); }
+  .faint { color: var(--faint); }
+  .ltr { direction: ltr; unicode-bidi: isolate; display: inline-block; }
+  .mono { font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; direction: ltr; unicode-bidi: isolate; }
+
+  .badge { display: inline-flex; align-items: center; gap: 5px; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap; line-height: 1.7; }
+  .b-green { background: var(--green-50); color: var(--green-600); }
+  .b-amber { background: var(--amber-50); color: var(--amber-600); }
+  .b-red { background: var(--red-50); color: var(--red-600); }
+  .b-blue { background: var(--blue-50); color: var(--blue-600); }
+  .b-violet { background: var(--violet-50); color: var(--violet-600); }
+  .b-teal { background: var(--teal-50); color: var(--teal-700); }
+  .b-gold { background: var(--gold-100); color: var(--gold-600); }
+  .b-gray { background: var(--bg-2); color: var(--ink-2); }
+
+  .kpi { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 16px; display: flex; gap: 12px; align-items: center; }
+  .kpi .ic { width: 46px; height: 46px; border-radius: 13px; display: grid; place-items: center; background: var(--teal-50); color: var(--teal-700); flex: none; }
+  .kpi .v { font-size: 24px; font-weight: 700; line-height: 1.15; }
+  .kpi .l { font-size: 12.5px; color: var(--muted); }
+  .kpi .d { font-size: 11.5px; font-weight: 600; color: var(--muted); }
+
+  .alert { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: 14px; font-size: 13px; line-height: 1.8; }
+  .alert.teal { background: var(--teal-50); color: var(--teal-700); }
+  .alert.blue { background: var(--blue-50); color: #1d47a0; }
+  .alert.amber { background: var(--amber-50); color: #7a4a00; }
+
+  .paper { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 30px 34px; font-size: 14px; line-height: 2.1; color: #1c2b31; box-shadow: var(--shadow-sm); }
+  .paper .meta { font-size: 12px; color: var(--muted); border-bottom: 1px dashed var(--line-2); padding-bottom: 8px; margin-bottom: 12px; }
+  .paper h4 { margin: 14px 0 6px; font-size: 14.5px; color: var(--navy-900); }
+  .paper .flagged { background: #fff6dc; border-bottom: 2px dashed #d39b14; border-radius: 4px; }
+
+  .cite { display: inline-flex; align-items: center; gap: 4px; padding: 0 8px; margin: 0 2px; border-radius: 7px; font-size: 12px; font-weight: 600; line-height: 1.9;
+    background: var(--teal-50); color: var(--teal-700); border: 1px solid var(--teal-100); cursor: pointer; white-space: nowrap; vertical-align: baseline; }
+  .cite:hover { background: var(--teal-100); }
+  .cite.doc { background: var(--blue-50); color: var(--blue-600); border-color: #d6e2fb; }
+  .cite.bad { background: var(--amber-50); color: var(--amber-600); border-color: #f3d79b; }
+
+  .pane { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+  .pane-h { padding: 12px 14px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: 8px; font-weight: 700; font-size: 13.5px; }
+  .pane-b { padding: 14px; }
+  .check-row { display: flex; gap: 8px; align-items: flex-start; font-size: 12.5px; padding: 8px 0; border-bottom: 1px dashed var(--line); }
+  .check-row:last-child { border-bottom: 0; }
+  .src-card { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; font-size: 12.5px; line-height: 1.8; cursor: pointer; }
+  .src-card:hover { border-color: var(--teal-300); }
+  .src-card .h { display: flex; justify-content: space-between; gap: 6px; font-weight: 700; font-size: 12px; color: var(--teal-700); margin-bottom: 4px; }
+
+  .seal { display: inline-flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 14px; border: 1.5px solid var(--gold-500); background: var(--gold-100); color: #5d4419; }
+  .seal .ring { width: 44px; height: 44px; border-radius: 50%; border: 2px dashed var(--gold-500); display: grid; place-items: center; color: var(--gold-600); }
+
+  .avatar { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: 13px; color: #fff;
+    background: linear-gradient(135deg, var(--teal-600), var(--navy-700)); flex: none; }
+  .avatar.gold { background: linear-gradient(135deg, var(--gold-500), var(--gold-600)); }
+  .avatar.sm { width: 32px; height: 32px; font-size: 11.5px; }
+}
+
+/* PrimeVue tweaks for the Arabic RTL layout. */
+.p-datatable .p-datatable-thead > tr > th { background: var(--bg); color: var(--muted); font-size: 12px; font-weight: 600; text-align: start; }
+.p-datatable .p-datatable-tbody > tr > td { font-size: 13px; text-align: start; }
+.p-dialog .p-dialog-title { font-size: 16px; }
+.p-button { font-family: inherit; }

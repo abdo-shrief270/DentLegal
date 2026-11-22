@@ -3,6 +3,7 @@
 Legal-protection platform for dentists in Saudi Arabia. This repository holds **Project 1**: the AI core (RAG over Saudi regulations) and the simplified release (Flutter dentist app, Vue web dashboard for lawyers and admins, Nuxt landing page).
 
 - **Plan:** [`PROJECT1_PLAN.md`](PROJECT1_PLAN.md) (approved, 9 weeks).
+- **Web dashboard (lawyer + admin):** [`web/`](web/README.md) — UI built with fake data; the backend comes next.
 
 ## Reference material (approved by the client)
 
