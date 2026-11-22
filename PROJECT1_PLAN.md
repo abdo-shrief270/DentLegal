@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Status** | Draft for approval by Abdelrahman. Planning only: no production code, repos, issues or cloud resources until approved. |
-| **Version / date** | v0.2 · 22 Nov 2026. Change from v0.1: the lawyer portal and admin dashboard move from Filament to a Vue 3 dashboard (Nuxt 4, SPA mode); the mobile app stays Flutter. Estimates and schedule updated (§11.1, D27). |
+| **Version / date** | v0.3 · 22 Nov 2026. v0.3: PrimeVue confirmed for the dashboard; a Nuxt marketing landing page added (S9.7). v0.2: the lawyer portal and admin dashboard move from Filament to a Vue 3 dashboard (Nuxt 4, SPA mode); the mobile app stays Flutter. Estimates and schedule updated (§11.1, D27). |
 | **Contract** | Project 1 (A1): 7,000 SAR · 8 weeks from start of work · M0 2,000 / M1 3,000 / M2 2,000 SAR |
 | **Sources of truth** | The planning brief (authoritative for price, timeline, payments and scope), then `site/docs/prd.html`, `site/docs/user-flows.html`, `site/docs/architecture.html` and the prototype in `site/prototype/`. |
 | **Known stale file** | `proposals/project1.html` still says 2 weeks, 50/50 payments and "sources until day 3". This plan follows the brief instead: 8 weeks, M0/M1/M2, sources by end of week 1. |
@@ -12,7 +12,7 @@
 
 ## 0. Summary
 
-- **What ships:** a Flutter dentist app (iOS + Android, Arabic RTL) with an AI legal consultant and a "case → analysis → draft" flow. A Laravel back end serving a REST API. A **Vue 3 web dashboard** (Nuxt 4 in SPA mode) with two areas: lawyer review and admin. A Python AI service doing OCR, PII masking, hybrid RAG over the supplied Saudi regulations, Claude generation and citation verification. Everything is hosted in a KSA cloud region.
+- **What ships:** a Flutter dentist app (iOS + Android, Arabic RTL) with an AI legal consultant and a "case → analysis → draft" flow. A Laravel back end serving a REST API. A **Vue 3 web dashboard** (Nuxt 4 in SPA mode) with two areas: lawyer review and admin. A **Nuxt marketing landing page** (pre-rendered, Arabic RTL) that also hosts the privacy, terms and support pages the stores require. A Python AI service doing OCR, PII masking, hybrid RAG over the supplied Saudi regulations, Claude generation and citation verification. Everything is hosted in a KSA cloud region.
 - **Recommended stack changes from the approved direction:** none to the layers. Three lean choices:
   - The AI part is a **separate, stateless FastAPI service** called synchronously from Horizon jobs, with no second queue (**Decision needed: D1**).
   - The lawyer portal and admin are **one Vue dashboard** with two role-based areas, rather than two separate apps.
@@ -20,7 +20,7 @@
 - **Two findings that shape the AI work** (details in §5.2):
   1. The supplied PDFs have damaged text layers. The dental-services regulation is unusable as extracted, so ingestion includes a transcription and human spot-check step.
   2. Anthropic offers no in-KSA inference (`inference_geo` is only `global` or `us`). De-identification before every LLM call is therefore mandatory, and the client's lawyer must sign off the cross-border transfer of de-identified text (**Decision needed: D4**).
-- **Effort:** 339 h of Must stories against 320 h of capacity (8 weeks × 40 h). The Vue dashboard adds about 32 h over the Filament version, because every lawyer and admin screen now needs its own API endpoints, UI and login/two-factor flow. **This no longer fits at 40 h/week.** The recommended fix (D27) is cut lists A and B (−21 h, no contract scope touched) plus about 42 h/week, giving 318 h of work and about 18 h of buffer.
+- **Effort:** 347 h of Must stories against 320 h of capacity (8 weeks × 40 h). The Vue dashboard adds about 32 h over the Filament version (every lawyer and admin screen now needs its own API endpoints, UI and login/two-factor flow), and the landing page adds 8 h. **This no longer fits at 40 h/week.** The recommended fix (D27) is cut lists A and B (−21 h, no contract scope touched) plus about 42 h/week, giving 326 h of work and about 10 h of buffer.
 - **Milestones (illustrative start Sun 22 Nov 2026):**
   - M1 prototype demo: Thu 31 Dec 2026 (end of W6).
   - Store submission: Thu 7 Jan 2027.
@@ -54,6 +54,8 @@ None block writing this plan; every non-blocking unknown is stated as an assumpt
 | 6 | Feedback tools | «مفيدة / غير مفيدة» plus a comment on every answer, analysis and draft. A general «ملاحظاتك» form. Usage statistics in admin. | — |
 | 7 | Basic admin | Manage pilot dentists and lawyers. Upload regulatory sources, index them, publish or archive versions. View ratings and feedback. | w06–w08 (simplified) |
 | 8 | Publishing & pilot report | Dentist app on the App Store and Google Play under the client's accounts. Lawyer portal and admin on the web. Hosting in KSA. Pilot report after the 2–3-week pilot. | — |
+
+**Added by Abdelrahman (not a contract item):** a Nuxt marketing landing page at `<domain>` (S9.7, §7.3). The privacy, terms and support pages the stores require live on it.
 
 **What "simplified" means:** only the screens in §6.1. The case carries a platform status (`draft → analyzing → ai_ready → lawyer_review → approved`) but not the six legal stages. One draft per case, with versions. One notification type.
 
@@ -115,8 +117,8 @@ Any new request during the build is logged in a change log, then either added to
 |---|---|
 | Q-A1 | Is 40 focused h/week realistic? If not, approve cut list A plus B (§11.1). |
 | Q-A2 | Do you have a Mac for iOS builds? Otherwise Codemagic's free tier (**Decision needed: D15**). |
-| Q-A3 | Do you agree with D1 (separate FastAPI service), D2 (Riverpod 3), D3 (OCI) and D26 (PrimeVue for the Vue dashboard)? |
-| Q-A6 | How do we absorb the +32 h from the Vue dashboard (D27)? |
+| Q-A3 | Do you agree with D1 (separate FastAPI service), D2 (Riverpod 3), and D3 (OCI)? (D26 PrimeVue: decided.) |
+| Q-A6 | How do we absorb the extra 40 h (D27)? |
 | Q-A4 | Sentry SaaS with scrubbing, or self-hosted GlitchTip in KSA (**Decision needed: D14**)? |
 | Q-A5 | Repo: a new private repo in a client-owned GitHub organisation (**Decision needed: D21**)? |
 
@@ -151,7 +153,9 @@ flowchart LR
     MON["Error tracking + uptime"]
   end
   D -- HTTPS --> CD
+  LP["Landing page<br/>Nuxt, pre-rendered<br/>domain root"]
   WD -- "HTTPS, cookie session" --> CD
+  LP -- "static files" --> CD
   CD --> LA
   LA <--> PG
   LA <--> RD
@@ -175,6 +179,7 @@ flowchart LR
 |---|---|---|
 | **Flutter dentist app** | UI for the screens in §6.1. Login, case wizard, consultant, viewing analysis, drafts and approved responses, ratings, feedback. Holds no business logic beyond validation and display. | Nothing persistent except the auth token in Keychain/Keystore |
 | **Vue web dashboard** | Nuxt 4 app in SPA mode (TypeScript, PrimeVue, Pinia), built to static files and served by Caddy at `portal.<domain>`. Two role-based areas: lawyer review (`/lawyer`) and admin (`/admin`). No business logic; talks only to the Laravel API. | Nothing persistent; session is an httpOnly cookie |
+| **Marketing landing page** | Nuxt 4 app pre-rendered to static HTML (good for search engines and fast loading), served by Caddy at `<domain>`. Product pages plus privacy, terms and support. No login, no forms that collect personal data. | Nothing |
 | **Laravel 12 app** | The system of record. REST API `/api/v1`: Sanctum tokens for mobile, Sanctum SPA cookie sessions + Fortify two-factor for the dashboard. Policies and RBAC, case state machine, uploads, OTP, invitations, ratings, feedback, stats, audit log, notifications. Orchestrates AI work through Horizon job chains. | All application tables, files, permissions |
 | **Horizon workers** | Run the case pipeline (OCR → mask → analyse → draft), consultant answers, KB ingestion and push notifications. Retries, timeouts, step status. | Job state (Redis) + `pipeline_jobs` |
 | **ai-svc (FastAPI)** | Stateless compute: PDF/image text extraction and OCR, Arabic normalisation, PII masking, embeddings, hybrid retrieval, reranking, Claude calls (structured outputs, streaming, refusal fallback), citation verification, eval harness. Receives case data **in the request**, returns results, and persists none of it. | Only the knowledge index (`knowledge_chunks` embeddings, written during ingestion) |
@@ -1109,7 +1114,7 @@ One Vue dashboard at `portal.<domain>` with two role-based areas, `/lawyer` and 
 | Concern | Choice | Why |
 |---|---|---|
 | Framework | **Nuxt 4 in SPA mode** (`ssr: false`), Vue 3 `<script setup lang="ts">`, TypeScript strict | An authenticated internal tool needs no SEO, so there is no SSR server to run or secure. Nuxt still gives file-based routing, auto-imports, route middleware and runtime config with less wiring than plain Vite + vue-router. The build is static files served by Caddy. |
-| UI kit | **PrimeVue 4** (styled mode, themed from the prototype tokens) + Tailwind CSS (**Decision needed: D26**) | The richest ready-made set for admin work: DataTable (sort, filter, pagination), forms, FileUpload, Dialog, Toast, Chart. It supports RTL. The lighter alternative is Nuxt UI, which has fewer data components and would cost more custom table work. |
+| UI kit | **PrimeVue 4** (styled mode, themed from the prototype tokens) + Tailwind CSS (decided, D26) | The richest ready-made set for admin work: DataTable (sort, filter, pagination), forms, FileUpload, Dialog, Toast, Chart. It supports RTL. The lighter alternative is Nuxt UI, which has fewer data components and would cost more custom table work. |
 | State | **Pinia** setup stores: `useAuthStore` (user, role, 2FA state), `useReviewStore` (workspace draft, dirty state) | Only state that spans pages lives in stores; page data comes from `useFetch`. |
 | Data | A `useApi` composable wrapping `$fetch` with credentials and XSRF; `useFetch` / `useAsyncData` in pages; types generated from OpenAPI (`openapi-typescript`) | One typed source of truth shared with Laravel |
 | Auth | **`nuxt-auth-sanctum`** (cookie mode) + Laravel **Fortify** (login, TOTP two-factor, recovery codes) | Sanctum's SPA mode keeps the session in an httpOnly cookie with CSRF protection; nothing sensitive in `localStorage` |
@@ -1118,7 +1123,12 @@ One Vue dashboard at `portal.<domain>` with two role-based areas, `/lawyer` and 
 | RTL | `<html lang="ar" dir="rtl">`, PrimeVue RTL, Tailwind logical utilities (`ms-*`, `me-*`), IBM Plex Sans Arabic | Matches the prototype |
 | Tests | Vitest for composables and stores; one Cypress smoke test on staging (login + 2FA → claim → edit → approve) | Critical path only |
 
-**Folder structure (`dashboard/`):**
+**Folder structure:** the web code is one pnpm workspace, `web/`, with three packages:
+- `web/base/`: a shared Nuxt layer (Tailwind config, prototype colour tokens, IBM Plex Sans Arabic, `useDates`), so the dashboard and landing page look the same;
+- `web/dashboard/`: the Vue dashboard below;
+- `web/landing/`: the marketing landing page (§7.3).
+
+`web/dashboard/`:
 
 ```
 app/
@@ -1164,6 +1174,27 @@ nuxt.config.ts  ssr: false, runtimeConfig.public.apiBase, PrimeVue + sanctum mod
 
 Admin sees **metadata only** for cases: no document text, no draft content. This matches the PRD's principle that access to documents requires justification.
 
+### 7.3 Marketing landing page (`<domain>`, Nuxt)
+
+| Concern | Choice |
+|---|---|
+| Rendering | Nuxt 4 with every route pre-rendered at build time (`nuxi generate`): plain static HTML, fast, indexable by search engines, no server to run |
+| Styling | Tailwind via the shared `web/base` layer; no PrimeVue (keeps the page light) |
+| SEO | `useSeoMeta` per page (Arabic title and description), Open Graph image, `@nuxtjs/sitemap`, `robots.txt`, `lang="ar" dir="rtl"` |
+| Privacy | No tracking cookies and no analytics in P1; no forms that collect personal data (contact is a `mailto:` / WhatsApp link) |
+| Hosting | Static files served by the same Caddy container, at `<domain>` |
+
+**Pages:**
+
+| Route | Content (Arabic, texts adapted from the prototype and presentation; client approves) |
+|---|---|
+| `/` | Hero «الحماية القانونية لأطباء الأسنان» with the three value messages from the onboarding screen; «كيف يعمل» in 3 steps (سجّل قضيتك ← تحليل ذكي بالمصادر النظامية ← اعتماد من محامٍ مرخّص); features (المستشار القانوني الذكي، تحليل القضية ومسودة الرد، مراجعة المحامي، الخصوصية والتشفير); short FAQ; App Store and Google Play badges (shown once the apps are live); «تواصل معنا» |
+| `/privacy` | «سياسة الخصوصية» (from S9.2, approved by the client's lawyer); the store listings link here |
+| `/terms` | «الشروط والأحكام» |
+| `/support` | «الدعم والتواصل»: email, WhatsApp, how to request account deletion; the App Store support URL points here |
+
+No «تجريبي» / beta / pilot wording on the page, for the same App Store reason as §9.10.
+
 ---
 
 ## 8. Infrastructure & DevOps
@@ -1193,7 +1224,7 @@ Admin sees **metadata only** for cases: no document text, no draft content. This
 
 ### 8.3 Production host layout (Docker Compose)
 
-- **Containers:** `caddy` (TLS, HTTP/2, security headers) → `app` (PHP 8.4-FPM + nginx unit, or FrankenPHP), plus the dashboard's static build (served by Caddy), `horizon`, `scheduler`, `ai-svc` (uvicorn, 2 workers, models preloaded), `postgres:17` with pgvector, `redis:7`, and `gotenberg` (PDF, if S4.5).
+- **Containers:** `caddy` (TLS, HTTP/2, security headers) → `app` (PHP 8.4-FPM + nginx unit, or FrankenPHP), plus the dashboard's and landing page's static builds (served by Caddy), `horizon`, `scheduler`, `ai-svc` (uvicorn, 2 workers, models preloaded), `postgres:17` with pgvector, `redis:7`, and `gotenberg` (PDF, if S4.5).
 - **Network:** only Caddy publishes ports 80 and 443. SSH uses a key, restricted to an allowlist of IPs or through the OCI Bastion service.
 - **RAM:** about 12 GB at load, mostly models: BGE-M3 2.3 GB, reranker 2.3 GB, NER 0.5 GB, Postgres, PHP.
 
@@ -1202,7 +1233,7 @@ Admin sees **metadata only** for cases: no document text, no draft content. This
 | Workflow | Steps |
 |---|---|
 | `backend.yml` | Composer install → Pint → Larastan (level 6) → Pest (with PG + Redis services) → build image |
-| `dashboard.yml` | `pnpm install` → ESLint → `vue-tsc --noEmit` → Vitest → `nuxi generate` → static bundle packed into the Caddy image |
+| `web.yml` | `pnpm install` → ESLint → `vue-tsc --noEmit` → Vitest → `nuxi generate` for `web/dashboard` and `web/landing` → both static bundles packed into the Caddy image |
 | `ai.yml` | ruff → mypy → pytest (unit; verification, normaliser, parser, masking test set) → build image |
 | `mobile.yml` | `flutter analyze` → `flutter test` → (on tag) build AAB and IPA, upload to Play internal and TestFlight via fastlane (macOS runner or Codemagic, D15) |
 | `deploy.yml` | Push images to OCIR (in-region) → SSH to the host → `docker compose pull && up -d` → `php artisan migrate --force` → smoke check `/health`. Staging on merge to `main`; prod on a `v*` tag behind a GitHub Environment approval. |
@@ -1235,7 +1266,7 @@ Dependency scanning: Dependabot, plus `composer audit`, `pip-audit`, `pnpm audit
 ### 8.8 Domains and TLS
 
 - **Domain** (**Decision needed: D16**): the client registers one domain. `.com` is immediate; `.sa` needs a CR via SaudiNIC.
-- **Hosts:** `api.<domain>` (mobile API), `portal.<domain>` (Vue dashboard: lawyer and admin; must share the parent domain with `api.` so Sanctum cookie sessions work), and `<domain>` (minimal landing page with privacy policy, terms and support contact, all required by the stores).
+- **Hosts:** `api.<domain>` (mobile API), `portal.<domain>` (Vue dashboard: lawyer and admin; must share the parent domain with `api.` so Sanctum cookie sessions work), and `<domain>` (the Nuxt landing page, including the privacy policy, terms and support pages the stores require).
 - **DNS** can sit at any registrar or Cloudflare in **DNS-only** mode. Proxying through a CDN would terminate TLS outside KSA.
 - **TLS:** Let's Encrypt certificates, automatic via Caddy.
 
@@ -1440,11 +1471,11 @@ gantt
 | **W3** (43 h) | S2.2 reranker + thresholds (4), S2.4 citation verifier (5), S2.5 consultant route (5), S2.6 consult API (5), S5.2 invitations + consents (4), S5.3 mobile auth screens (7), S3.1 case API (5), S0.9 Vue dashboard shell (8) | S2.1, S2.3, S5.1 | Lawyer: **3 h** validating 50 eval questions + gold articles. App name, logo and store text draft (Q-C3). Style reference (Q-C10). D22. |
 | **W4** (43 h) | S2.7 mobile consultant (9), S0.4 deploy pipeline (5), S3.2 upload API (4), S3.3 OCR pipeline (7), S3.4 PII masking + test set (9), S5.7 dashboard auth + 2FA (9) | S2.6, S0.3, S3.1 | Lawyer: **1 h** reviewing the case-type playbook queries. Client tries the consultant on staging (feedback by Thu). Client's lawyer: comments on privacy notice/consent drafts. |
 | **W5** (43 h) | S3.5 case retrieval (3), S3.6 analysis route (5), S3.7 draft route (7), S3.8 pipeline orchestration (5), S3.9 mobile case wizard (11), S4.1 lawyer area (2), S8.1 eval harness (5), S8.2a eval set part 1 (5) | S3.2–S3.4, S2.4 | Lawyer: **2 h** gold labels for 10 synthetic cases. **Apple and Google accounts must be active by Thu** (TestFlight / internal builds in W6). Decisions D9, D10. Disclaimer text (Q-C9). |
-| **W6** (46 h) | S3.10 mobile processing/analysis/draft/send (11), S3.11 home/cases/details (6), S4.2 review queue (5), S4.3 review workspace (14), S4.4 approve + push + approved view (7), S5.5 FCM setup (3). Eval run #1. **M1 demo Thu.** | All of W5; Apple APNs key | **M1 demo** (client + lawyer, 90 min); written acceptance within 3 working days; **M1 payment 3,000 SAR**. D11 (listing type). |
-| **W7** (43 h) | S7.1 admin users + invites (6), S6.1 ratings (4), S6.2 feedback form (2), S6.3 usage stats (6), S7.3 ratings/feedback views (4), S5.4 biometric lock (3), S9.1 screenshot protection (2), S9.2 PDPL artefacts + account deletion + retention jobs (5), S9.4a RC QA pass (4), S9.5 store listings + submission (7) | M1 feedback | Approve store listing texts and screenshots (Tue). Final privacy policy and terms (Tue). **Pilot dentist list** (10–20, names + mobiles). Sender ID live. D18, D20. |
-| **W8** (37 h) | S0.5 prod backups + monitoring (6), S7.2 KB admin UI (8), S8.2b eval set part 2 (4), S8.3 tuning + decisions memo (5), S9.3 security hardening (3), S9.4b QA + fixes (6), S9.6 prod go-live, runbook, handover (5). Eval run #2. | Store review outcome | Client's prod smoke test with Abdelrahman. Lawyer account active for the pilot. **M2 acceptance** once both stores are live → **M2 payment 2,000 SAR**. |
+| **W6** (46 h) | S3.10 mobile processing/analysis/draft/send (11), S3.11 home/cases/details (6), S4.2 review queue (5), S4.3 review workspace (14), S4.4 approve + push + approved view (7), S5.5 FCM setup (3). Eval run #1. **M1 demo Thu.** | All of W5; Apple APNs key | **M1 demo** (client + lawyer, 90 min); written acceptance within 3 working days; **M1 payment 3,000 SAR**. D11 (listing type). Landing page texts approved (by Thu). |
+| **W7** (41 h) | S7.1 admin users + invites (6), S6.1 ratings (4), S6.2 feedback form (2), S9.7 landing page (8), S5.4 biometric lock (3), S9.1 screenshot protection (2), S9.2 PDPL artefacts + account deletion + retention jobs (5), S9.4a RC QA pass (4), S9.5 store listings + submission (7) | M1 feedback | Approve store listing texts and screenshots (Tue). Final privacy policy and terms (Tue). **Pilot dentist list** (10–20, names + mobiles). Sender ID live. D18, D20. |
+| **W8** (47 h) | S0.5 prod backups + monitoring (6), S6.3 usage stats (6), S7.3 ratings/feedback views (4), S7.2 KB admin UI (8), S8.2b eval set part 2 (4), S8.3 tuning + decisions memo (5), S9.3 security hardening (3), S9.4b QA + fixes (6), S9.6 prod go-live, runbook, handover (5). Eval run #2. | Store review outcome | Client's prod smoke test with Abdelrahman. Lawyer account active for the pilot. **M2 acceptance** once both stores are live → **M2 payment 2,000 SAR**. |
 
-The weeks show the raw Must hours: 339 h, an average of 42.4 h/week, with W6 (the M1 week) the heaviest at 46 h. With cut lists A and B applied (recommended, D27), the total drops to 318 h: W6 becomes 39 h (S3.10 −3, S4.3 −4), W1 39 h, W5 41 h, W7 39 h and W8 31 h. At about 42 h/week that leaves roughly 18 h of contingency. Should and Could items are taken only if contingency is unused.
+The weeks show the raw Must hours: 347 h, an average of 43.4 h/week. W8 (47 h) and W6 (46 h) are the heaviest. With cut lists A and B applied (recommended, D27), the total drops to 326 h: W1 39, W2 43, W3 43, W4 43, W5 41, W6 39, W7 40, W8 38. At about 42 h/week that leaves roughly 10 h of contingency. Should and Could items are taken only if contingency is unused.
 
 If a client input arrives late, its dependent tasks move. When that affects a milestone date, Abdelrahman raises it with the client in writing; this plan doesn't change contract dates by itself.
 
@@ -1483,10 +1514,10 @@ If a client input arrives late, its dependent tasks move. When that affects a mi
 | E6 Feedback & stats | 12 | 12 |
 | E7 Admin | 21 | 18 |
 | E8 Evaluation | 19 | 19 |
-| E9 Security, compliance, QA & release | 32 | 32 |
-| **Total** | **356** | **339** (Should 14 h, Could 3 h) |
+| E9 Security, compliance, QA & release | 40 | 40 |
+| **Total** | **364** | **347** (Should 14 h, Could 3 h) |
 
-- **What changed from v0.1:** Must went from 307 h to 339 h (+32 h) because the lawyer and admin screens moved from Filament to Vue.
+- **What changed from v0.1:** Must went from 307 h to 347 h (+40 h): the lawyer and admin screens moved from Filament to Vue (+32 h), and the landing page was added (+8 h).
 
   | Change | h |
   |---|---|
@@ -1495,17 +1526,19 @@ If a client input arrives late, its dependent tasks move. When that affects a mi
   | Lawyer screens: REST endpoints + Vue pages (S4.1 −1, S4.2 +2, S4.3 +4, S4.4 +1) | +6 |
   | Admin screens: REST endpoints + Vue pages (S7.1 +2, S7.2 +3, S7.3 +2) | +7 |
   | Usage stats API + chart widgets (S6.3) | +2 |
-  | **Total Must** | **+32** |
+  | **Vue dashboard subtotal** | **+32** |
+  | v0.3: Nuxt marketing landing page (S9.7) | +8 |
+  | **Total Must vs v0.1** | **+40** |
 
-- **Capacity:** 8 weeks × 40 h = 320 h. Must is now **19 h over** capacity before any contingency.
+- **Capacity:** 8 weeks × 40 h = 320 h. Must is now **27 h over** capacity before any contingency.
 - **How to absorb it (**Decision needed: D27**):**
 
   | Option | Result | Trade-off |
   |---|---|---|
-  | **1. Cut lists A + B, and plan about 42 h/week (recommended)** | 318 h of work vs 336 h capacity: about 18 h (5%) buffer | Less polish (merged analysis tab, simpler lawyer editor, stats as cards + table); no contract scope removed; slightly longer weeks |
-  | 2. Cut lists A + B at 40 h/week | 318 h vs 320 h: about 2 h buffer | Not workable for an AI project: any slip moves M1/M2 |
+  | **1. Cut lists A + B, and plan about 42 h/week (recommended)** | 326 h of work vs 336 h capacity: about 10 h (3%) buffer | Less polish (merged analysis tab, simpler lawyer editor, stats as cards + table); no contract scope removed; slightly longer weeks |
+  | 2. Cut lists A + B at 40 h/week | 326 h vs 320 h: 6 h short | Does not fit |
   | 3. Extend the timeline | Keep all polish | Changes the contracted 8 weeks: needs the client's agreement first |
-  | 4. Filament for P1, Vue dashboard in P2 | Back to 307 h | Contradicts your choice; P2 would rebuild the web screens |
+  | 4. Filament for P1, Vue dashboard in P2 | Back to 315 h (with the landing page) | Contradicts your choice; P2 would rebuild the web screens |
 
 - **Cut list A** (**Decision needed: D24**, recommended): none of these touches the contract scope.
 
@@ -1527,7 +1560,7 @@ If a client input arrives late, its dependent tasks move. When that affects a mi
   | Lawyer paragraph editor → single textarea per section, citations kept per section (S4.3) | 4 h |
   | Usage-stats charts → cards + one table (S6.3) | 3 h |
 
-  Cut list B saves 9 h. A + B together save 21 h: 339 → 318 h.
+  Cut list B saves 9 h. A + B together save 21 h: 347 → 326 h.
 
 - **Should items (14 h)** are done only if contingency is unused by W7: S3.12 document viewer, S4.5 PDF, S4.6 citation sample review, S4.7 lawyer original view. S4.6's fallback is a CSV export of a random citation sample plus a shared sheet (1 h), so the pilot KPI stays measurable either way.
 
@@ -1647,6 +1680,7 @@ Priority uses MoSCoW: M = Must, S = Should, C = Could. "Deps" lists stories or c
 | S9.3 | Security hardening | OWASP API Top-10 checklist done; headers (HSTS, strict CSP for the dashboard), CORS limited to `portal.<domain>` with credentials, rate limits verified, secrets review, dependency audit clean | 3 | M | S0.4 |
 | S9.4 | QA pass + fixes | Test matrix §6.8 passed; dashboard Cypress smoke test green; full flow on staging and prod; p90 submit → draft < 10 min on 5 runs; no open critical/high defects | 10 | M | All features |
 | S9.5 | Store submission | Arabic listings, screenshots, privacy labels / data safety, content rating, review notes + demo account; both apps submitted by Thu W7 | 7 | M | Store accounts, S9.2 |
+| S9.7 | Marketing landing page | Nuxt pages `/`, `/privacy`, `/terms`, `/support` per §7.3, pre-rendered; Arabic RTL with the prototype look; SEO meta, Open Graph image, sitemap; store badges switch on after launch; Lighthouse ≥ 90 on mobile; live at `<domain>` before store submission | 8 | M | S0.9, S9.2, client texts |
 | S9.6 | Production go-live + handover | Prod deployed, sources indexed, smoke test passed, runbook + short Arabic admin guide, credentials handed to the client and rotated | 5 | M | S0.5, S9.4 |
 
 ---
@@ -1664,7 +1698,7 @@ Priority uses MoSCoW: M = Must, S = Should, C = Could. "Deps" lists stories or c
 | R7 | **Source text quality** (as found: lam-alef reversal, font-encoding corruption) causing wrong quotes or failed verification | High / Medium | Bake-off + transcription for corrupted sources; normaliser tests from real errors; lawyer spot-check; fuzzy quote matching on normalised text |
 | R8 | **SMS sender ID registration** (about 20 business days) delays real OTP | High / Medium | Request in W1; log driver + test numbers until then; fallback: the provider's pre-approved generic sender if available |
 | R9 | **AI quality or safety:** wrong legal reasoning, weak drafts, or classifier false-positive refusals | Medium / High | Retrieval threshold + `answerable`; citation verification + repair; mandatory lawyer approval; server-side fallback `default`; eval runs before M1 and M2, weekly in the pilot; prompts versioned |
-| R10 | **Single developer, tight capacity, scope creep** toward P2 features (stages, notifications, revisions). Capacity is tighter in v0.2 because the Vue dashboard adds 32 h. | High / High | D27 option 1 (cut lists A + B, about 42 h/week); drift table (§1.2) and change log; weekly demo; Must-only plan; if W3 ends more than 6 h behind, escalate option 3 to the client early |
+| R10 | **Single developer, tight capacity, scope creep** toward P2 features (stages, notifications, revisions). Capacity is tighter since v0.2: the Vue dashboard adds 32 h and the landing page 8 h. | High / High | D27 option 1 (cut lists A + B, about 42 h/week); drift table (§1.2) and change log; weekly demo; Must-only plan; if W3 ends more than 6 h behind, escalate option 3 to the client early |
 | R11 | **KSA cloud onboarding friction** (card verification, home-region availability) | Low–Medium / Medium | OCI signup on day 1; fallback to Jeddah as home region; GCP via CNTXT or STC as alternatives (§8.1) |
 | R12 | **Runaway LLM spend** (abuse or loops) | Low / Medium | Per-user rate limits, `max_tokens` caps, one repair retry only, workspace spend limits, daily cost digest |
 
@@ -1747,7 +1781,7 @@ Prices are list prices at the time of writing, at 1 USD = 3.75 SAR. They must be
 |---|---|---|
 | 1 | iOS app live | Live on the App Store under the client's account (public or unlisted per D11); installed from the store link on a real iPhone |
 | 2 | Android app live | Live on Google Play production under the client's organisation account; installed from the Play link on a real Android device |
-| 3 | Web live in KSA | `portal.<domain>/lawyer` and `/admin` and `api.<domain>` served over valid TLS from OCI Riyadh (shown in the OCI console) |
+| 3 | Web live in KSA | `portal.<domain>/lawyer` and `/admin`, `api.<domain>`, and the landing page at `<domain>` (with `/privacy`, `/terms`, `/support`) served over valid TLS from OCI Riyadh (shown in the OCI console) |
 | 4 | Production end-to-end by the client | On prod: dentist invited → real SMS OTP → consultant answer with sources → case with documents → analysis + draft with citations → lawyer edits and approves → dentist receives the approved response |
 | 5 | Feedback in admin | Ratings and a feedback message from step 4 appear in admin; usage stats reflect the activity |
 | 6 | Sources updatable from admin | Upload a new version of a source → review → «نشر الإصدار» → previous version archived; retrieval uses the new version |
@@ -1791,8 +1825,8 @@ Every row below is a **Decision needed**. Body text marks each one where it aris
 | D23 | Server-side refusal fallback | Enable `fallbacks: "default"`, logged and visible in `ai_runs` | Abdelrahman | W2 |
 | D24 | Cut list A | Approve (now part of D27 option 1) | Abdelrahman | Plan approval |
 | D25 | Older law edition | Index as archived (versioning proof), never retrieved | Abdelrahman | W2 |
-| D26 | Dashboard UI kit | PrimeVue 4 + Tailwind (data-heavy admin screens, RTL); Nuxt UI as the lighter alternative | Abdelrahman | W3 (before S0.9) |
-| D27 | Absorbing the +32 h of the Vue dashboard | Option 1: cut lists A + B and about 42 h/week; option 3 (timeline) needs the client | Abdelrahman (client for option 3) | Plan approval |
+| D26 | Dashboard UI kit | **Decided: PrimeVue 4 + Tailwind** | Abdelrahman | Done |
+| D27 | Absorbing the extra hours (+32 h Vue dashboard, +8 h landing page) | Option 1: cut lists A + B and about 42 h/week; option 3 (timeline) needs the client | Abdelrahman (client for option 3) | Plan approval |
 
 ## Appendix B: After plan approval (waiting for explicit OK)
 
