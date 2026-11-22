@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Status** | Draft for approval by Abdelrahman. Planning only: no production code, repos, issues or cloud resources until approved. |
-| **Version / date** | v0.1 · 15 Nov 2026 |
+| **Version / date** | v0.2 · 22 Nov 2026. Change from v0.1: the lawyer portal and admin dashboard move from Filament to a Vue 3 dashboard (Nuxt 4, SPA mode); the mobile app stays Flutter. Estimates and schedule updated (§11.1, D27). |
 | **Contract** | Project 1 (A1): 7,000 SAR · 8 weeks from start of work · M0 2,000 / M1 3,000 / M2 2,000 SAR |
 | **Sources of truth** | The planning brief (authoritative for price, timeline, payments and scope), then `site/docs/prd.html`, `site/docs/user-flows.html`, `site/docs/architecture.html` and the prototype in `site/prototype/`. |
 | **Known stale file** | `proposals/project1.html` still says 2 weeks, 50/50 payments and "sources until day 3". This plan follows the brief instead: 8 weeks, M0/M1/M2, sources by end of week 1. |
@@ -12,15 +12,15 @@
 
 ## 0. Summary
 
-- **What ships:** a Flutter dentist app (iOS + Android, Arabic RTL) with an AI legal consultant and a "case → analysis → draft" flow. A Laravel back end with two Filament web panels (lawyer review, admin). A Python AI service doing OCR, PII masking, hybrid RAG over the supplied Saudi regulations, Claude generation and citation verification. Everything is hosted in a KSA cloud region.
+- **What ships:** a Flutter dentist app (iOS + Android, Arabic RTL) with an AI legal consultant and a "case → analysis → draft" flow. A Laravel back end serving a REST API. A **Vue 3 web dashboard** (Nuxt 4 in SPA mode) with two areas: lawyer review and admin. A Python AI service doing OCR, PII masking, hybrid RAG over the supplied Saudi regulations, Claude generation and citation verification. Everything is hosted in a KSA cloud region.
 - **Recommended stack changes from the approved direction:** none to the layers. Three lean choices:
   - The AI part is a **separate, stateless FastAPI service** called synchronously from Horizon jobs, with no second queue (**Decision needed: D1**).
-  - The lawyer review screen is a **custom Filament page** rather than a separate SPA.
+  - The lawyer portal and admin are **one Vue dashboard** with two role-based areas, rather than two separate apps.
   - Everything runs on **one Docker Compose host per environment** (**Decision needed: D3**).
 - **Two findings that shape the AI work** (details in §5.2):
   1. The supplied PDFs have damaged text layers. The dental-services regulation is unusable as extracted, so ingestion includes a transcription and human spot-check step.
   2. Anthropic offers no in-KSA inference (`inference_geo` is only `global` or `us`). De-identification before every LLM call is therefore mandatory, and the client's lawyer must sign off the cross-border transfer of de-identified text (**Decision needed: D4**).
-- **Effort:** 307 h of Must stories against 320 h of capacity (8 weeks × 40 h). That fits, with only about 4% buffer. Cut list A (§11.1) restores about 8% without touching contract scope.
+- **Effort:** 339 h of Must stories against 320 h of capacity (8 weeks × 40 h). The Vue dashboard adds about 32 h over the Filament version, because every lawyer and admin screen now needs its own API endpoints, UI and login/two-factor flow. **This no longer fits at 40 h/week.** The recommended fix (D27) is cut lists A and B (−21 h, no contract scope touched) plus about 42 h/week, giving 318 h of work and about 18 h of buffer.
 - **Milestones (illustrative start Sun 22 Nov 2026):**
   - M1 prototype demo: Thu 31 Dec 2026 (end of W6).
   - Store submission: Thu 7 Jan 2027.
@@ -115,7 +115,8 @@ Any new request during the build is logged in a change log, then either added to
 |---|---|
 | Q-A1 | Is 40 focused h/week realistic? If not, approve cut list A plus B (§11.1). |
 | Q-A2 | Do you have a Mac for iOS builds? Otherwise Codemagic's free tier (**Decision needed: D15**). |
-| Q-A3 | Do you agree with D1 (separate FastAPI service), D2 (Riverpod 3) and D3 (OCI)? |
+| Q-A3 | Do you agree with D1 (separate FastAPI service), D2 (Riverpod 3), D3 (OCI) and D26 (PrimeVue for the Vue dashboard)? |
+| Q-A6 | How do we absorb the +32 h from the Vue dashboard (D27)? |
 | Q-A4 | Sentry SaaS with scrubbing, or self-hosted GlitchTip in KSA (**Decision needed: D14**)? |
 | Q-A5 | Repo: a new private repo in a client-owned GitHub organisation (**Decision needed: D21**)? |
 
@@ -129,12 +130,11 @@ Any new request during the build is logged in a change log, then either added to
 flowchart LR
   subgraph Users
     D["Dentist app<br/>Flutter iOS / Android"]
-    LW["Lawyer portal<br/>Filament panel /lawyer"]
-    AW["Admin<br/>Filament panel /admin"]
+    WD["Web dashboard<br/>Vue 3 + Nuxt 4 SPA<br/>/lawyer and /admin"]
   end
   subgraph KSA1["OCI Riyadh (KSA) - prod host, Docker Compose"]
-    CD["Caddy<br/>TLS 1.2+, HSTS"]
-    LA["Laravel 12 app<br/>REST /api/v1, Sanctum, Policies, Filament"]
+    CD["Caddy<br/>TLS 1.2+, HSTS<br/>serves dashboard static build"]
+    LA["Laravel 12 app<br/>REST /api/v1, Sanctum, Fortify, Policies"]
     HZ["Horizon workers<br/>queues: ai, ocr, ingest, notify"]
     AI["ai-svc (FastAPI)<br/>OCR, normalise, PII mask, embed,<br/>retrieve, rerank, generate, verify"]
     PG[("PostgreSQL 17<br/>pgvector + Arabic FTS + pg_trgm")]
@@ -151,8 +151,7 @@ flowchart LR
     MON["Error tracking + uptime"]
   end
   D -- HTTPS --> CD
-  LW -- HTTPS --> CD
-  AW -- HTTPS --> CD
+  WD -- "HTTPS, cookie session" --> CD
   CD --> LA
   LA <--> PG
   LA <--> RD
@@ -175,7 +174,8 @@ flowchart LR
 | Component | Responsibility | Owns |
 |---|---|---|
 | **Flutter dentist app** | UI for the screens in §6.1. Login, case wizard, consultant, viewing analysis, drafts and approved responses, ratings, feedback. Holds no business logic beyond validation and display. | Nothing persistent except the auth token in Keychain/Keystore |
-| **Laravel 12 app** | The system of record. REST API `/api/v1` (Sanctum tokens), Filament lawyer and admin panels (sessions + MFA), policies and RBAC, case state machine, uploads, OTP, invitations, ratings, feedback, stats, audit log, notifications. Orchestrates AI work through Horizon job chains. | All application tables, files, permissions |
+| **Vue web dashboard** | Nuxt 4 app in SPA mode (TypeScript, PrimeVue, Pinia), built to static files and served by Caddy at `portal.<domain>`. Two role-based areas: lawyer review (`/lawyer`) and admin (`/admin`). No business logic; talks only to the Laravel API. | Nothing persistent; session is an httpOnly cookie |
+| **Laravel 12 app** | The system of record. REST API `/api/v1`: Sanctum tokens for mobile, Sanctum SPA cookie sessions + Fortify two-factor for the dashboard. Policies and RBAC, case state machine, uploads, OTP, invitations, ratings, feedback, stats, audit log, notifications. Orchestrates AI work through Horizon job chains. | All application tables, files, permissions |
 | **Horizon workers** | Run the case pipeline (OCR → mask → analyse → draft), consultant answers, KB ingestion and push notifications. Retries, timeouts, step status. | Job state (Redis) + `pipeline_jobs` |
 | **ai-svc (FastAPI)** | Stateless compute: PDF/image text extraction and OCR, Arabic normalisation, PII masking, embeddings, hybrid retrieval, reranking, Claude calls (structured outputs, streaming, refusal fallback), citation verification, eval harness. Receives case data **in the request**, returns results, and persists none of it. | Only the knowledge index (`knowledge_chunks` embeddings, written during ingestion) |
 | **PostgreSQL 17** | Relational data + `pgvector` (HNSW) + Arabic `tsvector` + `pg_trgm` | — |
@@ -183,7 +183,7 @@ flowchart LR
 | **Object Storage** | Uploaded documents and source PDFs. Private buckets, customer-managed key, served only via Laravel temporary signed routes. | — |
 | **Anthropic API** | Generation for the consultant, analysis and draft, plus a one-off transcription of public regulation pages. Never receives raw case text, images or identities. | — |
 
-### 2.3 Decision needed (**Decision needed: D1**): a separate FastAPI service, or AI inside Laravel?
+### 2.3 Decision needed (D1): a separate FastAPI service, or AI inside Laravel?
 
 **Recommendation: a separate ai-svc, kept deliberately thin.**
 
@@ -220,7 +220,7 @@ flowchart LR
 | Multiple response cycles per case (إفادة → مذكرة → تظلم) | `drafts` already belong to a case with versions; P2 allows more than one draft per case (`drafts.cycle_no`). |
 | Tracked changes, OTP-signed approval, verification code | Every edit is already an immutable `draft_versions` row, so diffs are computed. Signing adds an `approvals` table on top of `approved_version_id`. |
 | Auto-assignment, SLA | `submitted_for_review_at`, `claimed_at` and `approved_at` exist from day 1. Add `review_assignments` plus scheduler rules. |
-| Roles & permissions UI, audit UI | `spatie/laravel-permission` and the append-only `audit_logs` are used from day 1. P2 adds Filament resources on top. |
+| Roles & permissions UI, audit UI | `spatie/laravel-permission` and the append-only `audit_logs` are used from day 1. P2 adds dashboard pages on top of the same API. |
 | Regulations library | KB chunks are already structured by law → article → paragraph with versions. The library is a read API plus mobile screens. |
 | AI settings, more AI routes (template filling, consult escalation) | ai-svc routes are versioned (`prompt_version`, `schema_version`), and runs are logged and comparable through the eval harness. |
 | More notifications, reminders | The `devices` table, FCM channel and Laravel Notifications are in place. P2 adds notification classes and scheduled jobs. |
@@ -370,10 +370,10 @@ At about 1,000 active chunks, exact search would also be fast. HNSW is used so t
 
 ### 4.1 Conventions
 
-- **Base URL and auth:** base URL `https://api.<domain>/api/v1`. Mobile auth uses `Authorization: Bearer <sanctum token>` with abilities `dentist:*`.
+- **Base URL and auth:** base URL `https://api.<domain>/api/v1`. Mobile auth uses `Authorization: Bearer <sanctum token>` with abilities `dentist:*`. The web dashboard uses Sanctum's **SPA cookie mode**: `GET /sanctum/csrf-cookie`, then Fortify login. The session cookie is httpOnly and scoped to the parent domain (`SESSION_DOMAIN=.<domain>`, `SANCTUM_STATEFUL_DOMAINS=portal.<domain>`); no tokens sit in browser storage.
 - **Format:** JSON with `{ "data": … }` envelopes and cursor pagination (`?cursor=`).
 - **Dates:** ISO-8601 in UTC. Display formatting (Hijri + Gregorian) happens on the client.
-- **Documentation:** OpenAPI 3.1 generated from the code with `dedoc/scramble` and published at `/docs/api` on staging only.
+- **Documentation:** OpenAPI 3.1 generated from the code with `dedoc/scramble` and published at `/docs/api` on staging only. The dashboard's TypeScript request/response types are generated from the same spec (`openapi-typescript`), so the API and the dashboard can't drift silently.
 - **Headers:** `Accept-Language: ar` (the only locale). `X-App-Version` is required from mobile so the API can force updates.
 - **Idempotency:** `POST` endpoints that start AI work accept an `Idempotency-Key` header to stop double taps creating duplicate runs.
 
@@ -415,7 +415,45 @@ At about 1,000 active chunks, exact search would also be fast. HNSW is used so t
 | POST | `/ratings` | Upsert «مفيدة / غير مفيدة» + comment |
 | POST | `/feedback` | General feedback |
 
-**Lawyer and admin:** Filament web panels on `https://portal.<domain>/lawyer` and `/admin`, using session auth, CSRF and built-in MFA. They are not part of the REST contract. Their actions call the same Laravel services (`ApproveDraft`, `InviteUser`, `PublishSourceVersion`) that P2 can expose over REST if a SPA is ever needed.
+**Dashboard auth (Fortify routes on `api.<domain>`, cookie session)**
+
+| Method | Path | Purpose |
+|---|---|---|
+| GET | `/sanctum/csrf-cookie` | Set the XSRF cookie before login |
+| POST | `/login` | Email + password (throttled) |
+| POST | `/two-factor-challenge` | TOTP code or recovery code (mandatory for lawyer and admin) |
+| POST | `/user/two-factor-authentication`, `/user/confirmed-two-factor-authentication` | First-login 2FA enrolment (QR + confirm) |
+| POST | `/invitations/{token}/accept` | Set password from an invite link |
+| POST | `/logout` | End the session |
+
+**Lawyer (`/api/v1/lawyer`, role lawyer, 2FA confirmed)**
+
+| Method | Path | Purpose |
+|---|---|---|
+| GET | `/reviews?tab=unclaimed\|mine\|approved` | Review queue |
+| POST | `/reviews/{draftId}/claim` | Atomic claim; 409 `already_claimed` |
+| GET | `/reviews/{draftId}` | Case file, masked document pages, current version, run sources with scores, verification checks, internal notes |
+| POST | `/reviews/{draftId}/versions` | Save edited paragraphs + citation refs + note as a new immutable version |
+| POST | `/reviews/{draftId}/notes` | Internal note (never shown to the dentist) |
+| POST | `/reviews/{draftId}/approve` | Lock version, approve, notify the dentist |
+| GET | `/documents/{id}/view-url` | Original file, claimed cases only, audited (Should) |
+| GET / POST | `/citation-samples`, `/citation-samples/{id}/verdict` | Citation-accuracy sampling (Should) |
+
+**Admin (`/api/v1/admin`, role admin, 2FA confirmed)**
+
+| Method | Path | Purpose |
+|---|---|---|
+| GET / POST | `/dentists`, `/lawyers` | List / invite |
+| POST | `/users/{id}/resend-invite`, `/users/{id}/deactivate`, `/users/{id}/activate` | Account actions (deactivation revokes tokens and sessions) |
+| GET / POST | `/knowledge/sources`, `/knowledge/sources/{id}/versions` | List sources / upload a new version (multipart) |
+| GET | `/knowledge/versions/{id}`, `/knowledge/versions/{id}/chunks` | Status and chunk preview |
+| POST | `/knowledge/versions/{id}/publish`, `/archive`, `/reindex` | Version lifecycle |
+| GET | `/ratings`, `/feedback` (filters; `?format=csv`) | Lists and CSV export |
+| PATCH | `/feedback/{id}` | Mark as seen or done |
+| GET | `/stats/overview?range=7d\|30d` | Dashboard numbers |
+| GET | `/ai-runs` | AI run log (Could) |
+
+Every lawyer and admin action calls the same Laravel action classes the mobile API uses (`ApproveDraft`, `InviteUser`, `PublishSourceVersion`), so there is one place for business rules.
 
 ### 4.3 Request and response sketches
 
@@ -488,7 +526,7 @@ GET /api/v1/cases/0193…/draft
   - `succeeded`: the case moves to `ai_ready`.
   - `failed`: the case moves to `failed` with `error_code` (`ocr_failed`, `ai_refused`, `ai_unavailable`, `bundle_too_large`). The app shows «إعادة المحاولة», which re-dispatches from the failed step.
 - **Consultant answers** use the same pattern: `consultation_messages.status` is polled by message id. The expected answer time is 10–25 s.
-- **Ingestion:** `knowledge_source_versions.status` is shown live in the admin table (Filament polling).
+- **Ingestion:** `knowledge_source_versions.status` is shown live in the admin dashboard (polling every 5 s while processing).
 
 ### 4.5 Internal ai-svc API (private network, `X-Service-Token`, never exposed)
 
@@ -529,7 +567,7 @@ The format is `{ "error": { "code": "snake_case", "message": "<Arabic, user-faci
 | Consultant questions | 20 / hour and 100 / day per dentist |
 | Case analyses | 10 / day per dentist |
 | Uploads | 60 files / hour per dentist |
-| Portal login | 5 / min per email + IP (Filament default throttling) |
+| Dashboard login and 2FA | 5 / min per email + IP (Fortify throttling) |
 
 An Anthropic Console spend limit per workspace (staging and prod) is the hard backstop.
 
@@ -946,7 +984,7 @@ For each run, ai-svc keeps a **manifest** mapping local refs to real IDs: `S3 �
 | ≥ 95% citation accuracy | A random sample (n ≥ 100, stratified by route) of pilot citations, judged by the lawyer in S4.6 |
 | < 10 min upload → draft | `pipeline_jobs.finished_at − first document uploaded_at` (reported as p50/p90, with the pipeline-only time shown separately) |
 
-### 5.15 Decision needed (**Decision needed: D4**): where LLM processing runs
+### 5.15 Decision needed (D4): where LLM processing runs
 
 - **What exists:** Anthropic processes only in `global` or `us`. There is no KSA or Gulf option, and storage at rest (workspace geo) is `us`.
 - **Recommendation:**
@@ -1062,21 +1100,54 @@ For each run, ai-svc keeps a **manifest** mapping local refs to real IDs: `S3 �
 
 ---
 
-## 7. Web portals plan (Laravel + Filament 4, Arabic RTL)
+## 7. Web dashboard plan (Vue 3 + Nuxt 4, Arabic RTL)
 
-One Laravel app with two Filament panels, `/lawyer` and `/admin`.
-- **Panel access:** `canAccessPanel()` checks the role.
-- **MFA:** Filament's built-in multi-factor authentication (authenticator app; email code as backup) is mandatory for both panels.
-- **Invitations:** lawyers and admins are invited by email and set their own password.
-- **Locale:** `ar` with RTL; Hijri and Gregorian date columns; IBM Plex Sans Arabic.
+One Vue dashboard at `portal.<domain>` with two role-based areas, `/lawyer` and `/admin`. It calls the Laravel REST API (§4.2) and holds no business logic.
+
+### 7.0 Stack and structure
+
+| Concern | Choice | Why |
+|---|---|---|
+| Framework | **Nuxt 4 in SPA mode** (`ssr: false`), Vue 3 `<script setup lang="ts">`, TypeScript strict | An authenticated internal tool needs no SEO, so there is no SSR server to run or secure. Nuxt still gives file-based routing, auto-imports, route middleware and runtime config with less wiring than plain Vite + vue-router. The build is static files served by Caddy. |
+| UI kit | **PrimeVue 4** (styled mode, themed from the prototype tokens) + Tailwind CSS (**Decision needed: D26**) | The richest ready-made set for admin work: DataTable (sort, filter, pagination), forms, FileUpload, Dialog, Toast, Chart. It supports RTL. The lighter alternative is Nuxt UI, which has fewer data components and would cost more custom table work. |
+| State | **Pinia** setup stores: `useAuthStore` (user, role, 2FA state), `useReviewStore` (workspace draft, dirty state) | Only state that spans pages lives in stores; page data comes from `useFetch`. |
+| Data | A `useApi` composable wrapping `$fetch` with credentials and XSRF; `useFetch` / `useAsyncData` in pages; types generated from OpenAPI (`openapi-typescript`) | One typed source of truth shared with Laravel |
+| Auth | **`nuxt-auth-sanctum`** (cookie mode) + Laravel **Fortify** (login, TOTP two-factor, recovery codes) | Sanctum's SPA mode keeps the session in an httpOnly cookie with CSRF protection; nothing sensitive in `localStorage` |
+| Forms | VeeValidate + Zod | Runtime validation with inferred types |
+| Dates | `Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura')` + Gregorian in a `useDates` composable | No date library needed |
+| RTL | `<html lang="ar" dir="rtl">`, PrimeVue RTL, Tailwind logical utilities (`ms-*`, `me-*`), IBM Plex Sans Arabic | Matches the prototype |
+| Tests | Vitest for composables and stores; one Cypress smoke test on staging (login + 2FA → claim → edit → approve) | Critical path only |
+
+**Folder structure (`dashboard/`):**
+
+```
+app/
+  pages/        login.vue, two-factor.vue, invite/[token].vue,
+                lawyer/index.vue, lawyer/reviews/[id].vue, lawyer/samples.vue,
+                admin/index.vue (stats), admin/dentists.vue, admin/lawyers.vue,
+                admin/knowledge/index.vue, admin/knowledge/[versionId].vue,
+                admin/ratings.vue, admin/feedback.vue, admin/ai-runs.vue
+  layouts/      auth.vue, lawyer.vue, admin.vue
+  middleware/   auth.global.ts, role.ts (lawyer | admin), two-factor.ts
+  components/   ui/ (badges, citation chip, Hijri date), review/ (CasePane, DraftEditor, SourcesPane), admin/
+  composables/  useApi.ts, useDates.ts, usePolling.ts
+  stores/       useAuthStore.ts, useReviewStore.ts
+shared/types/   api.d.ts (generated from OpenAPI)
+nuxt.config.ts  ssr: false, runtimeConfig.public.apiBase, PrimeVue + sanctum modules
+```
+
+- **Access:** the `role` middleware sends lawyers to `/lawyer` and admins to `/admin`; the API enforces the same rules with policies, so the UI guard is convenience, not security.
+- **Two-factor:** mandatory for every lawyer and admin. The first login after accepting an invite forces TOTP enrolment (QR code + confirm) and shows recovery codes once.
+- **Invitations:** lawyers and admins receive an email link to `invite/[token]` and set their own password.
+- **Security headers:** Caddy sends a strict CSP (scripts from self only), `frame-ancestors 'none'`, HSTS; the API allows CORS with credentials only from `portal.<domain>`.
 
 ### 7.1 Lawyer review (`/lawyer`)
 
 | Page | Content |
 |---|---|
 | «قائمة المراجعة» | Tabs: «بانتظار الاستلام» (unclaimed, shows code, title, case type, submitted at, risk), «قيد مراجعتي», «معتمدة». Action: «استلام» (atomic claim; 409 if taken). Shared-queue model (**Decision needed: D9**). |
-| Review workspace (custom Filament page, 3 panes like w04) | **Case file pane:** metadata, facts (masked), AI position strength and risk «للاسترشاد فقط», documents list with masked page text per document; «عرض الأصل» opens the original via a 5-minute signed URL and is audited (Should, D10). **Draft pane:** the draft as ordered paragraphs. Each paragraph has a textarea, its citation chips (remove, or add from the run's retrieved sources), and verification flags («غير مسند», «تعارض رقم المادة»). Paragraphs can be added, deleted and reordered. «حفظ كإصدار» saves a new immutable version with an optional note. **Sources pane:** each retrieved source with article reference, relevance score and full text; the automatic checks summary (e.g. «جميع الاستشهادات (7) مرتبطة بمواد مفهرسة»، «لا توجد بيانات تعريفية للمريض في النص»); internal notes (not shown to the dentist). |
-| «اعتماد الرد» | Confirmation modal with the checkbox «راجعت المسودة ومصادرها وأعتمدها». It locks the version and sets the draft and case to `approved`, writes the audit entry, and sends the push. Approved versions are read-only; further edits are P2. |
+| Review workspace (`lawyer/reviews/[id].vue`, 3 panes like w04) | **Case file pane:** metadata, facts (masked), AI position strength and risk «للاسترشاد فقط», documents list with masked page text per document; «عرض الأصل» opens the original via a 5-minute signed URL and is audited (Should, D10). **Draft pane:** the draft as ordered paragraphs. Each paragraph has a textarea, its citation chips (remove, or add from the run's retrieved sources), and verification flags («غير مسند», «تعارض رقم المادة»). Paragraphs can be added, deleted and reordered. «حفظ كإصدار» saves a new immutable version with an optional note. **Sources pane:** each retrieved source with article reference, relevance score and full text; the automatic checks summary (e.g. «جميع الاستشهادات (7) مرتبطة بمواد مفهرسة»، «لا توجد بيانات تعريفية للمريض في النص»); internal notes (not shown to the dentist). |
+| «اعتماد الرد» | Confirmation modal with the checkbox «راجعت المسودة ومصادرها وأعتمدها». It locks the version and sets the draft and case to `approved`, writes the audit entry, and sends the push. Approved versions are read-only; further edits are P2. Leaving the page with unsaved edits asks for confirmation. |
 | «مراجعة عينة الاستشهادات» (Should, S4.6) | Random citation sample: claim text, quote, source text, then «صحيح / غير صحيح» + note. It feeds the citation-accuracy KPI. |
 
 ### 7.2 Admin (`/admin`)
@@ -1088,7 +1159,7 @@ One Laravel app with two Filament panels, `/lawyer` and `/admin`.
 | «قاعدة المعرفة» | Sources with versions (edition, status, chunks, extraction method, published at). Actions: «رفع إصدار جديد», live processing status, «معاينة المقاطع» (chunk list with article/paragraph/page and text), «نشر الإصدار», «أرشفة», «إعادة الفهرسة». |
 | «التقييمات» | Ratings table with filters (type, useful or not, date, dentist), comment text, link to the rated item (read-only render), CSV export |
 | «الملاحظات» | Feedback list with category and status, mark as seen or done, CSV export |
-| Dashboard «إحصائيات الاستخدام» | Widgets: active dentists (7/30 days), consultations and answers, refusal rate, cases created, drafts generated, drafts approved, useful % by type, median and p90 submit → draft time, citation validity (auto), AI cost this month (from `ai_runs`) |
+| Home «إحصائيات الاستخدام» | Cards and two charts (PrimeVue Chart): active dentists (7/30 days), consultations and answers, refusal rate, cases created, drafts generated, drafts approved, useful % by type, median and p90 submit → draft time, citation validity (auto), AI cost this month (from `ai_runs`) |
 | «سجل التشغيل الذكي» (Could, S7.4) | Read-only `ai_runs` table: route, model served, effort, tokens, cost, latency, stop reason, validity |
 
 Admin sees **metadata only** for cases: no document text, no draft content. This matches the PRD's principle that access to documents requires justification.
@@ -1122,7 +1193,7 @@ Admin sees **metadata only** for cases: no document text, no draft content. This
 
 ### 8.3 Production host layout (Docker Compose)
 
-- **Containers:** `caddy` (TLS, HTTP/2, security headers) → `app` (PHP 8.4-FPM + nginx unit, or FrankenPHP), plus `horizon`, `scheduler`, `ai-svc` (uvicorn, 2 workers, models preloaded), `postgres:17` with pgvector, `redis:7`, and `gotenberg` (PDF, if S4.5).
+- **Containers:** `caddy` (TLS, HTTP/2, security headers) → `app` (PHP 8.4-FPM + nginx unit, or FrankenPHP), plus the dashboard's static build (served by Caddy), `horizon`, `scheduler`, `ai-svc` (uvicorn, 2 workers, models preloaded), `postgres:17` with pgvector, `redis:7`, and `gotenberg` (PDF, if S4.5).
 - **Network:** only Caddy publishes ports 80 and 443. SSH uses a key, restricted to an allowlist of IPs or through the OCI Bastion service.
 - **RAM:** about 12 GB at load, mostly models: BGE-M3 2.3 GB, reranker 2.3 GB, NER 0.5 GB, Postgres, PHP.
 
@@ -1131,11 +1202,12 @@ Admin sees **metadata only** for cases: no document text, no draft content. This
 | Workflow | Steps |
 |---|---|
 | `backend.yml` | Composer install → Pint → Larastan (level 6) → Pest (with PG + Redis services) → build image |
+| `dashboard.yml` | `pnpm install` → ESLint → `vue-tsc --noEmit` → Vitest → `nuxi generate` → static bundle packed into the Caddy image |
 | `ai.yml` | ruff → mypy → pytest (unit; verification, normaliser, parser, masking test set) → build image |
 | `mobile.yml` | `flutter analyze` → `flutter test` → (on tag) build AAB and IPA, upload to Play internal and TestFlight via fastlane (macOS runner or Codemagic, D15) |
 | `deploy.yml` | Push images to OCIR (in-region) → SSH to the host → `docker compose pull && up -d` → `php artisan migrate --force` → smoke check `/health`. Staging on merge to `main`; prod on a `v*` tag behind a GitHub Environment approval. |
 
-Dependency scanning: Dependabot, plus `composer audit`, `pip-audit` and `flutter pub outdated` in CI.
+Dependency scanning: Dependabot, plus `composer audit`, `pip-audit`, `pnpm audit` and `flutter pub outdated` in CI.
 
 ### 8.5 Backups and DR
 
@@ -1163,7 +1235,7 @@ Dependency scanning: Dependabot, plus `composer audit`, `pip-audit` and `flutter
 ### 8.8 Domains and TLS
 
 - **Domain** (**Decision needed: D16**): the client registers one domain. `.com` is immediate; `.sa` needs a CR via SaudiNIC.
-- **Hosts:** `api.<domain>` (mobile API), `portal.<domain>` (lawyer and admin panels), and `<domain>` (minimal landing page with privacy policy, terms and support contact, all required by the stores).
+- **Hosts:** `api.<domain>` (mobile API), `portal.<domain>` (Vue dashboard: lawyer and admin; must share the parent domain with `api.` so Sanctum cookie sessions work), and `<domain>` (minimal landing page with privacy policy, terms and support contact, all required by the stores).
 - **DNS** can sit at any registrar or Cloudflare in **DNS-only** mode. Proxying through a CDN would terminate TLS outside KSA.
 - **TLS:** Let's Encrypt certificates, automatic via Caddy.
 
@@ -1236,6 +1308,7 @@ The texts are drafted by Abdelrahman for the client's lawyer to finalise (S9.2).
   - OCI block volumes and Object Storage are encrypted, with a customer-managed key in OCI Vault for the document bucket;
   - Laravel `encrypted` casts (AES-256-GCM) on `facts_masked`, `text_masked` and `consultation_messages.text_masked`;
   - backups are age-encrypted.
+- **Dashboard sessions:** httpOnly, `Secure`, `SameSite=Lax` cookies; CSRF via Sanctum's XSRF token; 2 h idle timeout for lawyer and admin sessions.
 
 ### 9.4 RBAC (spatie roles + Laravel Policies)
 
@@ -1363,15 +1436,15 @@ gantt
 | Week | Developer tasks (h) | Depends on | Client inputs due this week |
 |---|---|---|---|
 | **W1** (41 h) | S0.1 monorepo + compose (6), S0.2 CI (5), S0.3 OCI provisioning (6), S0.6 Laravel skeleton (4), S0.7 Flutter shell (8), S0.8 ai-svc skeleton (3), S1.1 extraction bake-off on the 4 PDFs (5), S1.2 Arabic normaliser (4) | M0; OCI tenancy for S0.3 | **Day 1:** confirm B1–B4; open OCI tenancy (Riyadh home), Anthropic org, Apple + Google **organization** enrolment (D-U-N-S), Firebase project; add Abdelrahman. **By Thu:** any additional sources (end of W1 cut-off); domain purchase; SMS provider account + **sender ID request**; name the pilot lawyer; decisions D3, D4 (start legal review), D12, D13, D16 |
-| **W2** (39 h) | S1.3 parser + chunker (9), S1.4 KB schema + embeddings (4), S1.5 ingestion lifecycle (5), S1.6 index sources + lawyer spot-check (3), S2.1 hybrid retrieval (5), S2.3 Claude wrapper spike: structured + stream + fallback + geo (7), S5.1 OTP API (6) | S1.1–S1.2; Anthropic key | Lawyer: **2 h** spot-check of 30 chunks. ZDR request sent to Anthropic. Email provider (**Decision needed: D17**). |
-| **W3** (39 h) | S2.2 reranker + thresholds (4), S2.4 citation verifier (5), S2.5 consultant route (5), S2.6 consult API (5), S5.2 invitations + consents (4), S5.3 mobile auth screens (7), S5.6 RBAC + audit (4), S3.1 case API (5) | S2.1, S2.3, S5.1 | Lawyer: **3 h** validating 50 eval questions + gold articles. App name, logo and store text draft (Q-C3). Style reference (Q-C10). D22. |
-| **W4** (39 h) | S2.7 mobile consultant (9), S0.4 deploy pipeline (5), S3.2 upload API (4), S3.3 OCR pipeline (7), S3.4 PII masking + test set (9), S8.1 eval harness (5) | S2.6, S0.3, S3.1 | Lawyer: **1 h** reviewing the case-type playbook queries. Client tries the consultant on staging (feedback by Thu). Client's lawyer: comments on privacy notice/consent drafts. |
-| **W5** (39 h) | S3.5 case retrieval (3), S3.6 analysis route (5), S3.7 draft route (7), S3.8 pipeline orchestration (5), S3.9 mobile case wizard (11), S4.1 lawyer panel (3), S8.2a eval set part 1 (5) | S3.2–S3.4, S2.4 | Lawyer: **2 h** gold labels for 10 synthetic cases. **Apple and Google accounts must be active by Thu** (TestFlight / internal builds in W6). Decisions D9, D10. Disclaimer text (Q-C9). |
-| **W6** (39 h) | S3.10 mobile processing/analysis/draft/send (11), S3.11 home/cases/details (6), S4.2 review queue (3), S4.3 review workspace (10), S4.4 approve + push + approved view (6), S5.5 FCM setup (3). Eval run #1. **M1 demo Thu.** | All of W5; Apple APNs key | **M1 demo** (client + lawyer, 90 min); written acceptance within 3 working days; **M1 payment 3,000 SAR**. D11 (listing type). |
-| **W7** (37 h) | S7.1 admin users + invites (4), S6.1 ratings (4), S6.2 feedback form (2), S6.3 usage stats (4), S7.3 ratings/feedback views (2), S5.4 biometric lock (3), S9.1 screenshot protection (2), S9.2 PDPL artefacts + account deletion + retention jobs (5), S9.4a RC QA pass (4), S9.5 store listings + submission (7) | M1 feedback | Approve store listing texts and screenshots (Tue). Final privacy policy and terms (Tue). **Pilot dentist list** (10–20, names + mobiles). Sender ID live. D18, D20. |
-| **W8** (34 h) | S0.5 prod backups + monitoring (6), S7.2 KB admin UI (5), S8.2b eval set part 2 (4), S8.3 tuning + decisions memo (5), S9.3 security hardening (3), S9.4b QA + fixes (6), S9.6 prod go-live, runbook, handover (5). Eval run #2. | Store review outcome | Client's prod smoke test with Abdelrahman. Lawyer account active for the pilot. **M2 acceptance** once both stores are live → **M2 payment 2,000 SAR**. |
+| **W2** (43 h) | S1.3 parser + chunker (9), S1.4 KB schema + embeddings (4), S1.5 ingestion lifecycle (5), S1.6 index sources + lawyer spot-check (3), S2.1 hybrid retrieval (5), S2.3 Claude wrapper spike: structured + stream + fallback + geo (7), S5.1 OTP API (6), S5.6 RBAC + audit (4) | S1.1–S1.2; Anthropic key | Lawyer: **2 h** spot-check of 30 chunks. ZDR request sent to Anthropic. Email provider (**Decision needed: D17**). |
+| **W3** (43 h) | S2.2 reranker + thresholds (4), S2.4 citation verifier (5), S2.5 consultant route (5), S2.6 consult API (5), S5.2 invitations + consents (4), S5.3 mobile auth screens (7), S3.1 case API (5), S0.9 Vue dashboard shell (8) | S2.1, S2.3, S5.1 | Lawyer: **3 h** validating 50 eval questions + gold articles. App name, logo and store text draft (Q-C3). Style reference (Q-C10). D22. |
+| **W4** (43 h) | S2.7 mobile consultant (9), S0.4 deploy pipeline (5), S3.2 upload API (4), S3.3 OCR pipeline (7), S3.4 PII masking + test set (9), S5.7 dashboard auth + 2FA (9) | S2.6, S0.3, S3.1 | Lawyer: **1 h** reviewing the case-type playbook queries. Client tries the consultant on staging (feedback by Thu). Client's lawyer: comments on privacy notice/consent drafts. |
+| **W5** (43 h) | S3.5 case retrieval (3), S3.6 analysis route (5), S3.7 draft route (7), S3.8 pipeline orchestration (5), S3.9 mobile case wizard (11), S4.1 lawyer area (2), S8.1 eval harness (5), S8.2a eval set part 1 (5) | S3.2–S3.4, S2.4 | Lawyer: **2 h** gold labels for 10 synthetic cases. **Apple and Google accounts must be active by Thu** (TestFlight / internal builds in W6). Decisions D9, D10. Disclaimer text (Q-C9). |
+| **W6** (46 h) | S3.10 mobile processing/analysis/draft/send (11), S3.11 home/cases/details (6), S4.2 review queue (5), S4.3 review workspace (14), S4.4 approve + push + approved view (7), S5.5 FCM setup (3). Eval run #1. **M1 demo Thu.** | All of W5; Apple APNs key | **M1 demo** (client + lawyer, 90 min); written acceptance within 3 working days; **M1 payment 3,000 SAR**. D11 (listing type). |
+| **W7** (43 h) | S7.1 admin users + invites (6), S6.1 ratings (4), S6.2 feedback form (2), S6.3 usage stats (6), S7.3 ratings/feedback views (4), S5.4 biometric lock (3), S9.1 screenshot protection (2), S9.2 PDPL artefacts + account deletion + retention jobs (5), S9.4a RC QA pass (4), S9.5 store listings + submission (7) | M1 feedback | Approve store listing texts and screenshots (Tue). Final privacy policy and terms (Tue). **Pilot dentist list** (10–20, names + mobiles). Sender ID live. D18, D20. |
+| **W8** (37 h) | S0.5 prod backups + monitoring (6), S7.2 KB admin UI (8), S8.2b eval set part 2 (4), S8.3 tuning + decisions memo (5), S9.3 security hardening (3), S9.4b QA + fixes (6), S9.6 prod go-live, runbook, handover (5). Eval run #2. | Store review outcome | Client's prod smoke test with Abdelrahman. Lawyer account active for the pilot. **M2 acceptance** once both stores are live → **M2 payment 2,000 SAR**. |
 
-The weeks sum to 307 h, all Must stories. The remaining 13 h of 320 h capacity is contingency; Should and Could items are taken only if it is unused.
+The weeks show the raw Must hours: 339 h, an average of 42.4 h/week, with W6 (the M1 week) the heaviest at 46 h. With cut lists A and B applied (recommended, D27), the total drops to 318 h: W6 becomes 39 h (S3.10 −3, S4.3 −4), W1 39 h, W5 41 h, W7 39 h and W8 31 h. At about 42 h/week that leaves roughly 18 h of contingency. Should and Could items are taken only if contingency is unused.
 
 If a client input arrives late, its dependent tasks move. When that affects a milestone date, Abdelrahman raises it with the client in writing; this plan doesn't change contract dates by itself.
 
@@ -1401,19 +1474,39 @@ If a client input arrives late, its dependent tasks move. When that affects a mi
 
 | Epic | Total h | Must h |
 |---|---|---|
-| E0 Foundations & DevOps | 43 | 43 |
+| E0 Foundations & DevOps | 51 | 51 |
 | E1 Knowledge base & ingestion | 30 | 30 |
 | E2 Retrieval & consultant | 40 | 40 |
 | E3 Cases, documents, analysis & draft | 76 | 73 |
-| E4 Lawyer review | 32 | 22 |
-| E5 Accounts & auth | 27 | 27 |
-| E6 Feedback & stats | 10 | 10 |
-| E7 Admin | 13 | 11 |
+| E4 Lawyer review | 39 | 28 |
+| E5 Accounts & auth | 36 | 36 |
+| E6 Feedback & stats | 12 | 12 |
+| E7 Admin | 21 | 18 |
 | E8 Evaluation | 19 | 19 |
 | E9 Security, compliance, QA & release | 32 | 32 |
-| **Total** | **322** | **307** (Should 13 h, Could 2 h) |
+| **Total** | **356** | **339** (Should 14 h, Could 3 h) |
 
-- **Capacity:** 8 weeks × 40 h = 320 h. Must fits, with only 13 h (4%) contingency, which is thin for an AI project.
+- **What changed from v0.1:** Must went from 307 h to 339 h (+32 h) because the lawyer and admin screens moved from Filament to Vue.
+
+  | Change | h |
+  |---|---|
+  | New S0.9 Vue dashboard shell (Nuxt, PrimeVue RTL theme, auth module, layouts, typed API client) | +8 |
+  | New S5.7 dashboard auth: Sanctum SPA cookies + Fortify login, TOTP 2FA, recovery codes, invite → set password, plus their pages | +9 |
+  | Lawyer screens: REST endpoints + Vue pages (S4.1 −1, S4.2 +2, S4.3 +4, S4.4 +1) | +6 |
+  | Admin screens: REST endpoints + Vue pages (S7.1 +2, S7.2 +3, S7.3 +2) | +7 |
+  | Usage stats API + chart widgets (S6.3) | +2 |
+  | **Total Must** | **+32** |
+
+- **Capacity:** 8 weeks × 40 h = 320 h. Must is now **19 h over** capacity before any contingency.
+- **How to absorb it (**Decision needed: D27**):**
+
+  | Option | Result | Trade-off |
+  |---|---|---|
+  | **1. Cut lists A + B, and plan about 42 h/week (recommended)** | 318 h of work vs 336 h capacity: about 18 h (5%) buffer | Less polish (merged analysis tab, simpler lawyer editor, stats as cards + table); no contract scope removed; slightly longer weeks |
+  | 2. Cut lists A + B at 40 h/week | 318 h vs 320 h: about 2 h buffer | Not workable for an AI project: any slip moves M1/M2 |
+  | 3. Extend the timeline | Keep all polish | Changes the contracted 8 weeks: needs the client's agreement first |
+  | 4. Filament for P1, Vue dashboard in P2 | Back to 307 h | Contradicts your choice; P2 would rebuild the web screens |
+
 - **Cut list A** (**Decision needed: D24**, recommended): none of these touches the contract scope.
 
   | Cut | Saves |
@@ -1425,16 +1518,18 @@ If a client input arrives late, its dependent tasks move. When that affects a mi
   | Admin «إعادة إرسال الدعوة» becomes "delete invite and re-invite" (S7.1) | 1 h |
   | Mobile integration test replaced by a manual script (S0.7/S9.4) | 2 h |
 
-  Cut list A saves 12 h, bringing Must to 295 h and contingency to 25 h (8%).
-- **Cut list B (only if Q-A1 says < 40 h/week):** cuts that reduce P1 polish.
+  Cut list A saves 12 h.
+- **Cut list B (part of option 1):** cuts that reduce P1 polish.
 
   | Cut | Saves |
   |---|---|
   | Native document scanner → camera photo + PDF only | 2 h |
-  | Lawyer paragraph editor → single textarea per section, citations kept per section | 4 h |
-  | Usage-stats widgets → one table page | 2 h |
+  | Lawyer paragraph editor → single textarea per section, citations kept per section (S4.3) | 4 h |
+  | Usage-stats charts → cards + one table (S6.3) | 3 h |
 
-- **Should items (13 h)** are done only if contingency is unused by W7: S3.12 document viewer, S4.5 PDF, S4.6 citation sample review, S4.7 lawyer original view. S4.6's fallback is a CSV export of a random citation sample plus a shared sheet (1 h), so the pilot KPI stays measurable either way.
+  Cut list B saves 9 h. A + B together save 21 h: 339 → 318 h.
+
+- **Should items (14 h)** are done only if contingency is unused by W7: S3.12 document viewer, S4.5 PDF, S4.6 citation sample review, S4.7 lawyer original view. S4.6's fallback is a CSV export of a random citation sample plus a shared sheet (1 h), so the pilot KPI stays measurable either way.
 
 ### 11.2 Stories
 
@@ -1452,6 +1547,7 @@ Priority uses MoSCoW: M = Must, S = Should, C = Could. "Deps" lists stories or c
 | S0.6 | Laravel skeleton | Modules, Sanctum, Horizon, Pulse, spatie/permission, Scramble OpenAPI, error envelope, Pest + Larastan configured | 4 | M | S0.1 |
 | S0.7 | Flutter app shell | ar locale + RTL, prototype theme + IBM Plex Sans Arabic, go_router guards, dio client with interceptors, Riverpod, staging/prod flavors, Hijri/Gregorian formatter with tests, error/empty states | 8 | M | S0.1 |
 | S0.8 | ai-svc skeleton | FastAPI app, service-token auth, structlog with redaction, BGE-M3 + reranker loaded at start-up, `/v1/health` | 3 | M | S0.1 |
+| S0.9 | Vue dashboard shell | Nuxt 4 app in `dashboard/` with `ssr: false`, TypeScript strict; PrimeVue 4 + Tailwind themed from the prototype tokens, RTL, IBM Plex Sans Arabic; Pinia; `nuxt-auth-sanctum` (cookie mode); `auth`/`role`/`two-factor` middleware and the three layouts; `useApi` with types generated from OpenAPI; loading/empty/error states; `useDates` (Hijri + Gregorian) with tests; Vitest configured | 8 | M | S0.6 |
 
 **E1 Knowledge base & ingestion**
 
@@ -1497,12 +1593,12 @@ Priority uses MoSCoW: M = Must, S = Should, C = Could. "Deps" lists stories or c
 
 | ID | Story | Acceptance criteria | h | P | Deps |
 |---|---|---|---|---|---|
-| S4.1 | Lawyer panel | Filament `/lawyer`, invite → set password, MFA enforced, Arabic RTL | 3 | M | S0.6 |
-| S4.2 | Review queue + claim | Three tabs; atomic claim («استلام»; 409 if already taken); claimed cases visible only to the claimer | 3 | M | S4.1, S3.10 |
-| S4.3 | Review workspace | Three panes per §7.1; paragraph editor keeps citation links; «حفظ كإصدار» creates an immutable version; flags and checks visible; internal notes | 10 | M | S4.2 |
-| S4.4 | Approve + notify | Confirm modal; locks the version; case → approved; audit entry; FCM push «رد معتمد جاهز» deep-links to the approved view (m13/m14) within 1 min | 6 | M | S4.3, S5.5 |
+| S4.1 | Lawyer area | `/lawyer` routes, navigation and role guard in the dashboard; `/api/v1/lawyer/*` route group with policies | 2 | M | S0.9, S5.7 |
+| S4.2 | Review queue + claim | Queue API + DataTable with three tabs; atomic claim («استلام»; 409 if already taken); claimed cases visible only to the claimer | 5 | M | S4.1, S3.10 |
+| S4.3 | Review workspace | Workspace API (case file, masked pages, version, sources, checks, notes) + three-pane Vue page per §7.1; paragraph editor keeps citation links; «حفظ كإصدار» creates an immutable version; flags and checks visible; internal notes; unsaved-changes guard | 14 | M | S4.2 |
+| S4.4 | Approve + notify | Approve API + confirm dialog; locks the version; case → approved; audit entry; FCM push «رد معتمد جاهز» deep-links to the approved view (m13/m14) within 1 min | 7 | M | S4.3, S5.5 |
 | S4.5 | Approved response PDF | Arabic PDF via Gotenberg with Hijri + Gregorian date and lawyer name; available to the dentist and lawyer only after approval | 4 | S | S4.4 |
-| S4.6 | Citation sample review | Random stratified sample; «صحيح / غير صحيح» + note; KPI shown in admin | 4 | S | S4.1 |
+| S4.6 | Citation sample review | Sampling API + page; random stratified sample; «صحيح / غير صحيح» + note; KPI shown in admin | 5 | S | S4.1 |
 | S4.7 | Lawyer view of originals | 5-min signed route, audited, claimed cases only | 2 | S | S3.2 |
 
 **E5 Accounts & auth**
@@ -1515,6 +1611,7 @@ Priority uses MoSCoW: M = Must, S = Should, C = Could. "Deps" lists stories or c
 | S5.4 | Biometric lock | Opt-out toggle in «حسابي»; lock after 5 min in background and on cold start; app-switcher blur | 3 | M | S5.3 |
 | S5.5 | Devices + FCM | Token registration per device; Firebase for both flavors; APNs key; a test push reaches iOS and Android | 3 | M | Apple account |
 | S5.6 | RBAC, policies, audit service | Roles seeded; policies per §9.4 with Pest tests; `AuditLogger` + DB trigger blocking UPDATE/DELETE | 4 | M | S0.6 |
+| S5.7 | Dashboard auth + 2FA | Sanctum SPA cookie auth for `portal.<domain>`; Fortify login, TOTP two-factor (mandatory for lawyer/admin) with recovery codes, invite link → set password, throttling, 2 h idle timeout; Vue pages «تسجيل الدخول», «رمز التحقق الثنائي», «تعيين كلمة المرور»; Pest tests | 9 | M | S0.9, S5.6 |
 
 **E6 Feedback & stats**
 
@@ -1522,16 +1619,16 @@ Priority uses MoSCoW: M = Must, S = Should, C = Could. "Deps" lists stories or c
 |---|---|---|---|---|---|
 | S6.1 | Ratings | `POST /ratings` upsert; «مفيدة / غير مفيدة» + optional comment on answers, analysis and draft in the app | 4 | M | S2.7, S3.10 |
 | S6.2 | General feedback form | «ملاحظاتك» screen + API; includes app version, platform, screen | 2 | M | S0.7 |
-| S6.3 | Usage stats | Nightly roll-up + live counters; dashboard widgets per §7.2 | 4 | M | S7.1 |
+| S6.3 | Usage stats | Nightly roll-up + stats API; dashboard cards + 2 charts per §7.2 | 6 | M | S7.1 |
 
 **E7 Admin**
 
 | ID | Story | Acceptance criteria | h | P | Deps |
 |---|---|---|---|---|---|
-| S7.1 | Users & invites | Dentists and lawyers tables, invite / resend / deactivate; deactivation revokes tokens | 4 | M | S5.2, S4.1 |
-| S7.2 | Knowledge sources UI | Upload version, live status, chunk preview, publish, archive, re-index | 5 | M | S1.5 |
-| S7.3 | Ratings & feedback views | Filters, read-only render of the rated item, CSV export | 2 | M | S6.1, S6.2 |
-| S7.4 | AI runs viewer | Read-only table of `ai_runs` | 2 | C | S2.3 |
+| S7.1 | Users & invites | API + DataTables for dentists and lawyers; invite / resend / deactivate dialogs; deactivation revokes tokens and sessions | 6 | M | S5.2, S5.7 |
+| S7.2 | Knowledge sources UI | API + pages: upload version (FileUpload), live status (polling), chunk preview, publish, archive, re-index | 8 | M | S1.5, S0.9 |
+| S7.3 | Ratings & feedback views | API with filters + DataTables, read-only render of the rated item, server-side CSV export | 4 | M | S6.1, S6.2 |
+| S7.4 | AI runs viewer | API + read-only table of `ai_runs` | 3 | C | S2.3 |
 
 **E8 Evaluation**
 
@@ -1547,8 +1644,8 @@ Priority uses MoSCoW: M = Must, S = Should, C = Could. "Deps" lists stories or c
 |---|---|---|---|---|---|
 | S9.1 | Screenshot protection | Documents, analysis, draft and approved screens block screenshots on Android and are protected on iOS; no on-disk caching | 2 | M | S3.11 |
 | S9.2 | PDPL artefacts | Privacy notice + terms drafts (Arabic) for the client's lawyer; consent texts; «حذف الحساب»; `PurgeExpiredData` job per §9.7 | 5 | M | — |
-| S9.3 | Security hardening | OWASP API Top-10 checklist done; headers (HSTS, CSP for portal), CORS closed, rate limits verified, secrets review, dependency audit clean | 3 | M | S0.4 |
-| S9.4 | QA pass + fixes | Test matrix §6.8 passed; full flow on staging and prod; p90 submit → draft < 10 min on 5 runs; no open critical/high defects | 10 | M | All features |
+| S9.3 | Security hardening | OWASP API Top-10 checklist done; headers (HSTS, strict CSP for the dashboard), CORS limited to `portal.<domain>` with credentials, rate limits verified, secrets review, dependency audit clean | 3 | M | S0.4 |
+| S9.4 | QA pass + fixes | Test matrix §6.8 passed; dashboard Cypress smoke test green; full flow on staging and prod; p90 submit → draft < 10 min on 5 runs; no open critical/high defects | 10 | M | All features |
 | S9.5 | Store submission | Arabic listings, screenshots, privacy labels / data safety, content rating, review notes + demo account; both apps submitted by Thu W7 | 7 | M | Store accounts, S9.2 |
 | S9.6 | Production go-live + handover | Prod deployed, sources indexed, smoke test passed, runbook + short Arabic admin guide, credentials handed to the client and rotated | 5 | M | S0.5, S9.4 |
 
@@ -1567,7 +1664,7 @@ Priority uses MoSCoW: M = Must, S = Should, C = Could. "Deps" lists stories or c
 | R7 | **Source text quality** (as found: lam-alef reversal, font-encoding corruption) causing wrong quotes or failed verification | High / Medium | Bake-off + transcription for corrupted sources; normaliser tests from real errors; lawyer spot-check; fuzzy quote matching on normalised text |
 | R8 | **SMS sender ID registration** (about 20 business days) delays real OTP | High / Medium | Request in W1; log driver + test numbers until then; fallback: the provider's pre-approved generic sender if available |
 | R9 | **AI quality or safety:** wrong legal reasoning, weak drafts, or classifier false-positive refusals | Medium / High | Retrieval threshold + `answerable`; citation verification + repair; mandatory lawyer approval; server-side fallback `default`; eval runs before M1 and M2, weekly in the pilot; prompts versioned |
-| R10 | **Single developer, tight capacity, scope creep** toward P2 features (stages, notifications, revisions) | Medium / High | Drift table (§1.2) and change log; cut lists A/B; weekly demo; Must-only plan with a contingency buffer |
+| R10 | **Single developer, tight capacity, scope creep** toward P2 features (stages, notifications, revisions). Capacity is tighter in v0.2 because the Vue dashboard adds 32 h. | High / High | D27 option 1 (cut lists A + B, about 42 h/week); drift table (§1.2) and change log; weekly demo; Must-only plan; if W3 ends more than 6 h behind, escalate option 3 to the client early |
 | R11 | **KSA cloud onboarding friction** (card verification, home-region availability) | Low–Medium / Medium | OCI signup on day 1; fallback to Jeddah as home region; GCP via CNTXT or STC as alternatives (§8.1) |
 | R12 | **Runaway LLM spend** (abuse or loops) | Low / Medium | Per-user rate limits, `max_tokens` caps, one repair retry only, workspace spend limits, daily cost digest |
 
@@ -1692,8 +1789,10 @@ Every row below is a **Decision needed**. Body text marks each one where it aris
 | D21 | Repository ownership | New private repo in a client-owned GitHub organisation; Abdelrahman admin | Client | After plan approval |
 | D22 | Consultant "talk to a lawyer" | Suggestion text only (default); Could: record request for admin | Client | W3 |
 | D23 | Server-side refusal fallback | Enable `fallbacks: "default"`, logged and visible in `ai_runs` | Abdelrahman | W2 |
-| D24 | Cut list A | Approve, to restore an ~8% buffer | Abdelrahman | Plan approval |
+| D24 | Cut list A | Approve (now part of D27 option 1) | Abdelrahman | Plan approval |
 | D25 | Older law edition | Index as archived (versioning proof), never retrieved | Abdelrahman | W2 |
+| D26 | Dashboard UI kit | PrimeVue 4 + Tailwind (data-heavy admin screens, RTL); Nuxt UI as the lighter alternative | Abdelrahman | W3 (before S0.9) |
+| D27 | Absorbing the +32 h of the Vue dashboard | Option 1: cut lists A + B and about 42 h/week; option 3 (timeline) needs the client | Abdelrahman (client for option 3) | Plan approval |
 
 ## Appendix B: After plan approval (waiting for explicit OK)
 
