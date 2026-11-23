@@ -1,0 +1,47 @@
+# Masking eval set (PROJECT1_PLAN.md §5.10, §5.14). Synthetic texts in the style of complaint letters and records.
+# `planted`: values that must not survive masking. `keep`: terms that must survive (no over-masking of the facts the
+# analysis needs). Draft seed of 10 of the planned 30; span-level annotations come with S8.2.
+kind: pii
+verified: false
+items:
+  - id: p01
+    text: نحيطكم علمًا بورود شكوى من المريض صاحب الهوية رقم 1098765432 وجواله 0551234567 بشأن زراعة سن في الموضع 36.
+    planted: [{type: ID, value: "1098765432"}, {type: PHONE, value: "0551234567"}]
+    keep: ["36", "زراعة سن"]
+  - id: p02
+    text: "اسم المريضة: سارة أحمد القحطاني، العمر 34 سنة، رقم الملف: MRN-44821، تاريخ الميلاد: 12/03/1992م"
+    planted: [{type: PATIENT, value: "سارة أحمد القحطاني"}, {type: MRN, value: "MRN-44821"}, {type: DOB, value: "12/03/1992"}]
+    keep: ["34"]
+  - id: p03
+    text: للتواصل مع المريض عبر البريد patient.case@example.com أو على الرقم ‎+966 50 111 2233‎.
+    planted: [{type: EMAIL, value: "patient.case@example.com"}, {type: PHONE, value: "50 111 2233"}]
+    keep: []
+  - id: p04
+    text: يطالب المريض بتحويل مبلغ التعويض إلى الحساب SA4420000001234567891234 خلال أسبوعين.
+    planted: [{type: IBAN, value: "SA4420000001234567891234"}]
+    keep: ["أسبوعين"]
+  - id: p05
+    text: "حضر المريض برفقة ولي الأمر: خالد عبدالله العتيبي، وأفاد بأن الألم بدأ بعد يومين من العلاج."
+    planted: [{type: PERSON, value: "خالد عبدالله العتيبي"}]
+    keep: ["يومين"]
+  - id: p06
+    text: أتقدم أنا د. ريم الشهري بإفادتي بخصوص الشكوى رقم 02871/1448 المقدمة لدى الشؤون الصحية بجدة.
+    planted: [{type: DENTIST, value: "د. ريم الشهري"}]
+    keep: ["02871/1448", "الشؤون الصحية بجدة"]
+    dentist_name: د. ريم الشهري
+  - id: p07
+    text: هوية المريض ١٠٩٨٧٦٥٤٣٢ وجواله ٠٥٥٩٨٧٦٥٤٣ كما وردت في خطاب الإحالة.
+    planted: [{type: ID, value: "١٠٩٨٧٦٥٤٣٢"}, {type: PHONE, value: "٠٥٥٩٨٧٦٥٤٣"}, {type: ID, value: "1098765432"}, {type: PHONE, value: "0559876543"}]
+    keep: ["خطاب الإحالة"]
+  - id: p08
+    text: "العنوان: حي الروضة، شارع الأمير سلطان، جدة. رقم جواز السفر: A12345678"
+    planted: [{type: ADDRESS, value: "حي الروضة"}, {type: PASSPORT, value: "A12345678"}]
+    keep: []
+  - id: p09
+    text: "Patient name: Omar Saleh Alharbi, File No: 77-1203. Site 46 extraction on 05/09/2026."
+    planted: [{type: PATIENT, value: "Omar Saleh Alharbi"}, {type: MRN, value: "77-1203"}]
+    keep: ["46", "05/09/2026"]
+  - id: p10
+    text: تُحفظ إفادة الممارس وفق المادة 21 من نظام مزاولة المهن الصحية، ويُرفق تقرير الأشعة المقطعية بتاريخ 21/08/2026م.
+    planted: []
+    keep: ["المادة 21", "نظام مزاولة المهن الصحية", "21/08/2026"]

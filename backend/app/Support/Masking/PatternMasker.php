@@ -15,7 +15,8 @@ final class PatternMasker
     private const PATTERNS = [
         'IBAN' => '/\bSA\d{2}[ ]?(?:\d{4}[ ]?){4}\d{4}\b/i',
         'EMAIL' => '/[A-Z0-9._%+\-]+@[A-Z0-9.\-]+\.[A-Z]{2,}/i',
-        'PHONE' => '/(?<!\d)(?:\+?966|00966|0)?5\d{8}(?!\d)/',
+        // Also written in groups: «+966 50 111 2233», «055-123-4567» (bidi marks allowed between groups).
+        'PHONE' => '/(?<![\d+])(?:(?:\+|00)?966[\s\-\x{200E}\x{200F}]*|0)?5\d(?:[\s\-\x{200E}\x{200F}]?\d){7}(?!\d)/u',
         'ID' => '/(?<!\d)[12]\d{9}(?!\d)/',
         'LANDLINE' => '/(?<!\d)(?:\+?966|0)1[1-7]\d{7}(?!\d)/',
     ];

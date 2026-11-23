@@ -45,6 +45,12 @@ Ingestion writes chunks with status `review` and replaces the version's earlier 
 
 Logs are JSON and never contain questions, sources, prompts or answers (a redaction processor plus a test).
 
+## Evaluation (S8.1)
+
+`python -m app.eval run --set <set> --route retrieve|consult|pii` runs a dataset from `../eval/datasets/` and writes a markdown report to `../eval/reports/` with each metric beside its §5.14 target (recall@8, refusal accuracy, false refusals, citation validity, gold-cited rate, schema validity, latency, cost per answer, PII recall per type, over-masking). See [`../eval/README.md`](../eval/README.md). CI runs the `pii_v1` set on every change.
+
+The first runs (23 Nov, stand-in models, the current law indexed locally): `pii_v1` found a real gap, mobile numbers written in groups (`+966 50 111 2233`, `055-123-4567`) leaked, now fixed in ai-svc and in Laravel's pattern masker; `consult_v1` retrieval recall@8 0.83, refusals 4/4, one false refusal, with the misses listed in the report. Production numbers need the BGE models and the lawyer-verified sets (S8.2).
+
 ## Layout
 
 ```
@@ -55,12 +61,13 @@ app/
   retrieval/   embedder/reranker ports (BGE in production), SQL repository, hybrid retrieval + RRF + gate
   llm/         schemas v1, prompts (versioned), source/document blocks + manifest, Claude client, shared runner, consult and case services
   verify/      citation verification
+  eval/        eval harness: datasets, runners (retrieve / consult / pii), markdown reports, CLI
   extract/     PDF text layers, quality checks, OCR (Tesseract), repairs, case-document extraction with masking
   ingest/      structure parser (articles, regulations, definitions, forms, sections), chunker, ingestion service
   routes/      /v1 endpoints
 config/retrieval.yaml   retrieval thresholds (calibrated in S2.2 and S8.3)
 config/playbooks.yaml   fixed retrieval queries per case type and claim type
-tests/                  82 tests: unit, Postgres/pgvector, real Tesseract on pages of the supplied PDFs, API with a fake Claude client
+tests/                  88 tests: unit, Postgres/pgvector, real Tesseract on pages of the supplied PDFs, API with a fake Claude client
 ```
 
 ## Run locally

@@ -23,7 +23,8 @@ ARABIC_INDIC = str.maketrans("٠١٢٣٤٥٦٧٨٩۰۱۲۳۴۵۶۷۸۹", "012345
 PATTERNS: list[tuple[str, re.Pattern[str]]] = [
     ("IBAN", re.compile(r"\bSA\d{2}[ ]?(?:\d{4}[ ]?){4}\d{4}\b", re.IGNORECASE)),
     ("EMAIL", re.compile(r"[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}")),
-    ("PHONE", re.compile(r"(?<!\d)(?:\+?966|00966|0)?5\d{8}(?!\d)")),
+    # Mobile numbers, also written in groups: «+966 50 111 2233», «055-123-4567» (bidi marks allowed between groups).
+    ("PHONE", re.compile(r"(?<![\d+])(?:(?:\+|00)?966[\s\-\u200e\u200f]*|0)?5\d(?:[\s\-\u200e\u200f]?\d){7}(?!\d)")),
     ("ID", re.compile(r"(?<!\d)[12]\d{9}(?!\d)")),
     ("PHONE", re.compile(r"(?<!\d)(?:\+?966|0)1[1-7]\d{7}(?!\d)")),
     ("MRN", re.compile(r"(?:رقم الملف|رقم السجل الطبي|رقم السجل|MRN|File No\.?)\s*[:：]?\s*([A-Za-z0-9\-/]{3,20})", re.IGNORECASE)),

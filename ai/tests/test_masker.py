@@ -84,3 +84,13 @@ def test_ner_failure_fails_closed() -> None:
 def test_secret_is_required() -> None:
     with pytest.raises(MaskingError):
         Masker(NoNer(), b"")
+
+
+def test_phone_numbers_written_in_groups_are_masked() -> None:
+    # Found by the pii_v1 eval: spaced and dashed mobiles, with bidi marks, leaked before.
+    m = Masker(NoNer(), SECRET)
+    text = "اتصلوا على ‎+966 50 111 2233‎ أو 055-123-4567 أو 0551234567، والشكوى رقم 2026-100-55."
+    out = m.mask([text]).texts[0]
+    assert "111 2233" not in out and "123-4567" not in out and "0551234567" not in out
+    assert out.count("[PHONE_") == 3
+    assert "2026-100-55" in out

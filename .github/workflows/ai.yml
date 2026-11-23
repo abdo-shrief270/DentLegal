@@ -5,12 +5,14 @@ on:
   push:
     paths:
       - "ai/**"
+      - "eval/datasets/**"
       - "backend/database/migrations/*knowledge*"
       - "*.pdf"
       - ".github/workflows/ai.yml"
   pull_request:
     paths:
       - "ai/**"
+      - "eval/datasets/**"
       - ".github/workflows/ai.yml"
 
 concurrency:
@@ -56,3 +58,9 @@ jobs:
         run: mypy app
       - name: Tests
         run: pytest
+      # PROJECT1_PLAN.md §5.14: masking must not leak any planted identifier (pattern layers; NER runs in staging).
+      - name: Eval (pii_v1, masker)
+        run: python -m app.eval run --set pii_v1 --route pii --out "$RUNNER_TEMP/eval"
+        env:
+          AI_ENV: testing
+          AI_NER: none

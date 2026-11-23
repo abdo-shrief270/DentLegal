@@ -1,0 +1,82 @@
+# Consultant eval set (PROJECT1_PLAN.md §5.14). Synthetic questions; gold = the article that answers it in
+# نظام مزاولة المهن الصحية (HPPL, current edition). Draft seed of 16 of the planned 50: the lawyer verifies the gold
+# labels and the set grows to 50 in S8.2, then `verified` becomes true.
+kind: consult
+verified: false
+items:
+  - id: c01
+    topic: confidentiality
+    question: هل يجوز لي الإفصاح عن معلومات ملف المريض عند الرد على شكوى قدّمها ضدي؟
+    answerable: true
+    gold: [{source: HPPL, article: 21}]
+  - id: c02
+    topic: confidentiality
+    question: متى يُسمح للممارس الصحي بإفشاء أسرار المريض؟
+    answerable: true
+    gold: [{source: HPPL, article: 21}]
+  - id: c03
+    topic: consent
+    question: هل يشترط الحصول على موافقة المريض قبل خلع السن؟
+    answerable: true
+    gold: [{source: HPPL, article: 19}]
+  - id: c04
+    topic: consent
+    question: ماذا أفعل في حالة طارئة لا يمكن فيها الحصول على موافقة المريض أو وليه؟
+    answerable: true
+    gold: [{source: HPPL, article: 19}]
+  - id: c05
+    topic: professional error
+    question: هل ألتزم بالتعويض إذا ترتب على خطأ في العلاج ضرر للمريض؟
+    answerable: true
+    gold: [{source: HPPL, article: 27}]
+  - id: c06
+    topic: professional error
+    question: ما الأمثلة التي يعدها النظام خطأً مهنيًا صحيًا؟
+    answerable: true
+    gold: [{source: HPPL, article: 27}]
+  - id: c07
+    topic: insurance
+    question: هل التأمين ضد الأخطاء المهنية الطبية إلزامي على طبيب الأسنان في القطاع الخاص؟
+    answerable: true
+    gold: [{source: HPPL, article: 41}]
+  - id: c08
+    topic: appeals
+    question: ما المهلة المتاحة للتظلم من قرار الهيئة الصحية الشرعية أمام ديوان المظالم؟
+    answerable: true
+    gold: [{source: HPPL, article: 35}]
+  - id: c09
+    topic: appeals
+    question: كيف أتظلم من قرار لجنة المخالفات التي شكلها الوزير؟
+    answerable: true
+    gold: [{source: HPPL, article: 38}]
+  - id: c10
+    topic: advertising
+    question: هل يجوز لي الإعلان عن عيادتي في وسائل التواصل الاجتماعي؟
+    answerable: true
+    gold: [{source: HPPL, article: 10}]
+  - id: c11
+    topic: practice location
+    question: هل يجوز إجراء فحص أسنان مجاني في صيدلية؟
+    answerable: true
+    gold: [{source: HPPL, article: 13}]
+  - id: c12
+    topic: explicit reference
+    question: ماذا تنص المادة 41 من نظام مزاولة المهن الصحية؟
+    answerable: true
+    gold: [{source: HPPL, article: 41}]
+  - id: r01
+    topic: out of scope (labour)
+    question: كم عدد أيام الإجازة السنوية التي يستحقها مساعد طبيب الأسنان في العيادة؟
+    answerable: false
+  - id: r02
+    topic: out of scope (tax)
+    question: ما نسبة ضريبة القيمة المضافة على خدمات تبييض الأسنان التجميلية؟
+    answerable: false
+  - id: r03
+    topic: out of scope (commercial)
+    question: ما خطوات تسجيل اسم تجاري لعيادة أسنان جديدة؟
+    answerable: false
+  - id: r04
+    topic: out of scope (unrelated)
+    question: ما أفضل نوع من الحشوات التجميلية من حيث المتانة؟
+    answerable: false

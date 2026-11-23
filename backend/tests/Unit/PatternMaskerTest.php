@@ -51,4 +51,14 @@ class PatternMaskerTest extends TestCase
         $text = 'المرجع 10234567891234 للملف';
         $this->assertSame($text, (new PatternMasker)->mask($text)->text);
     }
+
+    public function test_masks_phone_numbers_written_in_groups(): void
+    {
+        $r = (new PatternMasker)->mask("اتصلوا على \u{200E}+966 50 111 2233\u{200E} أو 055-123-4567، الشكوى رقم 2026-100-55.");
+
+        $this->assertStringNotContainsString('111 2233', $r->text);
+        $this->assertStringNotContainsString('123-4567', $r->text);
+        $this->assertSame(2, $r->entityCounts['PHONE']);
+        $this->assertStringContainsString('2026-100-55', $r->text);
+    }
 }
