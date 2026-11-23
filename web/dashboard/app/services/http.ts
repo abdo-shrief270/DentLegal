@@ -1,7 +1,8 @@
 // Laravel API client (PROJECT1_PLAN.md §4.2). Sanctum SPA cookie mode: the session lives in an httpOnly
 // cookie; $fetch sends it with `credentials: 'include'` and Laravel's XSRF token header.
-// Not exercised yet: the backend is built later. Paths and shapes follow the plan's API contract.
-import type { DashboardApi } from '~/types/client'
+// Auth calls match the Laravel routes (backend/routes/web.php); the lawyer and admin calls follow the plan's contract.
+import type { Role, SessionUser } from '~/types/api'
+import type { DashboardApi, TwoFactorSetup } from '~/types/client'
 import { ApiError } from '~/types/client'
 
 function xsrfToken(): string | undefined {
@@ -24,18 +25,41 @@ export function createHttpApi(baseURL: string): DashboardApi {
   }
   const unwrap = async <T>(promise: Promise<{ data: T }>) => (await promise).data
 
+  // Shapes returned by the Laravel dashboard auth routes (backend/routes/web.php).
+  interface ApiSessionUser { id: string; name: string | null; email: string; role: Role; two_factor: { enabled: boolean; passed: boolean } }
+  interface ApiTwoFactorSetup { secret: string; otpauth_uri: string; recovery_codes: string[] }
+  const toSessionUser = (u: ApiSessionUser): SessionUser => {
+    const name = u.name ?? u.email
+    const initials = name.replace(/^(أ|م|د)\.\s*/, '').split(/\s+/).map((w) => w.replace(/^ال/, '')[0] ?? '').join('').slice(0, 2)
+    return { id: u.id, name, email: u.email, role: u.role, initials, subtitle: u.role === 'admin' ? 'إدارة المنصة' : 'محامٍ مراجِع' }
+  }
+  const toSetup = (s: ApiTwoFactorSetup): TwoFactorSetup => ({
+    secret: s.secret.replace(/(.{4})/g, '$1 ').trim(), otpauthUrl: s.otpauth_uri, recoveryCodes: s.recovery_codes,
+  })
+
   return {
     auth: {
       async login(email, password) {
         await request('/sanctum/csrf-cookie')
-        return request('/login', { method: 'POST', body: { email, password } })
+        const res = await unwrap(request<{ data: { two_factor_required: boolean; enrolment_required: boolean } }>('/login', { method: 'POST', body: { email, password } }))
+        return { twoFactorRequired: res.two_factor_required }
       },
-      twoFactorChallenge: (input) => request('/two-factor-challenge', { method: 'POST', body: { code: input.code, recovery_code: input.recoveryCode } }),
-      currentUser: () => unwrap(request('/api/v1/me')),
+      twoFactorChallenge: async (input) => toSessionUser(await unwrap(request<{ data: ApiSessionUser }>('/two-factor-challenge', { method: 'POST', body: { code: input.code, recovery_code: input.recoveryCode } }))),
+      async currentUser() {
+        try {
+          return toSessionUser(await unwrap(request<{ data: ApiSessionUser }>('/user')))
+        } catch (e) {
+          if (e instanceof ApiError && e.code === 'unauthenticated') return null
+          throw e
+        }
+      },
       logout: () => request('/logout', { method: 'POST' }),
-      getInvite: (token) => unwrap(request(`/api/v1/invitations/${token}`)),
-      acceptInvite: (token, password) => unwrap(request(`/invitations/${token}/accept`, { method: 'POST', body: { password } })),
-      confirmTwoFactor: (code) => unwrap(request('/user/confirmed-two-factor-authentication', { method: 'POST', body: { code } })),
+      getInvite: (token) => unwrap(request(`/invitations/${token}`)),
+      async acceptInvite(token, password) {
+        await request('/sanctum/csrf-cookie')
+        return toSetup(await unwrap(request<{ data: ApiTwoFactorSetup }>(`/invitations/${token}/accept`, { method: 'POST', body: { password } })))
+      },
+      confirmTwoFactor: async (code) => toSessionUser(await unwrap(request<{ data: ApiSessionUser }>('/user/confirmed-two-factor-authentication', { method: 'POST', body: { code } }))),
     },
     lawyer: {
       listReviews: (tab) => unwrap(request('/api/v1/lawyer/reviews', { query: { tab } })),

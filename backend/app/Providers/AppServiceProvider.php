@@ -45,6 +45,10 @@ class AppServiceProvider extends ServiceProvider
 
         // Authenticated API: 120 requests / minute per token (PROJECT1_PLAN.md §4.7).
         // Uploads: 60 files / hour per dentist (§4.7).
+        // §4.7: 5 / min per email + IP for the password step; 5 / min per pending or signed-in user + IP for codes.
+        RateLimiter::for('dashboard-login', fn (Request $request) => Limit::perMinute(5)->by(mb_strtolower((string) $request->input('email')).'|'.$request->ip()));
+        RateLimiter::for('dashboard-2fa', fn (Request $request) => Limit::perMinute(5)->by((string) ($request->user()?->getAuthIdentifier() ?? $request->session()->get('login.pending_id', '')).'|'.$request->ip()));
+        RateLimiter::for('invitations', fn (Request $request) => Limit::perMinute(10)->by($request->ip()));
         RateLimiter::for('uploads', fn (Request $request) => Limit::perHour(60)->by((string) ($request->user()?->getAuthIdentifier() ?? $request->ip())));
         RateLimiter::for('api', fn (Request $request) => Limit::perMinute(120)->by($request->user()?->currentAccessToken()?->getKey() ?? $request->ip()));
     }

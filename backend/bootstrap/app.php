@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\RequireAppVersion;
+use App\Http\Middleware\RequireTwoFactor;
 use App\Support\Api\ErrorRenderer;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -16,7 +17,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Sanctum SPA mode for the dashboard (portal.<domain>): cookie session + CSRF on API routes from stateful domains.
+        $middleware->statefulApi();
         $middleware->alias([
+            'two_factor' => RequireTwoFactor::class,
             'app.version' => RequireAppVersion::class,
             'abilities' => CheckAbilities::class,
             'role' => RoleMiddleware::class,

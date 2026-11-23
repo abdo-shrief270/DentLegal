@@ -26,6 +26,10 @@ use Spatie\Permission\Traits\HasRoles;
  * @property string|null $email
  * @property UserStatus $status
  * @property Carbon|null $last_login_at
+ * @property string|null $two_factor_secret
+ * @property list<string>|null $two_factor_recovery_codes
+ * @property Carbon|null $two_factor_confirmed_at
+ * @property int|null $two_factor_last_step
  * @property-read DentistProfile|null $dentistProfile
  */
 class User extends Authenticatable
@@ -35,7 +39,7 @@ class User extends Authenticatable
 
     protected $fillable = ['name', 'phone_e164', 'email', 'password', 'status', 'last_login_at'];
 
-    protected $hidden = ['password', 'remember_token'];
+    protected $hidden = ['password', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes'];
 
     protected function casts(): array
     {
@@ -43,6 +47,9 @@ class User extends Authenticatable
             'password' => 'hashed',
             'status' => UserStatus::class,
             'last_login_at' => 'datetime',
+            'two_factor_secret' => 'encrypted',
+            'two_factor_recovery_codes' => 'encrypted:array',
+            'two_factor_confirmed_at' => 'datetime',
         ];
     }
 

@@ -9,7 +9,7 @@ The system of record for Project 1 (PROJECT1_PLAN.md §2, §3, §4): REST API `/
 | Runtime | PHP 8.4 in production (the lock file is resolved for 8.3+), Laravel 12 |
 | Database | PostgreSQL 17 + `pgvector` + `pg_trgm`, Arabic full-text search |
 | Queues, cache, sessions, rate limits | Redis, Laravel Horizon |
-| Auth | Sanctum: 30-day tokens with the `dentist` ability for the app; cookie sessions + 2FA for the dashboard (S5.7, next) |
+| Auth | Sanctum: 30-day tokens with the `dentist` ability for the app; Sanctum SPA cookie sessions + mandatory TOTP two-factor for the dashboard |
 | Roles | `spatie/laravel-permission`: `dentist`, `lawyer`, `admin` |
 | API docs | `dedoc/scramble` at `/docs/api` (local and staging only) |
 | Quality | PHPUnit 11 against real PostgreSQL, Larastan level 6, Pint |
@@ -49,10 +49,11 @@ Each module keeps `Models`, `Enums`, `Actions` (one class per business operation
 | S3.8 Pipeline | `POST /cases/{id}/analysis` (consent `ai_processing`, ≥ 1 document, 10/day, `Idempotency-Key`, one run per case at a time) queues a chain on the `ai` queue: extract + mask (only masked text is stored) → analysis → draft → `ai_ready`. Overload and network errors retry with backoff; refusals and invalid output fail the run and the case with a code. A retry skips documents already extracted. Every Claude call is an `ai_runs` row with its sources |
 | Results | `GET …/analysis/status` (steps, progress), `GET …/analysis`, `GET …/draft` (placeholders rendered: dentist name, licence, «المريض (الرمز P-…)»), `POST …/submit-review` (consent `lawyer_access`; case → `lawyer_review`) |
 | S2.6 Consult API | Suggested questions (config), threads list (cursor), thread with messages, ask (new thread or follow-up) → 202 with the pending answer, poll `GET /consultation-messages/{id}`. Questions are pattern-masked before storage, then NER-masked by ai-svc with the thread's placeholder numbering before Claude sees them; the last 3 answered turns go as history. Consent `ai_processing`, 20/hour and 100/day per dentist, one open question per thread (409 `answer_pending`), `Idempotency-Key`. Answers are `answered` / `refused` (with the reason, no Claude call when retrieval is weak) / `failed` (with a code); only verified, cited sources are returned. Answers are stored encrypted |
+| S5.7 Dashboard auth | Cookie session (`GET /sanctum/csrf-cookie`, then `POST /login`), `POST /two-factor-challenge` (TOTP or a one-time recovery code; the pending login expires after 5 min), `GET /user`, `POST /logout`. Invite links: `GET /invitations/{token}`, `POST /invitations/{token}/accept` sets the password and starts enrolment (QR URI + 8 recovery codes shown once), `POST /user/confirmed-two-factor-authentication` turns it on. The `two_factor` middleware closes every lawyer and admin route until a code was checked in this session, and refuses API tokens. Throttled 5/min per email + IP and per user + IP; 2 h idle timeout (`SESSION_LIFETIME`). TOTP is RFC 6238 in `Identity/TwoFactor/Totp.php` (tested against the RFC vectors), so no Fortify: its current version pulls in passkey/WebAuthn packages we don't use |
 
-78 tests, 280 assertions: `php artisan test`.
+90 tests, 341 assertions: `php artisan test`.
 
-Next: dashboard auth + 2FA (S5.7), lawyer and admin APIs, the knowledge-base ingestion job (S1.5), push notifications.
+Next: lawyer and admin APIs, the knowledge-base ingestion job (S1.5), push notifications.
 
 ## Run locally
 
