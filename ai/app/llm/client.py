@@ -91,6 +91,21 @@ class ClaudeClient:
             return retry
         return result
 
+    def count_tokens(self, call: LlmCall) -> int:
+        """Exact input size of a call (system + messages + output schema), for the bundle size guard."""
+        try:
+            counted = self.client.beta.messages.count_tokens(
+                model=self.model,
+                system=[{"type": "text", "text": call.system}],
+                messages=call.messages,
+                output_config={"format": {"type": "json_schema", "schema": call.schema}},
+            )
+        except (anthropic.RateLimitError, anthropic.InternalServerError, anthropic.APIConnectionError) as exc:
+            raise LlmUnavailable(type(exc).__name__) from exc
+        except anthropic.APIStatusError as exc:
+            raise LlmRequestError(f"status {exc.status_code}") from exc
+        return int(counted.input_tokens)
+
     def _once(self, call: LlmCall, max_tokens: int) -> LlmResult:
         kwargs: dict[str, Any] = {
             "model": self.model,

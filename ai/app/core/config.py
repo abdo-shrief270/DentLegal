@@ -40,6 +40,17 @@ class Prices(BaseModel):
     us_geo_multiplier: float = 1.1
 
 
+class Playbooks(BaseModel):
+    """Fixed retrieval queries per case type and claim type (config/playbooks.yaml)."""
+
+    common: list[str] = Field(default_factory=list)
+    case_type: dict[str, list[str]] = Field(default_factory=dict)
+    claim_type: dict[str, list[str]] = Field(default_factory=dict)
+
+    def queries(self, case_type: str, claim_type: str) -> list[str]:
+        return [*self.common, *self.case_type.get(case_type, []), *self.claim_type.get(claim_type, [])]
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="AI_", env_file=".env", extra="ignore")
 
@@ -62,9 +73,15 @@ class Settings(BaseSettings):
     anthropic_max_retries: int = 3
     consult_effort: Literal["low", "medium", "high", "xhigh", "max"] = "low"
     consult_max_tokens: int = 8000
+    analysis_effort: Literal["low", "medium", "high", "xhigh", "max"] = "high"
+    draft_effort: Literal["low", "medium", "high", "xhigh", "max"] = "high"
+    case_max_tokens: int = 32000
+    # Bundles above this are refused (bundle_too_large), never truncated (§5.6 size guard).
+    case_bundle_max_tokens: int = 150_000
 
     prices: Prices = Field(default_factory=Prices)
     retrieval: RetrievalParams = Field(default_factory=lambda: load_retrieval_params())
+    playbooks: Playbooks = Field(default_factory=lambda: load_playbooks())
 
     def is_test_like(self) -> bool:
         return self.env in ("local", "testing")
@@ -89,6 +106,13 @@ def load_retrieval_params(path: Path | None = None) -> RetrievalParams:
     if not path.exists():
         return RetrievalParams()
     return RetrievalParams.model_validate(yaml.safe_load(path.read_text(encoding="utf-8")) or {})
+
+
+def load_playbooks(path: Path | None = None) -> Playbooks:
+    path = path or CONFIG_DIR / "playbooks.yaml"
+    if not path.exists():
+        return Playbooks()
+    return Playbooks.model_validate(yaml.safe_load(path.read_text(encoding="utf-8")) or {})
 
 
 @lru_cache

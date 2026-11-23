@@ -42,6 +42,9 @@ return [
         'connect_timeout' => 3,
         // Long routes (analysis, draft) are called from queued jobs with their own timeout.
         'timeout' => (int) env('AI_SERVICE_TIMEOUT', 30),
+        'consult_timeout' => 90,
+        // Analysis and draft run with effort high and up to 32k output tokens, plus one repair call (§5.6).
+        'case_timeout' => (int) env('AI_SERVICE_CASE_TIMEOUT', 600),
         'retries' => 2,
     ],
 

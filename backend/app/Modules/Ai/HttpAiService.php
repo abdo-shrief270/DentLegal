@@ -40,6 +40,23 @@ final class HttpAiService implements AiService
         return new MaskedTexts($body['masked'], $body['entity_counts'] ?? [], $body['placeholder_state'] ?? []);
     }
 
+    public function consult(string $maskedQuestion, array $history = []): array
+    {
+        return $this->post('/v1/consult', ['question' => $maskedQuestion, 'history' => $history], (int) config('dentlegal.ai_service.consult_timeout'));
+    }
+
+    public function analyzeCase(array $case, array $documents): array
+    {
+        return $this->post('/v1/case/analyze', ['case' => $case, 'documents' => $documents], (int) config('dentlegal.ai_service.case_timeout'));
+    }
+
+    public function draftCase(array $case, array $documents, array $analysis, array $sourceChunkIds): array
+    {
+        return $this->post('/v1/case/draft', [
+            'case' => $case, 'documents' => $documents, 'analysis' => $analysis, 'source_chunk_ids' => $sourceChunkIds,
+        ], (int) config('dentlegal.ai_service.case_timeout'));
+    }
+
     public function health(): array
     {
         /** @var array{status: string, models: array<string, bool>, db: bool} $body */
@@ -52,23 +69,23 @@ final class HttpAiService implements AiService
      * @param  array<string, mixed>  $payload
      * @return array<string, mixed>
      */
-    private function post(string $path, array $payload): array
+    private function post(string $path, array $payload, ?int $timeout = null): array
     {
-        return $this->send(fn (PendingRequest $r): Response => $r->post($path, $payload));
+        return $this->send(fn (PendingRequest $r): Response => $r->post($path, $payload), $timeout);
     }
 
     /**
      * @param  callable(PendingRequest): Response  $call
      * @return array<string, mixed>
      */
-    private function send(callable $call): array
+    private function send(callable $call, ?int $timeout = null): array
     {
         $cfg = config('dentlegal.ai_service');
         $request = Http::baseUrl((string) $cfg['url'])
             ->withHeaders(['X-Service-Token' => (string) $cfg['token']])
             ->acceptJson()
             ->connectTimeout($cfg['connect_timeout'])
-            ->timeout($cfg['timeout'])
+            ->timeout($timeout ?? $cfg['timeout'])
             ->retry(
                 $cfg['retries'] + 1,
                 fn (int $attempt): int => 200 * 2 ** ($attempt - 1),

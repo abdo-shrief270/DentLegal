@@ -10,8 +10,11 @@ from pydantic import BaseModel, Field
 from app.core.container import Container
 from app.core.errors import ServiceError
 from app.core.security import require_service_token
+from app.llm.case import CaseFacts, CaseService
 from app.llm.client import LlmRequestError, LlmUnavailable
 from app.llm.consult import ConsultService, HistoryTurn
+from app.llm.context import DocPage, DocumentEntry
+from app.llm.schemas import CaseAnalysis
 from app.masking.masker import DentistIdentity, MaskingError, PlaceholderState
 from app.retrieval.hybrid import HybridRetriever
 from app.retrieval.repository import ChunkRepository
@@ -133,3 +136,92 @@ def consult(body: ConsultIn, c: C) -> dict[str, Any]:
         raise ServiceError(503, "ai_unavailable", str(exc), retryable=True) from exc
     except LlmRequestError as exc:
         raise ServiceError(502, "ai_request_rejected", str(exc)) from exc
+
+
+# --- cases ------------------------------------------------------------------------------------------------------------
+
+
+class CaseIn(BaseModel):
+    case_type: str = Field(pattern=r"^(complaint|official_notice|sharia_board|preventive)$")
+    claim_type: str = Field(pattern=r"^(compensation|disciplinary|unknown)$")
+    authority: str = Field(max_length=200)
+    complaint_no: str = Field(max_length=60)
+    received_on: str = Field(max_length=10)
+    title: str = Field(max_length=160)
+    procedure: str = Field(max_length=200)
+    procedure_date: str = Field(max_length=10)
+    patient_code: str = Field(max_length=30)
+    facts: str = Field(min_length=20, max_length=8000)  # masked
+
+
+class PageIn(BaseModel):
+    page_no: int = Field(ge=1, le=500)
+    document_page_id: str = Field(max_length=64)
+    text: str = Field(max_length=40_000)  # masked
+
+
+class DocumentIn(BaseModel):
+    document_id: str = Field(max_length=64)
+    kind: str = Field(max_length=32)
+    name: str = Field(max_length=200)
+    ocr_confidence: float | None = Field(default=None, ge=0, le=1)
+    pages: list[PageIn] = Field(max_length=50)
+
+
+class AnalyzeIn(BaseModel):
+    case: CaseIn
+    documents: list[DocumentIn] = Field(max_length=15)
+
+
+class DraftIn(AnalyzeIn):
+    analysis: CaseAnalysis  # the `raw` analysis returned by /v1/case/analyze
+    # Empty when the analysis found no relevant sources; legal claims in the draft are then flagged «غير مسند».
+    source_chunk_ids: list[int] = Field(max_length=30)
+
+
+def _case_inputs(body: AnalyzeIn) -> tuple[CaseFacts, list[DocumentEntry]]:
+    docs = [
+        DocumentEntry(
+            ref=f"D{i}",
+            document_id=d.document_id,
+            kind=d.kind,
+            name=d.name,
+            pages=tuple(DocPage(p.page_no, p.document_page_id, p.text) for p in sorted(d.pages, key=lambda p: p.page_no)),
+            ocr_confidence=d.ocr_confidence,
+        )
+        for i, d in enumerate(body.documents, start=1)
+    ]
+    return CaseFacts(**body.case.model_dump()), docs
+
+
+def _case_service(c: Container, conn: Any) -> CaseService:
+    repo = ChunkRepository(conn)
+    return CaseService(HybridRetriever(repo, c.embedder, c.reranker, c.settings.retrieval), repo, c.claude, c.masker, c.settings)
+
+
+def _run_case(fn: Any) -> dict[str, Any]:
+    try:
+        result: dict[str, Any] = fn()
+        return result
+    except MaskingError as exc:
+        raise ServiceError(503, "masking_failed", str(exc), retryable=True) from exc
+    except LlmUnavailable as exc:
+        raise ServiceError(503, "ai_unavailable", str(exc), retryable=True) from exc
+    except LlmRequestError as exc:
+        raise ServiceError(502, "ai_request_rejected", str(exc)) from exc
+
+
+@router.post("/case/analyze", dependencies=[Auth])
+def case_analyze(body: AnalyzeIn, c: C) -> dict[str, Any]:
+    """Masked case bundle → analysis with verified citations; returns the source chunk ids for the draft call."""
+    case, docs = _case_inputs(body)
+    with c.pool.connection() as conn:
+        return _run_case(lambda: _case_service(c, conn).analyze(case, docs))
+
+
+@router.post("/case/draft", dependencies=[Auth])
+def case_draft(body: DraftIn, c: C) -> dict[str, Any]:
+    """Masked case bundle + analysis → formal draft (أولًا/ثانيًا/ثالثًا) with verified citations."""
+    case, docs = _case_inputs(body)
+    with c.pool.connection() as conn:
+        return _run_case(lambda: _case_service(c, conn).draft(case, docs, body.analysis, body.source_chunk_ids))

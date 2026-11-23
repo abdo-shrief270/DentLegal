@@ -51,16 +51,31 @@ class HybridRetriever:
         self._p = params
 
     def retrieve(self, masked_query: str, top_k: int, source_codes: list[str] | None = None) -> RetrievalResult:
+        return self.retrieve_many([masked_query], masked_query, top_k, source_codes)
+
+    def retrieve_many(self, queries: list[str], rerank_query: str, top_k: int, source_codes: list[str] | None = None) -> RetrievalResult:
+        """Several queries (case facts, complaint letter, playbook) fused into one ranking, reranked against `rerank_query`."""
         p = self._p
-        q_search = search_text(masked_query)
-        refs = find_article_refs(masked_query)
+        queries = [q for q in queries if q.strip()]
+        refs = [r for q in queries for r in find_article_refs(q)]
+        refs = list(dict.fromkeys(refs))
 
         explicit = self._repo.by_article(refs, source_codes)
-        dense = self._repo.dense(self._embedder.embed([masked_query])[0], p.k_dense, p.hnsw_ef_search, source_codes)
-        sparse = self._repo.sparse(q_search, p.k_sparse, source_codes)
-        rankings = [dense, sparse]
-        if len(sparse) < p.trigram_min_hits:
-            rankings.append(self._repo.trigram(q_search, p.k_sparse, p.trigram_threshold, source_codes))
+        vectors = self._embedder.embed(queries)
+        dense_by_query: list[list[int]] = []
+        sparse_by_query: list[list[int]] = []
+        rankings: list[list[int]] = []
+        for query, vector in zip(queries, vectors, strict=True):
+            q_search = search_text(query)
+            dense_q = self._repo.dense(vector, p.k_dense, p.hnsw_ef_search, source_codes)
+            sparse_q = self._repo.sparse(q_search, p.k_sparse, source_codes)
+            dense_by_query.append(dense_q)
+            sparse_by_query.append(sparse_q)
+            rankings += [dense_q, sparse_q]
+            if len(sparse_q) < p.trigram_min_hits:
+                rankings.append(self._repo.trigram(q_search, p.k_sparse, p.trigram_threshold, source_codes))
+        dense = _best_ranks(dense_by_query)
+        sparse = _best_ranks(sparse_by_query)
 
         fused = rrf(rankings, p.rrf_k)
         for chunk_id in explicit:
@@ -75,10 +90,10 @@ class HybridRetriever:
         rows = self._repo.fetch(candidates)
         candidates = [cid for cid in candidates if cid in rows]
         passages = [" › ".join([rows[c].source_title, *rows[c].heading_path]) + "\n" + rows[c].display_text for c in candidates]
-        scores = self._reranker.score(masked_query, passages)
+        scores = self._reranker.score(rerank_query, passages)
 
-        dense_rank = {cid: i for i, cid in enumerate(dense, start=1)}
-        sparse_rank = {cid: i for i, cid in enumerate(sparse, start=1)}
+        dense_rank = dense
+        sparse_rank = sparse
         explicit_set = set(explicit)
         ranked = sorted(zip(candidates, scores, strict=True), key=lambda cs: (-cs[1], cs[0]))
         score_of = dict(ranked)
@@ -110,3 +125,12 @@ class HybridRetriever:
                 "tau_answer": p.tau_answer,
             },
         )
+
+
+def _best_ranks(rankings: list[list[int]]) -> dict[int, int]:
+    """For logging: a chunk's best (lowest) rank across the queries."""
+    best: dict[int, int] = {}
+    for ranking in rankings:
+        for rank, cid in enumerate(ranking, start=1):
+            best[cid] = min(best.get(cid, rank), rank)
+    return best

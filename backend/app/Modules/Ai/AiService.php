@@ -28,6 +28,34 @@ interface AiService
      */
     public function mask(array $texts, array $allowlist = [], ?array $placeholderState = null, ?array $dentist = null): MaskedTexts;
 
+    /**
+     * Consultant answer for a masked question (+ the last turns), with verified citations and run metadata.
+     *
+     * @param  list<array{question: string, answer: string}>  $history
+     * @return array<string, mixed> {status, answer, sources, run}
+     */
+    public function consult(string $maskedQuestion, array $history = []): array;
+
+    /**
+     * Case analysis from a masked bundle. Long-running: call from a queued job.
+     *
+     * @param  array<string, mixed>  $case  masked case fields (facts already masked)
+     * @param  list<array<string, mixed>>  $documents  masked documents with pages
+     * @return array<string, mixed> {status, analysis, sources, source_chunk_ids, run}
+     */
+    public function analyzeCase(array $case, array $documents): array;
+
+    /**
+     * Formal draft from the same bundle plus the analysis (its `raw` form) and the analysis's source chunk ids.
+     *
+     * @param  array<string, mixed>  $case
+     * @param  list<array<string, mixed>>  $documents
+     * @param  array<string, mixed>  $analysis
+     * @param  list<int>  $sourceChunkIds
+     * @return array<string, mixed> {status, draft, sources, run}
+     */
+    public function draftCase(array $case, array $documents, array $analysis, array $sourceChunkIds): array;
+
     /** @return array{status: string, models: array<string, bool>, db: bool} */
     public function health(): array;
 }

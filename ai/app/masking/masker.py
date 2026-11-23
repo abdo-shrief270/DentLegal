@@ -40,6 +40,7 @@ LABELS: list[tuple[str, re.Pattern[str]]] = [
     ("ADDRESS", re.compile(r"(?:العنوان|Address)\s*[:：]?\s*([^\n؛;]{3,80})", re.IGNORECASE)),
 ]
 
+_NUMBERED = re.compile(r"\[(ID|PHONE|EMAIL|IBAN|MRN|PASSPORT|PERSON|ADDRESS)_(\d+)\]")
 PLACEHOLDER = re.compile(r"\[(?:PATIENT|DOB|(?:ID|PHONE|EMAIL|IBAN|MRN|PASSPORT|PERSON|ADDRESS)_\d+)\]|\{\{DENTIST_(?:NAME|LICENSE)\}\}")
 
 
@@ -62,6 +63,14 @@ class PlaceholderState:
 
     def to_dict(self) -> dict[str, Any]:
         return {"counters": dict(self.counters), "values": dict(self.values)}
+
+    @classmethod
+    def continuing(cls, texts: list[str]) -> PlaceholderState:
+        """For a residual pass over already-masked text: new numbers start after the highest one present."""
+        state = cls()
+        for kind, number in _NUMBERED.findall("\n".join(texts)):
+            state.counters[kind] = max(state.counters.get(kind, 0), int(number))
+        return state
 
 
 @dataclass(frozen=True)

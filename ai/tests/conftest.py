@@ -86,6 +86,7 @@ def settings(db_url: str) -> Settings:
 
 # --- fake Claude -------------------------------------------------------------------------------------------------
 
+DOC_RE = re.compile(r'<case_document id="(D\d+)"[^>]*>\n(.*?)\n</case_document>', re.DOTALL)
 SOURCE_RE = re.compile(r'<source id="(S\d+)"[^>]*>\n(.*?)\n</source>', re.DOTALL)
 
 
@@ -93,6 +94,12 @@ def sources_in(kwargs: dict[str, Any]) -> dict[str, str]:
     first = kwargs["messages"][0]["content"]
     text = "\n".join(part["text"] for part in first)
     return {m.group(1): m.group(2) for m in SOURCE_RE.finditer(text)}
+
+
+def docs_in(kwargs: dict[str, Any]) -> dict[str, str]:
+    """Document text per ref, without the [صفحة n] markers."""
+    text = "\n".join(part["text"] for part in kwargs["messages"][0]["content"])
+    return {m.group(1): re.sub(r"\[صفحة \d+\]\n", "", m.group(2)) for m in DOC_RE.finditer(text)}
 
 
 def message(
@@ -141,10 +148,16 @@ class FakeStream:
 class FakeAnthropic:
     """Same surface as anthropic.Anthropic for beta.messages.stream. `responder(kwargs, call_no)` builds each reply."""
 
-    def __init__(self, responder: Any) -> None:
+    def __init__(self, responder: Any, token_count: int = 5000) -> None:
         self.calls: list[dict[str, Any]] = []
+        self.counted: list[dict[str, Any]] = []
         self._responder = responder
-        self.beta = SimpleNamespace(messages=SimpleNamespace(stream=self._stream))
+        self._token_count = token_count
+        self.beta = SimpleNamespace(messages=SimpleNamespace(stream=self._stream, count_tokens=self._count))
+
+    def _count(self, **kwargs: Any) -> SimpleNamespace:
+        self.counted.append(kwargs)
+        return SimpleNamespace(input_tokens=self._token_count)
 
     def _stream(self, **kwargs: Any) -> FakeStream:
         self.calls.append(kwargs)

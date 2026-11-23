@@ -41,9 +41,9 @@ Each module keeps `Models`, `Enums`, `Actions` (one class per business operation
 | S3.1 Case API | Create, list (cursor pagination, status filter), show; 6-state machine with 409 on invalid transitions; atomic yearly codes; typed facts pattern-masked before storage and encrypted at rest |
 | S1.4 KB schema | `knowledge_*` tables, HNSW / GIN / trigram partial indexes on active chunks, generated Arabic `tsvector`, one active version per source, active chunks must be embedded |
 | S1.5 (Laravel side) | Publish archives the previous version and switches chunks in one transaction |
-| ai-svc client | `AiService` port + HTTP adapter (service token, timeouts, retries on 5xx/connection errors only) |
+| ai-svc client | `AiService` port + HTTP adapter: retrieve, mask, consult, analyzeCase, draftCase (service token, per-route timeouts, retries on 5xx/connection errors only) |
 
-55 tests, 173 assertions: `php artisan test`.
+57 tests, 178 assertions: `php artisan test`.
 
 Next: documents and uploads (S3.2), the analysis pipeline jobs (S3.8), consultations (S2.6), dashboard auth + 2FA (S5.7), lawyer and admin APIs, and ai-svc itself.
 

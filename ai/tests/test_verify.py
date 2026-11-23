@@ -1,17 +1,17 @@
-from app.llm.context import SourceEntry
-from app.llm.schemas import Cite, Para
-from app.verify.citations import check_quote, verify
+from app.llm.context import Manifest, SourceEntry
+from app.llm.schemas import Cite
+from app.verify.citations import Claim, check_quote, verify
 
 A19 = "لا يجوز إجراء أي عمل طبي لمريض إلا برضاه أو بموافقة من يمثله، ويجب أن يكون الرضا مبنيًا على شرح واضح."
 A21 = "يجب على الممارس الصحي أن يحافظ على الأسرار التي علم بها عن طريق مهنته."
-MANIFEST = {
+MANIFEST: Manifest = {
     "S1": SourceEntry("S1", 412, "المادة 19", "نظام مزاولة المهن الصحية", 19, None, A19),
     "S2": SourceEntry("S2", 415, "المادة 21", "نظام مزاولة المهن الصحية", 21, None, A21),
 }
 
 
-def para(text: str, *cites: tuple[str, str], legal: bool = True) -> Para:
-    return Para(text=text, legal_claim=legal, citations=[Cite(ref=r, quote=q) for r, q in cites])
+def para(text: str, *cites: tuple[str, str], legal: bool = True) -> Claim:
+    return Claim(text, legal, [Cite(ref=r, quote=q) for r, q in cites])
 
 
 def test_exact_and_fuzzy_quotes() -> None:

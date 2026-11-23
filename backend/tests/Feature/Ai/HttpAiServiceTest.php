@@ -65,4 +65,31 @@ class HttpAiServiceTest extends TestCase
         $this->expectException(AiServiceException::class);
         app(AiService::class)->mask(['نص أول', 'نص ثان']);
     }
+
+    public function test_case_routes_post_the_bundle_with_the_long_timeout(): void
+    {
+        Http::fake([
+            'ai-svc.test/v1/case/analyze' => Http::response(['status' => 'ok', 'analysis' => ['position_strength' => 72], 'source_chunk_ids' => [412, 415]]),
+            'ai-svc.test/v1/case/draft' => Http::response(['status' => 'ok', 'draft' => ['title' => 'إفادة']]),
+        ]);
+        $case = ['case_type' => 'complaint', 'facts' => 'وقائع مقنّعة تجريبية'];
+        $docs = [['document_id' => 'd1', 'kind' => 'complaint_letter', 'name' => 'خطاب', 'pages' => []]];
+
+        $analysis = app(AiService::class)->analyzeCase($case, $docs);
+        $draft = app(AiService::class)->draftCase($case, $docs, ['position_strength' => 72], $analysis['source_chunk_ids']);
+
+        $this->assertSame([412, 415], $analysis['source_chunk_ids']);
+        $this->assertSame('إفادة', $draft['draft']['title']);
+        Http::assertSent(fn (Request $r) => str_ends_with($r->url(), '/v1/case/draft') && $r['source_chunk_ids'] === [412, 415]);
+    }
+
+    public function test_consult_sends_the_question_and_history(): void
+    {
+        Http::fake(['ai-svc.test/v1/consult' => Http::response(['status' => 'answered', 'answer' => ['paragraphs' => []]])]);
+
+        $result = app(AiService::class)->consult('سؤال مقنّع', [['question' => 'سابق', 'answer' => 'جواب']]);
+
+        $this->assertSame('answered', $result['status']);
+        Http::assertSent(fn (Request $r) => $r['question'] === 'سؤال مقنّع' && count($r['history']) === 1);
+    }
 }

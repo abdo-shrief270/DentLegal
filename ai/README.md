@@ -10,7 +10,9 @@ The Python service behind DentLegal's AI (PROJECT1_PLAN.md §2.3 D1, §5). Larav
 | `POST /v1/mask` | Full PII masking with per-case placeholder numbering (state holds keyed hashes, never values) | Built (NER pluggable, CAMeL in production) |
 | `POST /v1/retrieve` | Hybrid retrieval: explicit article refs + pgvector + Arabic full text (+ trigram), RRF, parent articles, rerank, refusal gate | Built |
 | `POST /v1/consult` | Consultant answer: retrieval → refusal gate → Claude (ConsultAnswer schema) → validation → citation verification → one repair call | Built |
-| `POST /v1/extract`, `/v1/case/analyze`, `/v1/case/draft`, `/v1/kb/ingest` | OCR, case analysis, draft, source ingestion | Next (S3.3, S3.6, S3.7, S1.3/S1.5) |
+| `POST /v1/case/analyze` | Case analysis: multi-query retrieval (facts, complaint letter, per-case-type playbook) → bundle with documents → size guard → Claude (CaseAnalysis) → verification of source and document citations → one repair call | Built |
+| `POST /v1/case/draft` | Formal draft (أولًا الوقائع / ثانيًا الدفوع / ثالثًا الطلبات) from the same bundle, the analysis and the analysis's own sources; legal claims need a source | Built |
+| `POST /v1/extract`, `/v1/kb/ingest` | OCR of case documents, source ingestion (parse, chunk, embed) | Next (S3.3, S1.3/S1.5) |
 
 Request and response shapes match `backend/app/Modules/Ai/` (the Laravel client).
 
@@ -24,6 +26,16 @@ Request and response shapes match `backend/app/Modules/Ai/` (the Laravel client)
 6. **Verification:** each citation's ref must be in this run's manifest and its quote must appear in that source (exact after normalisation, else fuzzy ≥ 92); legal claims need a valid source; an article named in the text must be cited. Below 90% validity or any invented ref, one repair call is made with the problems listed.
 7. **Response:** paragraphs with each citation mapped to a `chunk_id` and its verification, the sources with their scores, and run metadata for `ai_runs` (tokens, cost, latency, model served, fallback, request id).
 
+## How a case analysis and draft are made
+
+1. **Residual PII guard** over the facts and every document page; new placeholders continue the numbering already in the text (`[PHONE_2]` after `[PHONE_1]`).
+2. **Retrieval** with several queries fused into one ranking: the case summary, the first 1,500 characters of the complaint letter, and the playbook queries for the case type and claim type (`config/playbooks.yaml`, to be reviewed with the lawyer in W4). Reranked against the case summary; up to 15 sources.
+3. **Bundle:** `<sources>`, `<case>` fields and `<case_document id="D1" kind=… pages=… ocr_confidence=…>` with page markers. Everything is escaped.
+4. **Size guard:** large bundles are token-counted with the API and refused above 150k tokens (`bundle_too_large`), never truncated.
+5. **Claude** with effort `high`, up to 32k output tokens, same request shape as the consultant.
+6. **Verification:** document citations resolve to the page the quote is on (`document_page_id`). Analysis points may rest on a document alone; draft paragraphs with `legal_claim` need a source. One repair call when the gate fails.
+7. **Analysis** returns `source_chunk_ids`; the **draft** call passes them back so the draft sees the same sources under the same S refs as the analysis it builds on. `sources_sufficient` is false when retrieval found too little, whatever the model said.
+
 Logs are JSON and never contain questions, sources, prompts or answers (a redaction processor plus a test).
 
 ## Layout
@@ -34,11 +46,12 @@ app/
   text/        display_text / search_text normalisation, Arabic ordinals, explicit article references
   masking/     PII masker (7 layers, fail-closed), NER port (CAMeL in production)
   retrieval/   embedder/reranker ports (BGE in production), SQL repository, hybrid retrieval + RRF + gate
-  llm/         schemas v1, prompts (versioned), source blocks + manifest, Claude client, consult service
+  llm/         schemas v1, prompts (versioned), source/document blocks + manifest, Claude client, shared runner, consult and case services
   verify/      citation verification
   routes/      /v1 endpoints
 config/retrieval.yaml   retrieval thresholds (calibrated in S2.2 and S8.3)
-tests/                  51 tests: unit + Postgres/pgvector + API with a fake Claude client
+config/playbooks.yaml   fixed retrieval queries per case type and claim type
+tests/                  62 tests: unit + Postgres/pgvector + API with a fake Claude client
 ```
 
 ## Run locally

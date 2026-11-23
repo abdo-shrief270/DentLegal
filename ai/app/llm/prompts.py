@@ -25,8 +25,30 @@ CONSULT_TASK = """Task: answer the dentist's question in <question>.
 CONSULT_PROMPT_VERSION = "consult-v1"
 CONSULT_SYSTEM = COMMON_RULES + "\n\n" + CONSULT_TASK
 
+CASE_ANALYSIS_TASK = """Task: assess the dentist's position in the case in <case>, using the case documents (D1, D2, ...) and the sources (S1, S2, ...).
+- position_strength is 0 to 100: 80 or more means the documentation strongly rebuts the claim; 50 to 79 means a defensible position with gaps; below 50 means significant exposure.
+- risk_level reflects the likely legal path, for example whether a private-right claim makes referral to the الهيئة الصحية الشرعية likely.
+- summary: 3 to 5 sentences.
+- strengths and weaknesses: short points; each cites sources and/or case documents. Give each weakness a severity.
+- recommended_actions: concrete steps for the dentist, each with an urgency (urgent, before_hearing, normal) and citations where a source requires the step.
+- missing_information: facts or documents that would change the assessment. List them instead of assuming facts.
+- sources_sufficient: false if the sources don't cover the main legal questions of this case; then say so in the summary instead of guessing."""
+
+CASE_DRAFT_TASK = """Task: draft the dentist's formal written statement (إفادة / رد) to the authority named in <case>, based on the case documents, the sources and the analysis in <analysis>.
+Structure: title; addressee; salutation; an intro paragraph; exactly three sections in this order: «أولًا: الوقائع» (kind facts), «ثانيًا: الدفوع» (kind defenses), «ثالثًا: الطلبات» (kind requests); closing; attachments list (names of the case documents to attach).
+- Use only facts present in the case file. Facts that are missing go to unsupported_points, never into the text.
+- Disclose patient information only to the extent necessary for the defence. Refer to the patient by [PATIENT] or the patient code.
+- Avoid statements that concede liability. If the file seems to establish a fault, do not argue against the evidence; note it in unsupported_points for the lawyer.
+- Mark every paragraph that makes a legal claim with legal_claim=true and cite at least one source (S…). Cite case documents (D…) for facts.
+- Write as the dentist ({{DENTIST_NAME}}, licence {{DENTIST_LICENSE}}) in a formal, respectful tone."""
+
+CASE_ANALYSIS_PROMPT_VERSION = "case-analysis-v1"
+CASE_DRAFT_PROMPT_VERSION = "case-draft-v1"
+CASE_ANALYSIS_SYSTEM = COMMON_RULES + "\n\n" + CASE_ANALYSIS_TASK
+CASE_DRAFT_SYSTEM = COMMON_RULES + "\n\n" + CASE_DRAFT_TASK
+
 REFUSAL_TEXT = "لا تتوفر لديّ مصادر نظامية كافية للإجابة عن هذا السؤال بدقة. ننصحك بالرجوع إلى محامٍ مرخّص."
 
-REPAIR_INSTRUCTION = """Some citations in your previous answer failed verification against the sources:
+REPAIR_INSTRUCTION = """Some citations in your previous output failed verification against the provided texts:
 {problems}
-Return the full answer again as JSON in the same schema. Fix each listed citation: use a source id that is present, and copy the quote exactly from that source. If a statement has no supporting source, remove the statement or set legal_claim=false."""
+Return the full output again as JSON in the same schema. Fix each listed citation: use an id that is present (S… for sources, D… for case documents), and copy the quote exactly from that text. If a statement has no supporting text, remove it, or for drafts move it to unsupported_points."""
