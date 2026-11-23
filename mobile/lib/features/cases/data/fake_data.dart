@@ -168,6 +168,7 @@ List<DentalCase> seedCases(DateTime now) => [
 
 CaseAnalysis analysisFor(DentalCase c) => CaseAnalysis(
   caseId: c.id,
+  id: 'analysis-${c.id}',
   positionStrength: c.positionStrength ?? 70,
   risk: c.risk ?? RiskLevel.medium,
   summary: 'الموقف الدفاعي جيد بشكل عام: توجد موافقة مستنيرة موقّعة تذكر خطر التنميل، وتخطيط بالأشعة المقطعية قبل الإجراء، ومتابعة وإحالة سريعة. نقطة الضعف الرئيسية هي غياب تعليمات ما بعد العملية الموقعة. ولأن الشكوى تتضمن مطالبة بالحق الخاص، يُرجَّح رفعها إلى الهيئة الصحية الشرعية.',
@@ -201,6 +202,7 @@ CaseDraft draftFor(DentalCase c, {required String dentistName, required String? 
   final license = licenseNo == null ? '' : '، المسجل لدى الهيئة السعودية للتخصصات الصحية برقم (${ltr(licenseNo)})';
   return CaseDraft(
     caseId: c.id,
+    versionId: '${c.id}-v${approved ? 2 : 1}',
     versionNo: approved ? 2 : 1,
     byLawyer: approved,
     title: 'إفادة الممارس الصحي بشأن الشكوى رقم ${c.complaintNo}',

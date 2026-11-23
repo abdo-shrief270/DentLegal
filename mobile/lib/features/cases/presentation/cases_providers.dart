@@ -1,14 +1,19 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../auth/presentation/auth_controller.dart';
+import '../../../core/api/api_config.dart';
+import '../../../core/api/api_providers.dart';
 import '../data/fake_cases_repository.dart';
+import '../data/http_cases_repository.dart';
 import '../domain/case_models.dart';
 import '../domain/cases_repository.dart';
 
 part 'cases_providers.g.dart';
 
 @Riverpod(keepAlive: true)
-CasesRepository casesRepository(Ref ref) => FakeCasesRepository(currentProfile: () => ref.read(authControllerProvider)?.profile);
+CasesRepository casesRepository(Ref ref) => ApiConfig.useRealApi
+    ? HttpCasesRepository(ref.watch(apiClientProvider))
+    : FakeCasesRepository(currentProfile: () => ref.read(authControllerProvider)?.profile);
 
 @riverpod
 Future<List<DentalCase>> casesList(Ref ref) => ref.watch(casesRepositoryProvider).listCases();
@@ -26,7 +31,7 @@ Future<CaseDraft> caseDraft(Ref ref, String id) => ref.watch(casesRepositoryProv
 Stream<PipelineProgress> casePipeline(Ref ref, String id) => ref.watch(casesRepositoryProvider).watchPipeline(id);
 
 @riverpod
-Future<RegulationSource> regulationSource(Ref ref, String sourceRef) => ref.watch(casesRepositoryProvider).getSource(sourceRef);
+Future<RegulationSource> regulationSource(Ref ref, Citation citation) => ref.watch(casesRepositoryProvider).getSource(citation);
 
 /// Refresh every case view after a change (create, analysis finished, submit).
 void invalidateCases(Ref ref, String caseId) {

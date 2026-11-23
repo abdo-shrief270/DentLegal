@@ -9,6 +9,7 @@ use App\Modules\Identity\Models\User;
 use App\Modules\Pipeline\Actions\StartAnalysis;
 use App\Modules\Pipeline\Models\Analysis;
 use App\Modules\Pipeline\Models\PipelineJob;
+use App\Modules\Pipeline\Support\RunSources;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -58,6 +59,8 @@ final class AnalysisController
             'id' => $analysis->id,
             ...$result,
             'needs_attention' => $analysis->needs_attention,
+            // The «المصادر» list and the chips' targets: the run's sources under the refs the citations use.
+            'sources' => collect(RunSources::for($analysis->ai_run_id))->map(fn (array $s, string $ref): array => ['ref' => $ref, ...$s])->values(),
             'created_at' => $analysis->created_at->toIso8601ZuluString(),
         ]]);
     }

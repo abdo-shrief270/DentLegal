@@ -42,7 +42,7 @@ final class CasesRepositoryProvider extends $FunctionalProvider<CasesRepository,
   }
 }
 
-String _$casesRepositoryHash() => r'c2bdf8a742bbf146214fb38c5d37ed8e65efaaa4';
+String _$casesRepositoryHash() => r'4f1e58f090a9d0cc5f444d657b8cd6e90e1619f1';
 
 @ProviderFor(casesList)
 final casesListProvider = CasesListProvider._();
@@ -272,7 +272,7 @@ final regulationSourceProvider = RegulationSourceFamily._();
 
 final class RegulationSourceProvider extends $FunctionalProvider<AsyncValue<RegulationSource>, RegulationSource, FutureOr<RegulationSource>>
     with $FutureModifier<RegulationSource>, $FutureProvider<RegulationSource> {
-  RegulationSourceProvider._({required RegulationSourceFamily super.from, required String super.argument})
+  RegulationSourceProvider._({required RegulationSourceFamily super.from, required Citation super.argument})
     : super(retry: null, name: r'regulationSourceProvider', isAutoDispose: true, dependencies: null, $allTransitiveDependencies: null);
 
   @override
@@ -291,7 +291,7 @@ final class RegulationSourceProvider extends $FunctionalProvider<AsyncValue<Regu
 
   @override
   FutureOr<RegulationSource> create(Ref ref) {
-    final argument = this.argument as String;
+    final argument = this.argument as Citation;
     return regulationSource(ref, argument);
   }
 
@@ -306,12 +306,12 @@ final class RegulationSourceProvider extends $FunctionalProvider<AsyncValue<Regu
   }
 }
 
-String _$regulationSourceHash() => r'790be55a0f4b2ec6eaad78bc00acf9120764a61c';
+String _$regulationSourceHash() => r'68a74e5d4b46a64b39401ea3c5db26e86b87a023';
 
-final class RegulationSourceFamily extends $Family with $FunctionalFamilyOverride<FutureOr<RegulationSource>, String> {
+final class RegulationSourceFamily extends $Family with $FunctionalFamilyOverride<FutureOr<RegulationSource>, Citation> {
   RegulationSourceFamily._() : super(retry: null, name: r'regulationSourceProvider', dependencies: null, $allTransitiveDependencies: null, isAutoDispose: true);
 
-  RegulationSourceProvider call(String sourceRef) => RegulationSourceProvider._(argument: sourceRef, from: this);
+  RegulationSourceProvider call(Citation citation) => RegulationSourceProvider._(argument: citation, from: this);
 
   @override
   String toString() => r'regulationSourceProvider';

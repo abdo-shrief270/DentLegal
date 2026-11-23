@@ -31,6 +31,8 @@ class _DraftPageState extends ConsumerState<DraftPage> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('أُرسلت المسودة للمراجعة القانونية. سنُشعرك فور اعتمادها.')));
       context.go('/cases/${widget.caseId}');
+    } on Object catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
@@ -56,8 +58,7 @@ class _DraftPageState extends ConsumerState<DraftPage> {
             const SizedBox(height: 8),
             Center(
               child: RatingRow(
-                onRate: (useful, comment) =>
-                    ref.read(caseActionsProvider.notifier).rate(RatingTarget.draft, '${widget.caseId}-v${draft.versionNo}', useful: useful, comment: comment),
+                onRate: (useful, comment) => ref.read(caseActionsProvider.notifier).rate(RatingTarget.draft, draft.versionId, useful: useful, comment: comment),
               ),
             ),
           ],

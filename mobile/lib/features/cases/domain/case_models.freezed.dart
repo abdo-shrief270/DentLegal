@@ -15,7 +15,8 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$CaseDocument {
 
- String get id; String get ref; String get name; DocumentKind get kind; int get pages; String get sizeLabel; bool get isImage; bool get lowQuality;
+ String get id; String get ref; String get name; DocumentKind get kind; int get pages; String get sizeLabel; bool get isImage; bool get lowQuality;/// The picked file on the device, until it is uploaded (real API mode).
+ String? get localPath; String? get mime;
 /// Create a copy of CaseDocument
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -27,20 +28,20 @@ $CaseDocumentCopyWith<CaseDocument> get copyWith => _$CaseDocumentCopyWithImpl<C
 @override
 bool operator ==(Object other) {
   final _this = this as CaseDocument;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CaseDocument&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.ref, _this.ref) || other.ref == _this.ref)&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.kind, _this.kind) || other.kind == _this.kind)&&(identical(other.pages, _this.pages) || other.pages == _this.pages)&&(identical(other.sizeLabel, _this.sizeLabel) || other.sizeLabel == _this.sizeLabel)&&(identical(other.isImage, _this.isImage) || other.isImage == _this.isImage)&&(identical(other.lowQuality, _this.lowQuality) || other.lowQuality == _this.lowQuality));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CaseDocument&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.ref, _this.ref) || other.ref == _this.ref)&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.kind, _this.kind) || other.kind == _this.kind)&&(identical(other.pages, _this.pages) || other.pages == _this.pages)&&(identical(other.sizeLabel, _this.sizeLabel) || other.sizeLabel == _this.sizeLabel)&&(identical(other.isImage, _this.isImage) || other.isImage == _this.isImage)&&(identical(other.lowQuality, _this.lowQuality) || other.lowQuality == _this.lowQuality)&&(identical(other.localPath, _this.localPath) || other.localPath == _this.localPath)&&(identical(other.mime, _this.mime) || other.mime == _this.mime));
 }
 
 
 @override
 int get hashCode {
   final _this = this as CaseDocument;
-  return Object.hash(runtimeType,_this.id,_this.ref,_this.name,_this.kind,_this.pages,_this.sizeLabel,_this.isImage,_this.lowQuality);
+  return Object.hash(runtimeType,_this.id,_this.ref,_this.name,_this.kind,_this.pages,_this.sizeLabel,_this.isImage,_this.lowQuality,_this.localPath,_this.mime);
 }
 
 @override
 String toString() {
   final _this = this as CaseDocument;
-  return 'CaseDocument(id: ${_this.id}, ref: ${_this.ref}, name: ${_this.name}, kind: ${_this.kind}, pages: ${_this.pages}, sizeLabel: ${_this.sizeLabel}, isImage: ${_this.isImage}, lowQuality: ${_this.lowQuality})';
+  return 'CaseDocument(id: ${_this.id}, ref: ${_this.ref}, name: ${_this.name}, kind: ${_this.kind}, pages: ${_this.pages}, sizeLabel: ${_this.sizeLabel}, isImage: ${_this.isImage}, lowQuality: ${_this.lowQuality}, localPath: ${_this.localPath}, mime: ${_this.mime})';
 }
 
 
@@ -51,7 +52,7 @@ abstract mixin class $CaseDocumentCopyWith<$Res>  {
   factory $CaseDocumentCopyWith(CaseDocument value, $Res Function(CaseDocument) _then) = _$CaseDocumentCopyWithImpl;
 @useResult
 $Res call({
- String id, String ref, String name, DocumentKind kind, int pages, String sizeLabel, bool isImage, bool lowQuality
+ String id, String ref, String name, DocumentKind kind, int pages, String sizeLabel, bool isImage, bool lowQuality, String? localPath, String? mime
 });
 
 
@@ -68,7 +69,7 @@ class _$CaseDocumentCopyWithImpl<$Res>
 
 /// Create a copy of CaseDocument
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? ref = null,Object? name = null,Object? kind = null,Object? pages = null,Object? sizeLabel = null,Object? isImage = null,Object? lowQuality = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? ref = null,Object? name = null,Object? kind = null,Object? pages = null,Object? sizeLabel = null,Object? isImage = null,Object? lowQuality = null,Object? localPath = freezed,Object? mime = freezed,}) {
   return _then(CaseDocument(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,ref: null == ref ? _self.ref : ref // ignore: cast_nullable_to_non_nullable
@@ -78,7 +79,9 @@ as DocumentKind,pages: null == pages ? _self.pages : pages // ignore: cast_nulla
 as int,sizeLabel: null == sizeLabel ? _self.sizeLabel : sizeLabel // ignore: cast_nullable_to_non_nullable
 as String,isImage: null == isImage ? _self.isImage : isImage // ignore: cast_nullable_to_non_nullable
 as bool,lowQuality: null == lowQuality ? _self.lowQuality : lowQuality // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,localPath: freezed == localPath ? _self.localPath : localPath // ignore: cast_nullable_to_non_nullable
+as String?,mime: freezed == mime ? _self.mime : mime // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -163,10 +166,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String ref,  String name,  DocumentKind kind,  int pages,  String sizeLabel,  bool isImage,  bool lowQuality)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String ref,  String name,  DocumentKind kind,  int pages,  String sizeLabel,  bool isImage,  bool lowQuality,  String? localPath,  String? mime)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CaseDocument() when $default != null:
-return $default(_that.id,_that.ref,_that.name,_that.kind,_that.pages,_that.sizeLabel,_that.isImage,_that.lowQuality);case _:
+return $default(_that.id,_that.ref,_that.name,_that.kind,_that.pages,_that.sizeLabel,_that.isImage,_that.lowQuality,_that.localPath,_that.mime);case _:
   return orElse();
 
 }
@@ -184,10 +187,10 @@ return $default(_that.id,_that.ref,_that.name,_that.kind,_that.pages,_that.sizeL
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String ref,  String name,  DocumentKind kind,  int pages,  String sizeLabel,  bool isImage,  bool lowQuality)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String ref,  String name,  DocumentKind kind,  int pages,  String sizeLabel,  bool isImage,  bool lowQuality,  String? localPath,  String? mime)  $default,) {final _that = this;
 switch (_that) {
 case _CaseDocument():
-return $default(_that.id,_that.ref,_that.name,_that.kind,_that.pages,_that.sizeLabel,_that.isImage,_that.lowQuality);case _:
+return $default(_that.id,_that.ref,_that.name,_that.kind,_that.pages,_that.sizeLabel,_that.isImage,_that.lowQuality,_that.localPath,_that.mime);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -204,10 +207,10 @@ return $default(_that.id,_that.ref,_that.name,_that.kind,_that.pages,_that.sizeL
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String ref,  String name,  DocumentKind kind,  int pages,  String sizeLabel,  bool isImage,  bool lowQuality)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String ref,  String name,  DocumentKind kind,  int pages,  String sizeLabel,  bool isImage,  bool lowQuality,  String? localPath,  String? mime)?  $default,) {final _that = this;
 switch (_that) {
 case _CaseDocument() when $default != null:
-return $default(_that.id,_that.ref,_that.name,_that.kind,_that.pages,_that.sizeLabel,_that.isImage,_that.lowQuality);case _:
+return $default(_that.id,_that.ref,_that.name,_that.kind,_that.pages,_that.sizeLabel,_that.isImage,_that.lowQuality,_that.localPath,_that.mime);case _:
   return null;
 
 }
@@ -219,7 +222,7 @@ return $default(_that.id,_that.ref,_that.name,_that.kind,_that.pages,_that.sizeL
 
 
 class _CaseDocument implements CaseDocument {
-  const _CaseDocument({required this.id, required this.ref, required this.name, required this.kind, required this.pages, required this.sizeLabel, this.isImage = false, this.lowQuality = false});
+  const _CaseDocument({required this.id, required this.ref, required this.name, required this.kind, required this.pages, required this.sizeLabel, this.isImage = false, this.lowQuality = false, this.localPath, this.mime});
   
 
 @override final  String id;
@@ -230,6 +233,9 @@ class _CaseDocument implements CaseDocument {
 @override final  String sizeLabel;
 @override@JsonKey() final  bool isImage;
 @override@JsonKey() final  bool lowQuality;
+/// The picked file on the device, until it is uploaded (real API mode).
+@override final  String? localPath;
+@override final  String? mime;
 
 /// Create a copy of CaseDocument
 /// with the given fields replaced by the non-null parameter values.
@@ -241,18 +247,18 @@ _$CaseDocumentCopyWith<_CaseDocument> get copyWith => __$CaseDocumentCopyWithImp
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _CaseDocument&&(identical(other.id, id) || other.id == id)&&(identical(other.ref, ref) || other.ref == ref)&&(identical(other.name, name) || other.name == name)&&(identical(other.kind, kind) || other.kind == kind)&&(identical(other.pages, pages) || other.pages == pages)&&(identical(other.sizeLabel, sizeLabel) || other.sizeLabel == sizeLabel)&&(identical(other.isImage, isImage) || other.isImage == isImage)&&(identical(other.lowQuality, lowQuality) || other.lowQuality == lowQuality));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _CaseDocument&&(identical(other.id, id) || other.id == id)&&(identical(other.ref, ref) || other.ref == ref)&&(identical(other.name, name) || other.name == name)&&(identical(other.kind, kind) || other.kind == kind)&&(identical(other.pages, pages) || other.pages == pages)&&(identical(other.sizeLabel, sizeLabel) || other.sizeLabel == sizeLabel)&&(identical(other.isImage, isImage) || other.isImage == isImage)&&(identical(other.lowQuality, lowQuality) || other.lowQuality == lowQuality)&&(identical(other.localPath, localPath) || other.localPath == localPath)&&(identical(other.mime, mime) || other.mime == mime));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,ref,name,kind,pages,sizeLabel,isImage,lowQuality);
+    return Object.hash(runtimeType,id,ref,name,kind,pages,sizeLabel,isImage,lowQuality,localPath,mime);
 }
 
 @override
 String toString() {
-    return 'CaseDocument(id: $id, ref: $ref, name: $name, kind: $kind, pages: $pages, sizeLabel: $sizeLabel, isImage: $isImage, lowQuality: $lowQuality)';
+    return 'CaseDocument(id: $id, ref: $ref, name: $name, kind: $kind, pages: $pages, sizeLabel: $sizeLabel, isImage: $isImage, lowQuality: $lowQuality, localPath: $localPath, mime: $mime)';
 }
 
 
@@ -263,7 +269,7 @@ abstract mixin class _$CaseDocumentCopyWith<$Res> implements $CaseDocumentCopyWi
   factory _$CaseDocumentCopyWith(_CaseDocument value, $Res Function(_CaseDocument) _then) = __$CaseDocumentCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String ref, String name, DocumentKind kind, int pages, String sizeLabel, bool isImage, bool lowQuality
+ String id, String ref, String name, DocumentKind kind, int pages, String sizeLabel, bool isImage, bool lowQuality, String? localPath, String? mime
 });
 
 
@@ -280,7 +286,7 @@ class __$CaseDocumentCopyWithImpl<$Res>
 
 /// Create a copy of CaseDocument
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? ref = null,Object? name = null,Object? kind = null,Object? pages = null,Object? sizeLabel = null,Object? isImage = null,Object? lowQuality = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? ref = null,Object? name = null,Object? kind = null,Object? pages = null,Object? sizeLabel = null,Object? isImage = null,Object? lowQuality = null,Object? localPath = freezed,Object? mime = freezed,}) {
   return _then(_CaseDocument(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,ref: null == ref ? _self.ref : ref // ignore: cast_nullable_to_non_nullable
@@ -290,7 +296,9 @@ as DocumentKind,pages: null == pages ? _self.pages : pages // ignore: cast_nulla
 as int,sizeLabel: null == sizeLabel ? _self.sizeLabel : sizeLabel // ignore: cast_nullable_to_non_nullable
 as String,isImage: null == isImage ? _self.isImage : isImage // ignore: cast_nullable_to_non_nullable
 as bool,lowQuality: null == lowQuality ? _self.lowQuality : lowQuality // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,localPath: freezed == localPath ? _self.localPath : localPath // ignore: cast_nullable_to_non_nullable
+as String?,mime: freezed == mime ? _self.mime : mime // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -909,7 +917,7 @@ as double,
 /// @nodoc
 mixin _$Citation {
 
- String get ref; String get label; bool get verified;
+ String get ref; String get label; bool get verified; int? get chunkId;
 /// Create a copy of Citation
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -921,20 +929,20 @@ $CitationCopyWith<Citation> get copyWith => _$CitationCopyWithImpl<Citation>(thi
 @override
 bool operator ==(Object other) {
   final _this = this as Citation;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Citation&&(identical(other.ref, _this.ref) || other.ref == _this.ref)&&(identical(other.label, _this.label) || other.label == _this.label)&&(identical(other.verified, _this.verified) || other.verified == _this.verified));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Citation&&(identical(other.ref, _this.ref) || other.ref == _this.ref)&&(identical(other.label, _this.label) || other.label == _this.label)&&(identical(other.verified, _this.verified) || other.verified == _this.verified)&&(identical(other.chunkId, _this.chunkId) || other.chunkId == _this.chunkId));
 }
 
 
 @override
 int get hashCode {
   final _this = this as Citation;
-  return Object.hash(runtimeType,_this.ref,_this.label,_this.verified);
+  return Object.hash(runtimeType,_this.ref,_this.label,_this.verified,_this.chunkId);
 }
 
 @override
 String toString() {
   final _this = this as Citation;
-  return 'Citation(ref: ${_this.ref}, label: ${_this.label}, verified: ${_this.verified})';
+  return 'Citation(ref: ${_this.ref}, label: ${_this.label}, verified: ${_this.verified}, chunkId: ${_this.chunkId})';
 }
 
 
@@ -945,7 +953,7 @@ abstract mixin class $CitationCopyWith<$Res>  {
   factory $CitationCopyWith(Citation value, $Res Function(Citation) _then) = _$CitationCopyWithImpl;
 @useResult
 $Res call({
- String ref, String label, bool verified
+ String ref, String label, bool verified, int? chunkId
 });
 
 
@@ -962,12 +970,13 @@ class _$CitationCopyWithImpl<$Res>
 
 /// Create a copy of Citation
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? ref = null,Object? label = null,Object? verified = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? ref = null,Object? label = null,Object? verified = null,Object? chunkId = freezed,}) {
   return _then(Citation(
 ref: null == ref ? _self.ref : ref // ignore: cast_nullable_to_non_nullable
 as String,label: null == label ? _self.label : label // ignore: cast_nullable_to_non_nullable
 as String,verified: null == verified ? _self.verified : verified // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,chunkId: freezed == chunkId ? _self.chunkId : chunkId // ignore: cast_nullable_to_non_nullable
+as int?,
   ));
 }
 
@@ -1052,10 +1061,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String ref,  String label,  bool verified)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String ref,  String label,  bool verified,  int? chunkId)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Citation() when $default != null:
-return $default(_that.ref,_that.label,_that.verified);case _:
+return $default(_that.ref,_that.label,_that.verified,_that.chunkId);case _:
   return orElse();
 
 }
@@ -1073,10 +1082,10 @@ return $default(_that.ref,_that.label,_that.verified);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String ref,  String label,  bool verified)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String ref,  String label,  bool verified,  int? chunkId)  $default,) {final _that = this;
 switch (_that) {
 case _Citation():
-return $default(_that.ref,_that.label,_that.verified);case _:
+return $default(_that.ref,_that.label,_that.verified,_that.chunkId);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -1093,10 +1102,10 @@ return $default(_that.ref,_that.label,_that.verified);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String ref,  String label,  bool verified)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String ref,  String label,  bool verified,  int? chunkId)?  $default,) {final _that = this;
 switch (_that) {
 case _Citation() when $default != null:
-return $default(_that.ref,_that.label,_that.verified);case _:
+return $default(_that.ref,_that.label,_that.verified,_that.chunkId);case _:
   return null;
 
 }
@@ -1108,12 +1117,13 @@ return $default(_that.ref,_that.label,_that.verified);case _:
 
 
 class _Citation extends Citation {
-  const _Citation({required this.ref, required this.label, this.verified = true}): super._();
+  const _Citation({required this.ref, required this.label, this.verified = true, this.chunkId}): super._();
   
 
 @override final  String ref;
 @override final  String label;
 @override@JsonKey() final  bool verified;
+@override final  int? chunkId;
 
 /// Create a copy of Citation
 /// with the given fields replaced by the non-null parameter values.
@@ -1125,18 +1135,18 @@ _$CitationCopyWith<_Citation> get copyWith => __$CitationCopyWithImpl<_Citation>
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Citation&&(identical(other.ref, ref) || other.ref == ref)&&(identical(other.label, label) || other.label == label)&&(identical(other.verified, verified) || other.verified == verified));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Citation&&(identical(other.ref, ref) || other.ref == ref)&&(identical(other.label, label) || other.label == label)&&(identical(other.verified, verified) || other.verified == verified)&&(identical(other.chunkId, chunkId) || other.chunkId == chunkId));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,ref,label,verified);
+    return Object.hash(runtimeType,ref,label,verified,chunkId);
 }
 
 @override
 String toString() {
-    return 'Citation(ref: $ref, label: $label, verified: $verified)';
+    return 'Citation(ref: $ref, label: $label, verified: $verified, chunkId: $chunkId)';
 }
 
 
@@ -1147,7 +1157,7 @@ abstract mixin class _$CitationCopyWith<$Res> implements $CitationCopyWith<$Res>
   factory _$CitationCopyWith(_Citation value, $Res Function(_Citation) _then) = __$CitationCopyWithImpl;
 @override @useResult
 $Res call({
- String ref, String label, bool verified
+ String ref, String label, bool verified, int? chunkId
 });
 
 
@@ -1164,12 +1174,13 @@ class __$CitationCopyWithImpl<$Res>
 
 /// Create a copy of Citation
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? ref = null,Object? label = null,Object? verified = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? ref = null,Object? label = null,Object? verified = null,Object? chunkId = freezed,}) {
   return _then(_Citation(
 ref: null == ref ? _self.ref : ref // ignore: cast_nullable_to_non_nullable
 as String,label: null == label ? _self.label : label // ignore: cast_nullable_to_non_nullable
 as String,verified: null == verified ? _self.verified : verified // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,chunkId: freezed == chunkId ? _self.chunkId : chunkId // ignore: cast_nullable_to_non_nullable
+as int?,
   ));
 }
 
@@ -1458,7 +1469,8 @@ as Urgency?,
 /// @nodoc
 mixin _$CaseAnalysis {
 
- String get caseId; int get positionStrength; RiskLevel get risk; String get summary; List<AnalysisPoint> get strengths; List<AnalysisPoint> get weaknesses; List<AnalysisPoint> get actions; List<RegulationSource> get sources; bool get sourcesSufficient;
+ String get caseId;/// The analysis id (what a rating points at).
+ String get id; int get positionStrength; RiskLevel get risk; String get summary; List<AnalysisPoint> get strengths; List<AnalysisPoint> get weaknesses; List<AnalysisPoint> get actions; List<RegulationSource> get sources; bool get sourcesSufficient;
 /// Create a copy of CaseAnalysis
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1470,20 +1482,20 @@ $CaseAnalysisCopyWith<CaseAnalysis> get copyWith => _$CaseAnalysisCopyWithImpl<C
 @override
 bool operator ==(Object other) {
   final _this = this as CaseAnalysis;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CaseAnalysis&&(identical(other.caseId, _this.caseId) || other.caseId == _this.caseId)&&(identical(other.positionStrength, _this.positionStrength) || other.positionStrength == _this.positionStrength)&&(identical(other.risk, _this.risk) || other.risk == _this.risk)&&(identical(other.summary, _this.summary) || other.summary == _this.summary)&&const DeepCollectionEquality().equals(other.strengths, _this.strengths)&&const DeepCollectionEquality().equals(other.weaknesses, _this.weaknesses)&&const DeepCollectionEquality().equals(other.actions, _this.actions)&&const DeepCollectionEquality().equals(other.sources, _this.sources)&&(identical(other.sourcesSufficient, _this.sourcesSufficient) || other.sourcesSufficient == _this.sourcesSufficient));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CaseAnalysis&&(identical(other.caseId, _this.caseId) || other.caseId == _this.caseId)&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.positionStrength, _this.positionStrength) || other.positionStrength == _this.positionStrength)&&(identical(other.risk, _this.risk) || other.risk == _this.risk)&&(identical(other.summary, _this.summary) || other.summary == _this.summary)&&const DeepCollectionEquality().equals(other.strengths, _this.strengths)&&const DeepCollectionEquality().equals(other.weaknesses, _this.weaknesses)&&const DeepCollectionEquality().equals(other.actions, _this.actions)&&const DeepCollectionEquality().equals(other.sources, _this.sources)&&(identical(other.sourcesSufficient, _this.sourcesSufficient) || other.sourcesSufficient == _this.sourcesSufficient));
 }
 
 
 @override
 int get hashCode {
   final _this = this as CaseAnalysis;
-  return Object.hash(runtimeType,_this.caseId,_this.positionStrength,_this.risk,_this.summary,const DeepCollectionEquality().hash(_this.strengths),const DeepCollectionEquality().hash(_this.weaknesses),const DeepCollectionEquality().hash(_this.actions),const DeepCollectionEquality().hash(_this.sources),_this.sourcesSufficient);
+  return Object.hash(runtimeType,_this.caseId,_this.id,_this.positionStrength,_this.risk,_this.summary,const DeepCollectionEquality().hash(_this.strengths),const DeepCollectionEquality().hash(_this.weaknesses),const DeepCollectionEquality().hash(_this.actions),const DeepCollectionEquality().hash(_this.sources),_this.sourcesSufficient);
 }
 
 @override
 String toString() {
   final _this = this as CaseAnalysis;
-  return 'CaseAnalysis(caseId: ${_this.caseId}, positionStrength: ${_this.positionStrength}, risk: ${_this.risk}, summary: ${_this.summary}, strengths: ${_this.strengths}, weaknesses: ${_this.weaknesses}, actions: ${_this.actions}, sources: ${_this.sources}, sourcesSufficient: ${_this.sourcesSufficient})';
+  return 'CaseAnalysis(caseId: ${_this.caseId}, id: ${_this.id}, positionStrength: ${_this.positionStrength}, risk: ${_this.risk}, summary: ${_this.summary}, strengths: ${_this.strengths}, weaknesses: ${_this.weaknesses}, actions: ${_this.actions}, sources: ${_this.sources}, sourcesSufficient: ${_this.sourcesSufficient})';
 }
 
 
@@ -1494,7 +1506,7 @@ abstract mixin class $CaseAnalysisCopyWith<$Res>  {
   factory $CaseAnalysisCopyWith(CaseAnalysis value, $Res Function(CaseAnalysis) _then) = _$CaseAnalysisCopyWithImpl;
 @useResult
 $Res call({
- String caseId, int positionStrength, RiskLevel risk, String summary, List<AnalysisPoint> strengths, List<AnalysisPoint> weaknesses, List<AnalysisPoint> actions, List<RegulationSource> sources, bool sourcesSufficient
+ String caseId, String id, int positionStrength, RiskLevel risk, String summary, List<AnalysisPoint> strengths, List<AnalysisPoint> weaknesses, List<AnalysisPoint> actions, List<RegulationSource> sources, bool sourcesSufficient
 });
 
 
@@ -1511,9 +1523,10 @@ class _$CaseAnalysisCopyWithImpl<$Res>
 
 /// Create a copy of CaseAnalysis
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? caseId = null,Object? positionStrength = null,Object? risk = null,Object? summary = null,Object? strengths = null,Object? weaknesses = null,Object? actions = null,Object? sources = null,Object? sourcesSufficient = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? caseId = null,Object? id = null,Object? positionStrength = null,Object? risk = null,Object? summary = null,Object? strengths = null,Object? weaknesses = null,Object? actions = null,Object? sources = null,Object? sourcesSufficient = null,}) {
   return _then(CaseAnalysis(
 caseId: null == caseId ? _self.caseId : caseId // ignore: cast_nullable_to_non_nullable
+as String,id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,positionStrength: null == positionStrength ? _self.positionStrength : positionStrength // ignore: cast_nullable_to_non_nullable
 as int,risk: null == risk ? _self.risk : risk // ignore: cast_nullable_to_non_nullable
 as RiskLevel,summary: null == summary ? _self.summary : summary // ignore: cast_nullable_to_non_nullable
@@ -1607,10 +1620,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String caseId,  int positionStrength,  RiskLevel risk,  String summary,  List<AnalysisPoint> strengths,  List<AnalysisPoint> weaknesses,  List<AnalysisPoint> actions,  List<RegulationSource> sources,  bool sourcesSufficient)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String caseId,  String id,  int positionStrength,  RiskLevel risk,  String summary,  List<AnalysisPoint> strengths,  List<AnalysisPoint> weaknesses,  List<AnalysisPoint> actions,  List<RegulationSource> sources,  bool sourcesSufficient)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CaseAnalysis() when $default != null:
-return $default(_that.caseId,_that.positionStrength,_that.risk,_that.summary,_that.strengths,_that.weaknesses,_that.actions,_that.sources,_that.sourcesSufficient);case _:
+return $default(_that.caseId,_that.id,_that.positionStrength,_that.risk,_that.summary,_that.strengths,_that.weaknesses,_that.actions,_that.sources,_that.sourcesSufficient);case _:
   return orElse();
 
 }
@@ -1628,10 +1641,10 @@ return $default(_that.caseId,_that.positionStrength,_that.risk,_that.summary,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String caseId,  int positionStrength,  RiskLevel risk,  String summary,  List<AnalysisPoint> strengths,  List<AnalysisPoint> weaknesses,  List<AnalysisPoint> actions,  List<RegulationSource> sources,  bool sourcesSufficient)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String caseId,  String id,  int positionStrength,  RiskLevel risk,  String summary,  List<AnalysisPoint> strengths,  List<AnalysisPoint> weaknesses,  List<AnalysisPoint> actions,  List<RegulationSource> sources,  bool sourcesSufficient)  $default,) {final _that = this;
 switch (_that) {
 case _CaseAnalysis():
-return $default(_that.caseId,_that.positionStrength,_that.risk,_that.summary,_that.strengths,_that.weaknesses,_that.actions,_that.sources,_that.sourcesSufficient);case _:
+return $default(_that.caseId,_that.id,_that.positionStrength,_that.risk,_that.summary,_that.strengths,_that.weaknesses,_that.actions,_that.sources,_that.sourcesSufficient);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -1648,10 +1661,10 @@ return $default(_that.caseId,_that.positionStrength,_that.risk,_that.summary,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String caseId,  int positionStrength,  RiskLevel risk,  String summary,  List<AnalysisPoint> strengths,  List<AnalysisPoint> weaknesses,  List<AnalysisPoint> actions,  List<RegulationSource> sources,  bool sourcesSufficient)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String caseId,  String id,  int positionStrength,  RiskLevel risk,  String summary,  List<AnalysisPoint> strengths,  List<AnalysisPoint> weaknesses,  List<AnalysisPoint> actions,  List<RegulationSource> sources,  bool sourcesSufficient)?  $default,) {final _that = this;
 switch (_that) {
 case _CaseAnalysis() when $default != null:
-return $default(_that.caseId,_that.positionStrength,_that.risk,_that.summary,_that.strengths,_that.weaknesses,_that.actions,_that.sources,_that.sourcesSufficient);case _:
+return $default(_that.caseId,_that.id,_that.positionStrength,_that.risk,_that.summary,_that.strengths,_that.weaknesses,_that.actions,_that.sources,_that.sourcesSufficient);case _:
   return null;
 
 }
@@ -1663,10 +1676,12 @@ return $default(_that.caseId,_that.positionStrength,_that.risk,_that.summary,_th
 
 
 class _CaseAnalysis implements CaseAnalysis {
-  const _CaseAnalysis({required this.caseId, required this.positionStrength, required this.risk, required this.summary, required  List<AnalysisPoint> strengths, required  List<AnalysisPoint> weaknesses, required  List<AnalysisPoint> actions, required  List<RegulationSource> sources, this.sourcesSufficient = true}): _strengths = strengths,_weaknesses = weaknesses,_actions = actions,_sources = sources;
+  const _CaseAnalysis({required this.caseId, this.id = '', required this.positionStrength, required this.risk, required this.summary, required  List<AnalysisPoint> strengths, required  List<AnalysisPoint> weaknesses, required  List<AnalysisPoint> actions, required  List<RegulationSource> sources, this.sourcesSufficient = true}): _strengths = strengths,_weaknesses = weaknesses,_actions = actions,_sources = sources;
   
 
 @override final  String caseId;
+/// The analysis id (what a rating points at).
+@override@JsonKey() final  String id;
 @override final  int positionStrength;
 @override final  RiskLevel risk;
 @override final  String summary;
@@ -1710,18 +1725,18 @@ _$CaseAnalysisCopyWith<_CaseAnalysis> get copyWith => __$CaseAnalysisCopyWithImp
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _CaseAnalysis&&(identical(other.caseId, caseId) || other.caseId == caseId)&&(identical(other.positionStrength, positionStrength) || other.positionStrength == positionStrength)&&(identical(other.risk, risk) || other.risk == risk)&&(identical(other.summary, summary) || other.summary == summary)&&const DeepCollectionEquality().equals(other.strengths, _strengths)&&const DeepCollectionEquality().equals(other.weaknesses, _weaknesses)&&const DeepCollectionEquality().equals(other.actions, _actions)&&const DeepCollectionEquality().equals(other.sources, _sources)&&(identical(other.sourcesSufficient, sourcesSufficient) || other.sourcesSufficient == sourcesSufficient));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _CaseAnalysis&&(identical(other.caseId, caseId) || other.caseId == caseId)&&(identical(other.id, id) || other.id == id)&&(identical(other.positionStrength, positionStrength) || other.positionStrength == positionStrength)&&(identical(other.risk, risk) || other.risk == risk)&&(identical(other.summary, summary) || other.summary == summary)&&const DeepCollectionEquality().equals(other.strengths, _strengths)&&const DeepCollectionEquality().equals(other.weaknesses, _weaknesses)&&const DeepCollectionEquality().equals(other.actions, _actions)&&const DeepCollectionEquality().equals(other.sources, _sources)&&(identical(other.sourcesSufficient, sourcesSufficient) || other.sourcesSufficient == sourcesSufficient));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,caseId,positionStrength,risk,summary,const DeepCollectionEquality().hash(_strengths),const DeepCollectionEquality().hash(_weaknesses),const DeepCollectionEquality().hash(_actions),const DeepCollectionEquality().hash(_sources),sourcesSufficient);
+    return Object.hash(runtimeType,caseId,id,positionStrength,risk,summary,const DeepCollectionEquality().hash(_strengths),const DeepCollectionEquality().hash(_weaknesses),const DeepCollectionEquality().hash(_actions),const DeepCollectionEquality().hash(_sources),sourcesSufficient);
 }
 
 @override
 String toString() {
-    return 'CaseAnalysis(caseId: $caseId, positionStrength: $positionStrength, risk: $risk, summary: $summary, strengths: $strengths, weaknesses: $weaknesses, actions: $actions, sources: $sources, sourcesSufficient: $sourcesSufficient)';
+    return 'CaseAnalysis(caseId: $caseId, id: $id, positionStrength: $positionStrength, risk: $risk, summary: $summary, strengths: $strengths, weaknesses: $weaknesses, actions: $actions, sources: $sources, sourcesSufficient: $sourcesSufficient)';
 }
 
 
@@ -1732,7 +1747,7 @@ abstract mixin class _$CaseAnalysisCopyWith<$Res> implements $CaseAnalysisCopyWi
   factory _$CaseAnalysisCopyWith(_CaseAnalysis value, $Res Function(_CaseAnalysis) _then) = __$CaseAnalysisCopyWithImpl;
 @override @useResult
 $Res call({
- String caseId, int positionStrength, RiskLevel risk, String summary, List<AnalysisPoint> strengths, List<AnalysisPoint> weaknesses, List<AnalysisPoint> actions, List<RegulationSource> sources, bool sourcesSufficient
+ String caseId, String id, int positionStrength, RiskLevel risk, String summary, List<AnalysisPoint> strengths, List<AnalysisPoint> weaknesses, List<AnalysisPoint> actions, List<RegulationSource> sources, bool sourcesSufficient
 });
 
 
@@ -1749,9 +1764,10 @@ class __$CaseAnalysisCopyWithImpl<$Res>
 
 /// Create a copy of CaseAnalysis
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? caseId = null,Object? positionStrength = null,Object? risk = null,Object? summary = null,Object? strengths = null,Object? weaknesses = null,Object? actions = null,Object? sources = null,Object? sourcesSufficient = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? caseId = null,Object? id = null,Object? positionStrength = null,Object? risk = null,Object? summary = null,Object? strengths = null,Object? weaknesses = null,Object? actions = null,Object? sources = null,Object? sourcesSufficient = null,}) {
   return _then(_CaseAnalysis(
 caseId: null == caseId ? _self.caseId : caseId // ignore: cast_nullable_to_non_nullable
+as String,id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,positionStrength: null == positionStrength ? _self.positionStrength : positionStrength // ignore: cast_nullable_to_non_nullable
 as int,risk: null == risk ? _self.risk : risk // ignore: cast_nullable_to_non_nullable
 as RiskLevel,summary: null == summary ? _self.summary : summary // ignore: cast_nullable_to_non_nullable
@@ -2319,7 +2335,8 @@ as List<DraftParagraph>,
 /// @nodoc
 mixin _$CaseDraft {
 
- String get caseId; int get versionNo; bool get byLawyer; String get title; String get addressee; String get salutation; DraftParagraph get intro; List<DraftSection> get sections; String get closing; List<String> get attachments; String? get approvedBy; DateTime? get approvedAt;
+ String get caseId;/// The version id (what a rating points at).
+ String get versionId; int get versionNo; bool get byLawyer; String get title; String get addressee; String get salutation; DraftParagraph get intro; List<DraftSection> get sections; String get closing; List<String> get attachments; String? get approvedBy; DateTime? get approvedAt;
 /// Create a copy of CaseDraft
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -2331,20 +2348,20 @@ $CaseDraftCopyWith<CaseDraft> get copyWith => _$CaseDraftCopyWithImpl<CaseDraft>
 @override
 bool operator ==(Object other) {
   final _this = this as CaseDraft;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CaseDraft&&(identical(other.caseId, _this.caseId) || other.caseId == _this.caseId)&&(identical(other.versionNo, _this.versionNo) || other.versionNo == _this.versionNo)&&(identical(other.byLawyer, _this.byLawyer) || other.byLawyer == _this.byLawyer)&&(identical(other.title, _this.title) || other.title == _this.title)&&(identical(other.addressee, _this.addressee) || other.addressee == _this.addressee)&&(identical(other.salutation, _this.salutation) || other.salutation == _this.salutation)&&(identical(other.intro, _this.intro) || other.intro == _this.intro)&&const DeepCollectionEquality().equals(other.sections, _this.sections)&&(identical(other.closing, _this.closing) || other.closing == _this.closing)&&const DeepCollectionEquality().equals(other.attachments, _this.attachments)&&(identical(other.approvedBy, _this.approvedBy) || other.approvedBy == _this.approvedBy)&&(identical(other.approvedAt, _this.approvedAt) || other.approvedAt == _this.approvedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CaseDraft&&(identical(other.caseId, _this.caseId) || other.caseId == _this.caseId)&&(identical(other.versionId, _this.versionId) || other.versionId == _this.versionId)&&(identical(other.versionNo, _this.versionNo) || other.versionNo == _this.versionNo)&&(identical(other.byLawyer, _this.byLawyer) || other.byLawyer == _this.byLawyer)&&(identical(other.title, _this.title) || other.title == _this.title)&&(identical(other.addressee, _this.addressee) || other.addressee == _this.addressee)&&(identical(other.salutation, _this.salutation) || other.salutation == _this.salutation)&&(identical(other.intro, _this.intro) || other.intro == _this.intro)&&const DeepCollectionEquality().equals(other.sections, _this.sections)&&(identical(other.closing, _this.closing) || other.closing == _this.closing)&&const DeepCollectionEquality().equals(other.attachments, _this.attachments)&&(identical(other.approvedBy, _this.approvedBy) || other.approvedBy == _this.approvedBy)&&(identical(other.approvedAt, _this.approvedAt) || other.approvedAt == _this.approvedAt));
 }
 
 
 @override
 int get hashCode {
   final _this = this as CaseDraft;
-  return Object.hash(runtimeType,_this.caseId,_this.versionNo,_this.byLawyer,_this.title,_this.addressee,_this.salutation,_this.intro,const DeepCollectionEquality().hash(_this.sections),_this.closing,const DeepCollectionEquality().hash(_this.attachments),_this.approvedBy,_this.approvedAt);
+  return Object.hash(runtimeType,_this.caseId,_this.versionId,_this.versionNo,_this.byLawyer,_this.title,_this.addressee,_this.salutation,_this.intro,const DeepCollectionEquality().hash(_this.sections),_this.closing,const DeepCollectionEquality().hash(_this.attachments),_this.approvedBy,_this.approvedAt);
 }
 
 @override
 String toString() {
   final _this = this as CaseDraft;
-  return 'CaseDraft(caseId: ${_this.caseId}, versionNo: ${_this.versionNo}, byLawyer: ${_this.byLawyer}, title: ${_this.title}, addressee: ${_this.addressee}, salutation: ${_this.salutation}, intro: ${_this.intro}, sections: ${_this.sections}, closing: ${_this.closing}, attachments: ${_this.attachments}, approvedBy: ${_this.approvedBy}, approvedAt: ${_this.approvedAt})';
+  return 'CaseDraft(caseId: ${_this.caseId}, versionId: ${_this.versionId}, versionNo: ${_this.versionNo}, byLawyer: ${_this.byLawyer}, title: ${_this.title}, addressee: ${_this.addressee}, salutation: ${_this.salutation}, intro: ${_this.intro}, sections: ${_this.sections}, closing: ${_this.closing}, attachments: ${_this.attachments}, approvedBy: ${_this.approvedBy}, approvedAt: ${_this.approvedAt})';
 }
 
 
@@ -2355,7 +2372,7 @@ abstract mixin class $CaseDraftCopyWith<$Res>  {
   factory $CaseDraftCopyWith(CaseDraft value, $Res Function(CaseDraft) _then) = _$CaseDraftCopyWithImpl;
 @useResult
 $Res call({
- String caseId, int versionNo, bool byLawyer, String title, String addressee, String salutation, DraftParagraph intro, List<DraftSection> sections, String closing, List<String> attachments, String? approvedBy, DateTime? approvedAt
+ String caseId, String versionId, int versionNo, bool byLawyer, String title, String addressee, String salutation, DraftParagraph intro, List<DraftSection> sections, String closing, List<String> attachments, String? approvedBy, DateTime? approvedAt
 });
 
 
@@ -2372,9 +2389,10 @@ class _$CaseDraftCopyWithImpl<$Res>
 
 /// Create a copy of CaseDraft
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? caseId = null,Object? versionNo = null,Object? byLawyer = null,Object? title = null,Object? addressee = null,Object? salutation = null,Object? intro = null,Object? sections = null,Object? closing = null,Object? attachments = null,Object? approvedBy = freezed,Object? approvedAt = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? caseId = null,Object? versionId = null,Object? versionNo = null,Object? byLawyer = null,Object? title = null,Object? addressee = null,Object? salutation = null,Object? intro = null,Object? sections = null,Object? closing = null,Object? attachments = null,Object? approvedBy = freezed,Object? approvedAt = freezed,}) {
   return _then(CaseDraft(
 caseId: null == caseId ? _self.caseId : caseId // ignore: cast_nullable_to_non_nullable
+as String,versionId: null == versionId ? _self.versionId : versionId // ignore: cast_nullable_to_non_nullable
 as String,versionNo: null == versionNo ? _self.versionNo : versionNo // ignore: cast_nullable_to_non_nullable
 as int,byLawyer: null == byLawyer ? _self.byLawyer : byLawyer // ignore: cast_nullable_to_non_nullable
 as bool,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
@@ -2480,10 +2498,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String caseId,  int versionNo,  bool byLawyer,  String title,  String addressee,  String salutation,  DraftParagraph intro,  List<DraftSection> sections,  String closing,  List<String> attachments,  String? approvedBy,  DateTime? approvedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String caseId,  String versionId,  int versionNo,  bool byLawyer,  String title,  String addressee,  String salutation,  DraftParagraph intro,  List<DraftSection> sections,  String closing,  List<String> attachments,  String? approvedBy,  DateTime? approvedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CaseDraft() when $default != null:
-return $default(_that.caseId,_that.versionNo,_that.byLawyer,_that.title,_that.addressee,_that.salutation,_that.intro,_that.sections,_that.closing,_that.attachments,_that.approvedBy,_that.approvedAt);case _:
+return $default(_that.caseId,_that.versionId,_that.versionNo,_that.byLawyer,_that.title,_that.addressee,_that.salutation,_that.intro,_that.sections,_that.closing,_that.attachments,_that.approvedBy,_that.approvedAt);case _:
   return orElse();
 
 }
@@ -2501,10 +2519,10 @@ return $default(_that.caseId,_that.versionNo,_that.byLawyer,_that.title,_that.ad
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String caseId,  int versionNo,  bool byLawyer,  String title,  String addressee,  String salutation,  DraftParagraph intro,  List<DraftSection> sections,  String closing,  List<String> attachments,  String? approvedBy,  DateTime? approvedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String caseId,  String versionId,  int versionNo,  bool byLawyer,  String title,  String addressee,  String salutation,  DraftParagraph intro,  List<DraftSection> sections,  String closing,  List<String> attachments,  String? approvedBy,  DateTime? approvedAt)  $default,) {final _that = this;
 switch (_that) {
 case _CaseDraft():
-return $default(_that.caseId,_that.versionNo,_that.byLawyer,_that.title,_that.addressee,_that.salutation,_that.intro,_that.sections,_that.closing,_that.attachments,_that.approvedBy,_that.approvedAt);case _:
+return $default(_that.caseId,_that.versionId,_that.versionNo,_that.byLawyer,_that.title,_that.addressee,_that.salutation,_that.intro,_that.sections,_that.closing,_that.attachments,_that.approvedBy,_that.approvedAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -2521,10 +2539,10 @@ return $default(_that.caseId,_that.versionNo,_that.byLawyer,_that.title,_that.ad
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String caseId,  int versionNo,  bool byLawyer,  String title,  String addressee,  String salutation,  DraftParagraph intro,  List<DraftSection> sections,  String closing,  List<String> attachments,  String? approvedBy,  DateTime? approvedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String caseId,  String versionId,  int versionNo,  bool byLawyer,  String title,  String addressee,  String salutation,  DraftParagraph intro,  List<DraftSection> sections,  String closing,  List<String> attachments,  String? approvedBy,  DateTime? approvedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _CaseDraft() when $default != null:
-return $default(_that.caseId,_that.versionNo,_that.byLawyer,_that.title,_that.addressee,_that.salutation,_that.intro,_that.sections,_that.closing,_that.attachments,_that.approvedBy,_that.approvedAt);case _:
+return $default(_that.caseId,_that.versionId,_that.versionNo,_that.byLawyer,_that.title,_that.addressee,_that.salutation,_that.intro,_that.sections,_that.closing,_that.attachments,_that.approvedBy,_that.approvedAt);case _:
   return null;
 
 }
@@ -2536,10 +2554,12 @@ return $default(_that.caseId,_that.versionNo,_that.byLawyer,_that.title,_that.ad
 
 
 class _CaseDraft implements CaseDraft {
-  const _CaseDraft({required this.caseId, required this.versionNo, required this.byLawyer, required this.title, required this.addressee, required this.salutation, required this.intro, required  List<DraftSection> sections, required this.closing, required  List<String> attachments, this.approvedBy, this.approvedAt}): _sections = sections,_attachments = attachments;
+  const _CaseDraft({required this.caseId, this.versionId = '', required this.versionNo, required this.byLawyer, required this.title, required this.addressee, required this.salutation, required this.intro, required  List<DraftSection> sections, required this.closing, required  List<String> attachments, this.approvedBy, this.approvedAt}): _sections = sections,_attachments = attachments;
   
 
 @override final  String caseId;
+/// The version id (what a rating points at).
+@override@JsonKey() final  String versionId;
 @override final  int versionNo;
 @override final  bool byLawyer;
 @override final  String title;
@@ -2574,18 +2594,18 @@ _$CaseDraftCopyWith<_CaseDraft> get copyWith => __$CaseDraftCopyWithImpl<_CaseDr
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _CaseDraft&&(identical(other.caseId, caseId) || other.caseId == caseId)&&(identical(other.versionNo, versionNo) || other.versionNo == versionNo)&&(identical(other.byLawyer, byLawyer) || other.byLawyer == byLawyer)&&(identical(other.title, title) || other.title == title)&&(identical(other.addressee, addressee) || other.addressee == addressee)&&(identical(other.salutation, salutation) || other.salutation == salutation)&&(identical(other.intro, intro) || other.intro == intro)&&const DeepCollectionEquality().equals(other.sections, _sections)&&(identical(other.closing, closing) || other.closing == closing)&&const DeepCollectionEquality().equals(other.attachments, _attachments)&&(identical(other.approvedBy, approvedBy) || other.approvedBy == approvedBy)&&(identical(other.approvedAt, approvedAt) || other.approvedAt == approvedAt));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _CaseDraft&&(identical(other.caseId, caseId) || other.caseId == caseId)&&(identical(other.versionId, versionId) || other.versionId == versionId)&&(identical(other.versionNo, versionNo) || other.versionNo == versionNo)&&(identical(other.byLawyer, byLawyer) || other.byLawyer == byLawyer)&&(identical(other.title, title) || other.title == title)&&(identical(other.addressee, addressee) || other.addressee == addressee)&&(identical(other.salutation, salutation) || other.salutation == salutation)&&(identical(other.intro, intro) || other.intro == intro)&&const DeepCollectionEquality().equals(other.sections, _sections)&&(identical(other.closing, closing) || other.closing == closing)&&const DeepCollectionEquality().equals(other.attachments, _attachments)&&(identical(other.approvedBy, approvedBy) || other.approvedBy == approvedBy)&&(identical(other.approvedAt, approvedAt) || other.approvedAt == approvedAt));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,caseId,versionNo,byLawyer,title,addressee,salutation,intro,const DeepCollectionEquality().hash(_sections),closing,const DeepCollectionEquality().hash(_attachments),approvedBy,approvedAt);
+    return Object.hash(runtimeType,caseId,versionId,versionNo,byLawyer,title,addressee,salutation,intro,const DeepCollectionEquality().hash(_sections),closing,const DeepCollectionEquality().hash(_attachments),approvedBy,approvedAt);
 }
 
 @override
 String toString() {
-    return 'CaseDraft(caseId: $caseId, versionNo: $versionNo, byLawyer: $byLawyer, title: $title, addressee: $addressee, salutation: $salutation, intro: $intro, sections: $sections, closing: $closing, attachments: $attachments, approvedBy: $approvedBy, approvedAt: $approvedAt)';
+    return 'CaseDraft(caseId: $caseId, versionId: $versionId, versionNo: $versionNo, byLawyer: $byLawyer, title: $title, addressee: $addressee, salutation: $salutation, intro: $intro, sections: $sections, closing: $closing, attachments: $attachments, approvedBy: $approvedBy, approvedAt: $approvedAt)';
 }
 
 
@@ -2596,7 +2616,7 @@ abstract mixin class _$CaseDraftCopyWith<$Res> implements $CaseDraftCopyWith<$Re
   factory _$CaseDraftCopyWith(_CaseDraft value, $Res Function(_CaseDraft) _then) = __$CaseDraftCopyWithImpl;
 @override @useResult
 $Res call({
- String caseId, int versionNo, bool byLawyer, String title, String addressee, String salutation, DraftParagraph intro, List<DraftSection> sections, String closing, List<String> attachments, String? approvedBy, DateTime? approvedAt
+ String caseId, String versionId, int versionNo, bool byLawyer, String title, String addressee, String salutation, DraftParagraph intro, List<DraftSection> sections, String closing, List<String> attachments, String? approvedBy, DateTime? approvedAt
 });
 
 
@@ -2613,9 +2633,10 @@ class __$CaseDraftCopyWithImpl<$Res>
 
 /// Create a copy of CaseDraft
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? caseId = null,Object? versionNo = null,Object? byLawyer = null,Object? title = null,Object? addressee = null,Object? salutation = null,Object? intro = null,Object? sections = null,Object? closing = null,Object? attachments = null,Object? approvedBy = freezed,Object? approvedAt = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? caseId = null,Object? versionId = null,Object? versionNo = null,Object? byLawyer = null,Object? title = null,Object? addressee = null,Object? salutation = null,Object? intro = null,Object? sections = null,Object? closing = null,Object? attachments = null,Object? approvedBy = freezed,Object? approvedAt = freezed,}) {
   return _then(_CaseDraft(
 caseId: null == caseId ? _self.caseId : caseId // ignore: cast_nullable_to_non_nullable
+as String,versionId: null == versionId ? _self.versionId : versionId // ignore: cast_nullable_to_non_nullable
 as String,versionNo: null == versionNo ? _self.versionNo : versionNo // ignore: cast_nullable_to_non_nullable
 as int,byLawyer: null == byLawyer ? _self.byLawyer : byLawyer // ignore: cast_nullable_to_non_nullable
 as bool,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable

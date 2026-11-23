@@ -43,4 +43,4 @@ final class FeedbackRepositoryProvider extends $FunctionalProvider<FeedbackRepos
   }
 }
 
-String _$feedbackRepositoryHash() => r'be3d20f64557de6e69a3a592323d8ed74bbf831e';
+String _$feedbackRepositoryHash() => r'1486de85773f1de8e7ff8d11fe4accaf60ea76fa';

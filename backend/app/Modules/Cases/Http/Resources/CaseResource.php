@@ -32,6 +32,10 @@ final class CaseResource extends JsonResource
             'updated_at' => $this->updated_at->toIso8601ZuluString(),
             'submitted_for_review_at' => $this->submitted_for_review_at?->toIso8601ZuluString(),
             'approved_at' => $this->approved_at?->toIso8601ZuluString(),
+            // For the cards on «الرئيسية» and «قضاياي» (loaded by the controller, no extra queries per case).
+            'risk' => $this->whenLoaded('currentAnalysis', fn () => $this->currentAnalysis?->risk_level),
+            'position_strength' => $this->whenLoaded('currentAnalysis', fn () => $this->currentAnalysis?->position_strength),
+            'lawyer_name' => $this->whenLoaded('draft', fn () => $this->draft?->reviewer?->name),
             $this->mergeWhen($detail, fn (): array => [
                 'complaint_no' => $this->complaint_no,
                 'procedure' => $this->procedure,

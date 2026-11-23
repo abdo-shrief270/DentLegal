@@ -42,7 +42,7 @@ final class DocumentPickerProvider extends $FunctionalProvider<DocumentPicker, D
   }
 }
 
-String _$documentPickerHash() => r'c01ba8556dbfc510538c57fe11ca419ef6598539';
+String _$documentPickerHash() => r'e359a2e2989b075be83e364f23145359d8c401a0';
 
 @ProviderFor(WizardController)
 final wizardControllerProvider = WizardControllerProvider._();
@@ -72,7 +72,7 @@ final class WizardControllerProvider extends $NotifierProvider<WizardController,
   }
 }
 
-String _$wizardControllerHash() => r'f7ce8fc2d59c1b148510690ce71c6a9af491c79c';
+String _$wizardControllerHash() => r'350ffe3d738495a7d41de5b0c6ee10ad5d7e1cdb';
 
 abstract class _$WizardController extends $Notifier<WizardState> {
   WizardState build();

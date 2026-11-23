@@ -6,6 +6,16 @@
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>NSCameraUsageDescription</key>
+	<string>لتصوير خطاب الشكوى أو المستندات وإرفاقها بالقضية.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>لاختيار صورة مستند وإرفاقها بالقضية.</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<!-- Only local addresses (a development server); everything else stays HTTPS. -->
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
 	<key>CFBundleDisplayName</key>
 	<string>Dentlegal</string>
 	<key>CFBundleExecutable</key>

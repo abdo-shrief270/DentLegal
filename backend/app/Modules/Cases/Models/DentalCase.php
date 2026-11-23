@@ -8,11 +8,14 @@ use App\Modules\Cases\Enums\CaseStatus;
 use App\Modules\Cases\Enums\CaseType;
 use App\Modules\Cases\Enums\ClaimType;
 use App\Modules\Identity\Models\User;
+use App\Modules\Pipeline\Models\Analysis;
+use App\Modules\Pipeline\Models\Draft;
 use Database\Factories\DentalCaseFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 
@@ -72,5 +75,17 @@ class DentalCase extends Model
     public function dentist(): BelongsTo
     {
         return $this->belongsTo(User::class, 'dentist_id');
+    }
+
+    /** @return HasOne<Analysis, $this> */
+    public function currentAnalysis(): HasOne
+    {
+        return $this->hasOne(Analysis::class, 'case_id')->where('is_current', true);
+    }
+
+    /** @return HasOne<Draft, $this> */
+    public function draft(): HasOne
+    {
+        return $this->hasOne(Draft::class, 'case_id');
     }
 }

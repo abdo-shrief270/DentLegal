@@ -5,5 +5,5 @@ import 'consult_models.dart';
 abstract interface class ConsultRepository {
   Future<List<String>> suggestedQuestions();
   Future<ConsultMessage> ask(String question, {required List<ConsultMessage> history});
-  Future<RegulationSource> getSource(String ref);
+  Future<RegulationSource> getSource(Citation citation);
 }

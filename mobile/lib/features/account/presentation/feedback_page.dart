@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../../core/api/api_error.dart';
 import '../../../core/theme/app_colors.dart';
 import '../domain/feedback_repository.dart';
 import 'feedback_providers.dart';
@@ -39,8 +40,8 @@ class _FeedbackPageState extends ConsumerState<FeedbackPage> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('وصلتنا ملاحظتك، شكرًا لك.')));
       context.pop();
-    } on Object {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تعذّر الإرسال. حاول مرة أخرى.')));
+    } on Object catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e is ApiError ? e.message : 'تعذّر الإرسال. حاول مرة أخرى.')));
     } finally {
       if (mounted) setState(() => _sending = false);
     }

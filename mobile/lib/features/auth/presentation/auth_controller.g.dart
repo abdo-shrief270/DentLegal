@@ -42,16 +42,16 @@ final class AuthRepositoryProvider extends $FunctionalProvider<AuthRepository, A
   }
 }
 
-String _$authRepositoryHash() => r'a94a1cbc137adecf85b92722132bef35783d5df2';
+String _$authRepositoryHash() => r'1ab899401398f79d4621b9e6cafdb536132532c7';
 
-/// The signed-in dentist, or null. The token itself would live in secure storage (Keychain/Keystore).
+/// The signed-in dentist, or null. The token lives in secure storage (Keychain/Keystore), never in state.
 
 @ProviderFor(AuthController)
 final authControllerProvider = AuthControllerProvider._();
 
-/// The signed-in dentist, or null. The token itself would live in secure storage (Keychain/Keystore).
+/// The signed-in dentist, or null. The token lives in secure storage (Keychain/Keystore), never in state.
 final class AuthControllerProvider extends $NotifierProvider<AuthController, Session?> {
-  /// The signed-in dentist, or null. The token itself would live in secure storage (Keychain/Keystore).
+  /// The signed-in dentist, or null. The token lives in secure storage (Keychain/Keystore), never in state.
   AuthControllerProvider._()
     : super(
         from: null,
@@ -76,9 +76,9 @@ final class AuthControllerProvider extends $NotifierProvider<AuthController, Ses
   }
 }
 
-String _$authControllerHash() => r'13b33adabd320222e1e84da1cfe07fc8af12ef05';
+String _$authControllerHash() => r'936dcacabcb368623a38baf526045e7338646bdf';
 
-/// The signed-in dentist, or null. The token itself would live in secure storage (Keychain/Keystore).
+/// The signed-in dentist, or null. The token lives in secure storage (Keychain/Keystore), never in state.
 
 abstract class _$AuthController extends $Notifier<Session?> {
   Session? build();

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Knowledge\Http\Controllers;
 
 use App\Modules\Knowledge\Models\KnowledgeChunk;
+use App\Modules\Pipeline\Support\RunSources;
 use Illuminate\Http\JsonResponse;
 
 final class ChunkController
@@ -16,13 +17,14 @@ final class ChunkController
     {
         /** @var KnowledgeChunk $model */
         $model = KnowledgeChunk::query()
-            ->select(['id', 'version_id', 'chunk_key', 'chunk_type', 'article_no', 'paragraph_ref', 'display_text', 'status'])
+            ->select(['id', 'version_id', 'chunk_key', 'chunk_type', 'article_no', 'paragraph_ref', 'display_text', 'status', 'heading_path'])
             ->with('version:id,source_id,version_label,edition,status', 'version.source:id,code,title_ar')
             ->findOrFail($chunk);
 
         return response()->json(['data' => [
             'id' => $model->id,
             'label' => $model->label(),
+            'title' => RunSources::title($model),
             'law' => $model->version->source->title_ar,
             'source_code' => $model->version->source->code,
             'edition' => $model->version->edition,

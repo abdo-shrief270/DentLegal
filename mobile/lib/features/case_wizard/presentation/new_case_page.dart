@@ -24,8 +24,13 @@ class NewCasePage extends ConsumerWidget {
     final c = ref.read(wizardControllerProvider.notifier);
 
     Future<void> submit() async {
-      final id = await c.submit();
-      if (context.mounted) context.pushReplacement('/cases/$id/processing');
+      try {
+        final id = await c.submit();
+        if (context.mounted) context.pushReplacement('/cases/$id/processing');
+      } on Object catch (e) {
+        // ApiError, AuthException and DocumentTooLarge all carry a message that is safe to show.
+        if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+      }
     }
 
     return PopScope(
@@ -268,7 +273,11 @@ class _StepDocuments extends ConsumerWidget {
     final c = ref.read(wizardControllerProvider.notifier);
     Widget source(PickSource src, IconData icon, String label) => Expanded(
       child: OutlinedButton.icon(
-        onPressed: s.picking ? null : () => c.pick(src),
+        onPressed: s.picking
+            ? null
+            : () => c.pick(src).catchError((Object e) {
+                if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+              }),
         icon: Icon(icon, size: 18),
         label: Text(label, style: const TextStyle(fontSize: 13)),
       ),

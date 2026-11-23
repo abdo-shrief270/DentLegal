@@ -1,15 +1,19 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../core/api/api_config.dart';
+import '../../../core/api/api_error.dart';
+import '../../../core/api/api_providers.dart';
 import '../../cases/domain/case_models.dart';
 import '../../cases/presentation/cases_providers.dart';
 import '../data/fake_consult_repository.dart';
+import '../data/http_consult_repository.dart';
 import '../domain/consult_models.dart';
 import '../domain/consult_repository.dart';
 
 part 'consult_controller.g.dart';
 
 @Riverpod(keepAlive: true)
-ConsultRepository consultRepository(Ref ref) => FakeConsultRepository();
+ConsultRepository consultRepository(Ref ref) => ApiConfig.useRealApi ? HttpConsultRepository(ref.watch(apiClientProvider)) : FakeConsultRepository();
 
 @riverpod
 Future<List<String>> suggestedQuestions(Ref ref) => ref.watch(consultRepositoryProvider).suggestedQuestions();
@@ -39,8 +43,8 @@ class ConsultController extends _$ConsultController {
     try {
       final answer = await ref.read(consultRepositoryProvider).ask(text, history: state.messages);
       state = state.copyWith(messages: [...state.messages, answer], waiting: false);
-    } on Object {
-      state = state.copyWith(waiting: false, error: 'تعذّر الحصول على إجابة. حاول مرة أخرى.');
+    } on Object catch (e) {
+      state = state.copyWith(waiting: false, error: e is ApiError ? e.message : 'تعذّر الحصول على إجابة. حاول مرة أخرى.');
     }
   }
 

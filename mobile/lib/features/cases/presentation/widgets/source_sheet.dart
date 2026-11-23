@@ -12,18 +12,18 @@ import '../cases_providers.dart';
 Future<void> showCitationSheet(BuildContext context, Citation citation) => showModalBottomSheet<void>(
   context: context,
   isScrollControlled: true,
-  builder: (_) => citation.isDocument ? _DocumentNote(citation) : _SourceSheet(citation.ref),
+  builder: (_) => citation.isDocument ? _DocumentNote(citation) : _SourceSheet(citation),
 );
 
 class _SourceSheet extends ConsumerWidget {
-  const _SourceSheet(this.sourceRef);
-  final String sourceRef;
+  const _SourceSheet(this.citation);
+  final Citation citation;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => Padding(
     padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
     child: AsyncView<RegulationSource>(
-      value: ref.watch(regulationSourceProvider(sourceRef)),
+      value: ref.watch(regulationSourceProvider(citation)),
       builder: (s) => Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,

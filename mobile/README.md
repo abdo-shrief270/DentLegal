@@ -26,11 +26,33 @@ lib/
     account/     account, feedback
 ```
 
-Every feature is split into `domain/` (models, repository interfaces), `data/` (fake repositories for now) and `presentation/` (pages, widgets, providers). Screens depend only on the repository interfaces, so the real Laravel API clients replace the fakes in the providers without UI changes.
+Every feature is split into `domain/` (models, repository interfaces), `data/` (fake and HTTP repositories) and `presentation/` (pages, widgets, providers). Screens depend only on the repository interfaces; the providers pick the fake or the HTTP implementation.
+
+## Real API mode
+
+```bash
+flutter run --dart-define=MOCK_DATA=false --dart-define=API_BASE_URL=http://10.0.2.2:8000
+```
+
+`API_BASE_URL` is the Laravel host without `/api/v1` (`10.0.2.2` is the Android emulator's alias for the dev machine; on a phone use the machine's LAN address, or the staging HTTPS host). `APP_VERSION` defaults to `1.0.0 (1)` and must stay equal to `version` in `pubspec.yaml`: the API refuses builds below `DENTLEGAL_MIN_APP_VERSION` with 426.
+
+| Piece | Where |
+|---|---|
+| HTTP client: JSON, `X-App-Version`, bearer token, error envelope → `ApiError` (Arabic message), 401 → back to sign-in | `lib/core/api/api_client.dart` |
+| Token: Keychain / Keystore via `flutter_secure_storage`; restored before the first frame | `lib/core/api/token_store.dart`, `lib/main.dart` |
+| Auth: OTP, device registration, profile, versioned consents, logout, account deletion | `features/auth/data/http_auth_repository.dart` |
+| Cases: list, detail, create + encrypted uploads, analysis start (idempotency key), status polling every 3 s, analysis, draft, send for review (records the lawyer-access consent), ratings, «نص المادة» | `features/cases/data/http_cases_repository.dart`, `api_mappers.dart` |
+| Consultant: suggested questions, threads, polling the answer every 2 s | `features/consult/data/http_consult_repository.dart` |
+| Feedback | `features/account/data/http_feedback_repository.dart` |
+| Documents: PDF from Files (`file_picker`), photo from the camera (`image_picker`); ≤ 20 MB | `features/case_wizard/data/device_document_picker.dart` |
+
+Tests: `test/api/` runs the HTTP layer against recorded API shapes with a fake Dio adapter (no network). `test_live/` is a smoke test against a running Laravel with the demo seeder (sign in by OTP, profile, create a case with a PDF, list, logout); see the command at the top of the file. It passed against the current backend.
+
+Still to add: push (`firebase_messaging`, once the Firebase project exists), the native document scanner, biometric unlock and screenshot protection (S5.4, S9.1).
 
 ## Fake data mode
 
-The API is not built yet. All data is synthetic and lives in memory (`features/*/data/fake_*.dart`). Every tab shows a «بيانات تجريبية» badge while `MOCK_DATA` is on (the default). No real patient data is used anywhere.
+All data is synthetic and lives in memory (`features/*/data/fake_*.dart`). Every tab shows a «بيانات تجريبية» badge while `MOCK_DATA` is on (the default, used by the web preview). No real patient data is used anywhere.
 
 Demo sign-in:
 
@@ -42,7 +64,6 @@ Demo sign-in:
 
 The OTP is always `123456`. The analysis pipeline runs in about seven seconds.
 
-Native features are UI-only for now and arrive with the backend: secure token storage, biometric unlock, screenshot protection, the document scanner, push notifications.
 
 ## Commands
 

@@ -32,6 +32,7 @@ final class CaseController
         $cases = DentalCase::query()
             ->where('dentist_id', $user->id)
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->string('status')->toString()))
+            ->with(['currentAnalysis', 'draft.reviewer'])
             ->orderByDesc('updated_at')->orderByDesc('id')
             ->cursorPaginate($request->integer('per_page', 20));
 
@@ -51,6 +52,6 @@ final class CaseController
     {
         Gate::authorize('view', $case);
 
-        return new CaseResource($case);
+        return new CaseResource($case->load(['currentAnalysis', 'draft.reviewer']));
     }
 }

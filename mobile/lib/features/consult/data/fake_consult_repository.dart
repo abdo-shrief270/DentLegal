@@ -59,8 +59,8 @@ class FakeConsultRepository implements ConsultRepository {
   }
 
   @override
-  Future<RegulationSource> getSource(String ref) async {
+  Future<RegulationSource> getSource(Citation citation) async {
     await fakeLatency(150);
-    return sourceByRef(ref);
+    return sourceByRef(citation.ref);
   }
 }

@@ -60,4 +60,7 @@ class FakeAuthRepository implements AuthRepository {
     if (_phone != null) _profiles.remove(_phone);
     _phone = null;
   }
+
+  @override
+  Future<Session?> restore() async => null;
 }

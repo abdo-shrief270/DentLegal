@@ -42,7 +42,7 @@ final class ConsultRepositoryProvider extends $FunctionalProvider<ConsultReposit
   }
 }
 
-String _$consultRepositoryHash() => r'79e979a37b0592fb5217bce82e94f9eb09db98c5';
+String _$consultRepositoryHash() => r'e07badda675f499d46eb5a4dc5202d3262076867';
 
 @ProviderFor(suggestedQuestions)
 final suggestedQuestionsProvider = SuggestedQuestionsProvider._();

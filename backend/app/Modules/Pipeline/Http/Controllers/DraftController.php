@@ -37,12 +37,13 @@ final class DraftController
             'draft_id' => $draft->id,
             'status' => $draft->status,
             'version' => [
+                'id' => $version->id,
                 'no' => $version->version_no,
                 'author' => $version->author_type,
                 'created_at' => $version->created_at->toIso8601ZuluString(),
                 ...DraftRenderer::render($version->content_json, $case),
             ],
-            'approval' => $draft->approved_at ? ['approved_at' => $draft->approved_at->toIso8601ZuluString()] : null,
+            'approval' => $draft->approved_at ? ['approved_at' => $draft->approved_at->toIso8601ZuluString(), 'approved_by' => $draft->reviewer?->name] : null,
         ]]);
     }
 

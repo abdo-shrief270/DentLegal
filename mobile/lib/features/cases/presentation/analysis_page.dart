@@ -115,7 +115,7 @@ class AnalysisPage extends ConsumerWidget {
           const SizedBox(height: 8),
           Center(
             child: RatingRow(
-              onRate: (useful, comment) => ref.read(caseActionsProvider.notifier).rate(RatingTarget.analysis, caseId, useful: useful, comment: comment),
+              onRate: (useful, comment) => ref.read(caseActionsProvider.notifier).rate(RatingTarget.analysis, a.id, useful: useful, comment: comment),
             ),
           ),
         ],

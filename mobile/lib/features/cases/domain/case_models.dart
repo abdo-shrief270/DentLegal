@@ -24,6 +24,10 @@ abstract class CaseDocument with _$CaseDocument {
     required String sizeLabel,
     @Default(false) bool isImage,
     @Default(false) bool lowQuality,
+
+    /// The picked file on the device, until it is uploaded (real API mode).
+    String? localPath,
+    String? mime,
   }) = _CaseDocument;
 }
 
@@ -70,7 +74,8 @@ abstract class RegulationSource with _$RegulationSource {
 /// Citation inside an answer, analysis point or draft paragraph: a regulation (S…) or a case document (D…).
 @freezed
 abstract class Citation with _$Citation {
-  const factory Citation({required String ref, required String label, @Default(true) bool verified}) = _Citation;
+  /// [chunkId] identifies the regulation text behind an S ref (`GET /knowledge/chunks/{id}`); null for document refs.
+  const factory Citation({required String ref, required String label, @Default(true) bool verified, int? chunkId}) = _Citation;
 
   const Citation._();
 
@@ -88,6 +93,9 @@ abstract class AnalysisPoint with _$AnalysisPoint {
 abstract class CaseAnalysis with _$CaseAnalysis {
   const factory CaseAnalysis({
     required String caseId,
+
+    /// The analysis id (what a rating points at).
+    @Default('') String id,
     required int positionStrength,
     required RiskLevel risk,
     required String summary,
@@ -118,6 +126,9 @@ abstract class DraftSection with _$DraftSection {
 abstract class CaseDraft with _$CaseDraft {
   const factory CaseDraft({
     required String caseId,
+
+    /// The version id (what a rating points at).
+    @Default('') String versionId,
     required int versionNo,
     required bool byLawyer,
     required String title,

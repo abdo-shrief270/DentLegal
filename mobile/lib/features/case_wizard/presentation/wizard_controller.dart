@@ -3,6 +3,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../cases/domain/case_models.dart';
 import '../../cases/presentation/cases_providers.dart';
+import '../../../core/api/api_config.dart';
+import '../data/device_document_picker.dart';
 import '../data/fake_document_picker.dart';
 import '../domain/document_picker.dart';
 
@@ -10,7 +12,7 @@ part 'wizard_controller.freezed.dart';
 part 'wizard_controller.g.dart';
 
 @Riverpod(keepAlive: true)
-DocumentPicker documentPicker(Ref ref) => FakeDocumentPicker();
+DocumentPicker documentPicker(Ref ref) => ApiConfig.useRealApi ? DeviceDocumentPicker() : FakeDocumentPicker();
 
 @freezed
 abstract class WizardState with _$WizardState {
@@ -64,7 +66,16 @@ class WizardController extends _$WizardController {
     try {
       final doc = await ref.read(documentPickerProvider).pick(source);
       if (!ref.mounted) return;
-      if (doc != null) state = state.copyWith(documents: [...state.documents, doc]);
+      if (doc != null) {
+        // The wizard asks for the complaint letter first: the first file is it unless the picker knows better.
+        final kind = state.documents.isEmpty && doc.kind == DocumentKind.other ? DocumentKind.complaintLetter : doc.kind;
+        state = state.copyWith(
+          documents: [
+            ...state.documents,
+            doc.copyWith(kind: kind),
+          ],
+        );
+      }
     } finally {
       if (ref.mounted) state = state.copyWith(picking: false);
     }

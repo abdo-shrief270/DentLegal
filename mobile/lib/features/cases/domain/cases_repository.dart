@@ -18,6 +18,6 @@ abstract interface class CasesRepository {
   Future<void> submitForReview(String caseId);
 
   /// Regulation text behind a citation (`GET /knowledge/chunks/{id}`), for the «نص المادة» sheet.
-  Future<RegulationSource> getSource(String ref);
+  Future<RegulationSource> getSource(Citation citation);
   Future<void> rate({required RatingTarget target, required String targetId, required bool useful, String? comment});
 }

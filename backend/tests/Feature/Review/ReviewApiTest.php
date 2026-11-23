@@ -162,7 +162,9 @@ class ReviewApiTest extends TestCase
         $this->withHeader('X-App-Version', '1.0.0 (1)')->getJson("/api/v1/cases/{$this->case->id}/draft")->assertOk()
             ->assertJsonPath('data.version.no', 3)
             ->assertJsonPath('data.version.title', 'إفادة نهائية')
+            ->assertJsonPath('data.approval.approved_by', $lawyer->name)
             ->assertJsonMissingPath('data.notes');
+        $this->getJson("/api/v1/cases/{$this->case->id}")->assertOk()->assertJsonPath('data.lawyer_name', $lawyer->name)->assertJsonPath('data.risk', 'medium');
     }
 
     public function test_the_dentist_does_not_see_lawyer_work_in_progress(): void
