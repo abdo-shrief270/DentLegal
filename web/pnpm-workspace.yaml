@@ -6,3 +6,8 @@ packages:
 onlyBuiltDependencies:
   - '@parcel/watcher'
   - esbuild
+
+# Security (S9.3): GHSA-g3hv-75wg-m249 in minimatch < 11.0.1, reached only at build time through Nitro's archiver.
+# readdir-glob uses just the Minimatch class, which 11.x keeps.
+overrides:
+  readdir-glob>minimatch: ">=11.0.1"

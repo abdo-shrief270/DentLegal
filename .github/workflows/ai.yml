@@ -58,6 +58,8 @@ jobs:
         run: mypy app
       - name: Tests
         run: pytest
+      - name: Dependency audit (pip-audit)
+        run: pip-audit --skip-editable
       # PROJECT1_PLAN.md §5.14: masking must not leak any planted identifier (pattern layers; NER runs in staging).
       - name: Eval (pii_v1, masker)
         run: python -m app.eval run --set pii_v1 --route pii --out "$RUNNER_TEMP/eval"

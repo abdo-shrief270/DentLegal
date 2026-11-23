@@ -18,7 +18,7 @@ Route::middleware('throttle:invitations')->group(function (): void {
     Route::post('invitations/{token}/accept', [DashboardAuthController::class, 'acceptInvitation'])->where('token', '[A-Za-z0-9]{32,80}')->name('dashboard.invitation.accept');
 });
 
-Route::middleware('auth:web')->group(function (): void {
+Route::middleware(['auth:web', 'throttle:dashboard'])->group(function (): void {
     Route::get('user', [DashboardAuthController::class, 'show'])->name('dashboard.user');
     Route::post('user/two-factor-authentication', [DashboardAuthController::class, 'enable'])->middleware('throttle:dashboard-2fa')->name('dashboard.two-factor.enable');
     Route::post('user/confirmed-two-factor-authentication', [DashboardAuthController::class, 'confirm'])->middleware('throttle:dashboard-2fa')->name('dashboard.two-factor.confirm');

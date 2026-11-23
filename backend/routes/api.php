@@ -23,8 +23,8 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::prefix('v1')->middleware('app.version')->group(function (): void {
-    Route::post('auth/otp/request', [OtpController::class, 'request'])->name('auth.otp.request');
-    Route::post('auth/otp/verify', [OtpController::class, 'verify'])->name('auth.otp.verify');
+    Route::post('auth/otp/request', [OtpController::class, 'request'])->middleware('throttle:otp')->name('auth.otp.request');
+    Route::post('auth/otp/verify', [OtpController::class, 'verify'])->middleware('throttle:otp')->name('auth.otp.verify');
 
     Route::middleware(['auth:sanctum', 'abilities:dentist', 'role:dentist', 'throttle:api'])->group(function (): void {
         Route::post('auth/logout', [MeController::class, 'logout'])->name('auth.logout');

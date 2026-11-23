@@ -11,7 +11,7 @@ The system of record for Project 1 (PROJECT1_PLAN.md §2, §3, §4): REST API `/
 | Queues, cache, sessions, rate limits | Redis, Laravel Horizon |
 | Auth | Sanctum: 30-day tokens with the `dentist` ability for the app; Sanctum SPA cookie sessions + mandatory TOTP two-factor for the dashboard |
 | Roles | `spatie/laravel-permission`: `dentist`, `lawyer`, `admin` |
-| API docs | `dedoc/scramble` at `/docs/api` (local and staging only) |
+| API docs | `dedoc/scramble` at `/docs/api` (local environment only) |
 | Quality | PHPUnit 11 against real PostgreSQL, Larastan level 6, Pint |
 
 ## Structure
@@ -63,9 +63,10 @@ Each module keeps `Models`, `Enums`, `Actions` (one class per business operation
 | S6.3 Usage stats | `/api/v1/admin/stats/overview?range=7d\|30d`: active and invited dentists, answers and refusal rate, cases, drafts generated and approved, useful % per type, submit → draft p50/p90, citation validity, AI cost, daily series. `stats:roll-up` runs nightly at 00:20 Riyadh (`--days=N` back-fills); the schedule needs `php artisan schedule:work` (or cron) on the server |
 | Original documents | `GET /documents/{id}/view-url` (dentist, own case) and `GET /api/v1/lawyer/documents/{id}/view-url` (only the lawyer who claimed the case) return a 5-minute signed link that streams the decrypted file with `no-store` and a sandboxing CSP. Issuing and opening are audited |
 | S5.5 Push | `DraftApproved` → queued «رد معتمد جاهز» to each of the dentist's devices: generic text with the case code, payload `{type: draft_approved, case_id}`; dead tokens are cleared. `PUSH_DRIVER=log` until the Firebase project exists, then `fcm` with the service-account JSON at `FCM_CREDENTIALS` (FCM HTTP v1; the OAuth token comes from an RS256 JWT, cached 50 min) |
+| S9.3 Security | Security headers on every response, CORS for the dashboard origin only, a throttle on every route (tested), no `/storage` route, Horizon for admins with two-factor only, `TRUSTED_PROXIES` for Caddy, `php artisan security:check` for deploys. Checklist: [`docs/security/owasp-api-top10.md`](../docs/security/owasp-api-top10.md) |
 | S9.2 Retention | `retention:purge` nightly at 01:10 Riyadh (`--dry-run` counts only): OTP codes after 24 h, tokens unused for 30 days, `ai_runs` after 12 months, audit rows after 2 years (the trigger allows exactly that and nothing newer), and accounts deleted more than `RETENTION_ACCOUNT_GRACE_DAYS` (7) ago: cases with their encrypted files, analyses, drafts, notes, consultations, ratings, feedback, consents, devices and profile are removed and the user row is emptied to a tombstone so audit references stay valid. The case-data end-of-pilot rule waits for D18 |
 
-115 tests, 565 assertions: `php artisan test`.
+122 tests, 598 assertions: `php artisan test`.
 
 Next: the approved draft as PDF (S4.5, Should; needs a PDF library) and the mobile app's real API layer, the knowledge-base ingestion job (S1.5), push notifications.
 

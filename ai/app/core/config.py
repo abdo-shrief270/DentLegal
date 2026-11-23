@@ -96,8 +96,10 @@ class Settings(BaseSettings):
             problems.append("stand-in embedding/reranking models")
         if self.ner != "camel":
             problems.append("NER disabled (masking would not be complete)")
-        if not self.service_token.get_secret_value() or not self.masking_secret.get_secret_value():
-            problems.append("AI_SERVICE_TOKEN or AI_MASKING_SECRET missing")
+        for name, secret in (("AI_SERVICE_TOKEN", self.service_token), ("AI_MASKING_SECRET", self.masking_secret)):
+            value = secret.get_secret_value()
+            if len(value) < 32 or "change-me" in value:
+                problems.append(f"{name} missing, a placeholder, or shorter than 32 characters")
         if problems:
             raise RuntimeError(f"unsafe configuration for {self.env}: " + "; ".join(problems))
 

@@ -33,7 +33,8 @@ return [
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),
-            'serve' => true,
+            // No /storage/{path} route (S9.3): nothing serves this disk, and it holds server-only files.
+            'serve' => false,
             'throw' => false,
             'report' => false,
         ],

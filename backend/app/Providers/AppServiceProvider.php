@@ -67,6 +67,8 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('dashboard-login', fn (Request $request) => Limit::perMinute(5)->by(mb_strtolower((string) $request->input('email')).'|'.$request->ip()));
         RateLimiter::for('dashboard-2fa', fn (Request $request) => Limit::perMinute(5)->by((string) ($request->user()?->getAuthIdentifier() ?? $request->session()->get('login.pending_id', '')).'|'.$request->ip()));
         RateLimiter::for('invitations', fn (Request $request) => Limit::perMinute(10)->by($request->ip()));
+        // Route-level ceiling on the OTP endpoints; the per-phone and per-IP rules of §4.7 live in the actions.
+        RateLimiter::for('otp', fn (Request $request) => Limit::perMinute(20)->by($request->ip()));
         RateLimiter::for('dashboard', fn (Request $request) => Limit::perMinute(120)->by((string) ($request->user()?->getAuthIdentifier() ?? $request->ip())));
         RateLimiter::for('uploads', fn (Request $request) => Limit::perHour(60)->by((string) ($request->user()?->getAuthIdentifier() ?? $request->ip())));
         RateLimiter::for('api', fn (Request $request) => Limit::perMinute(120)->by($request->user()?->currentAccessToken()?->getKey() ?? $request->ip()));
