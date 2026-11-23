@@ -4,6 +4,7 @@ Legal-protection platform for dentists in Saudi Arabia. This repository holds **
 
 - **Plan:** [`PROJECT1_PLAN.md`](PROJECT1_PLAN.md) (approved, 9 weeks).
 - **Web dashboard (lawyer + admin):** [`web/`](web/README.md) — UI built with fake data; the backend comes next.
+- **AI service (Python):** [`ai/`](ai/README.md) — masking, hybrid retrieval over the regulations, Claude consultant with verified citations.
 - **API (Laravel):** [`backend/`](backend/README.md) — auth, cases, knowledge base and the ai-svc client, tested against PostgreSQL.
 - **Dentist app (Flutter):** [`mobile/`](mobile/README.md) — UI built with fake data; the backend comes next.
 - **Change requests:** [`docs/change-requests/`](docs/change-requests/) — CR-01 activation keys (waiting for the client's approval).

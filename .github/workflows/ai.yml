@@ -1,0 +1,55 @@
+# ai-svc: lint, types and tests against PostgreSQL + pgvector (PROJECT1_PLAN.md §8.4).
+name: AI service
+
+on:
+  push:
+    paths:
+      - "ai/**"
+      - "backend/database/migrations/*knowledge*"
+      - ".github/workflows/ai.yml"
+  pull_request:
+    paths:
+      - "ai/**"
+      - ".github/workflows/ai.yml"
+
+concurrency:
+  group: ai-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: ai
+    services:
+      postgres:
+        image: pgvector/pgvector:0.8.1-pg17
+        env:
+          POSTGRES_USER: dentlegal
+          POSTGRES_PASSWORD: dentlegal
+          POSTGRES_DB: dentlegal_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U dentlegal -d dentlegal_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      AI_TEST_DATABASE_URL: postgresql://dentlegal:dentlegal@127.0.0.1:5432/dentlegal_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: ai/pyproject.toml
+      - run: pip install -e ".[dev]"
+      - name: Lint (ruff)
+        run: ruff check . && ruff format --check .
+      - name: Types (mypy, strict)
+        run: mypy app
+      - name: Tests
+        run: pytest

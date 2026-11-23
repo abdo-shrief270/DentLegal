@@ -1,0 +1,13 @@
+# Retrieval parameters (PROJECT1_PLAN.md §5.5). Start values; calibrated on the eval sets in S2.2 and S8.3.
+k_dense: 30
+k_sparse: 30
+k_rerank: 30
+rrf_k: 60
+explicit_ref_boost: 0.05     # added to the RRF score of chunks the question names explicitly («المادة 27»)
+trigram_min_hits: 5          # add pg_trgm similarity when full-text search finds fewer hits than this
+trigram_threshold: 0.2
+tau_keep: 0.20               # sigmoid reranker score to keep a chunk
+tau_answer: 0.35             # best score below this → refuse without calling the LLM
+top_consult: 8
+top_case: 15
+hnsw_ef_search: 100

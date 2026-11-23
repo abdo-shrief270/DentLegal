@@ -28,10 +28,11 @@ final class HttpAiService implements AiService
      * @param  list<string>  $texts
      * @param  list<string>  $allowlist
      * @param  array<string, mixed>|null  $placeholderState
+     * @param  array{name: string|null, license_no: string|null}|null  $dentist
      */
-    public function mask(array $texts, array $allowlist = [], ?array $placeholderState = null): MaskedTexts
+    public function mask(array $texts, array $allowlist = [], ?array $placeholderState = null, ?array $dentist = null): MaskedTexts
     {
-        $body = $this->post('/v1/mask', ['texts' => $texts, 'allowlist' => $allowlist, 'placeholder_state' => $placeholderState]);
+        $body = $this->post('/v1/mask', ['texts' => $texts, 'allowlist' => $allowlist, 'placeholder_state' => $placeholderState, 'dentist' => $dentist]);
         if (! isset($body['masked']) || count($body['masked']) !== count($texts)) {
             throw new AiServiceException('ai-svc returned an incomplete masking result', 'masking_failed', false);
         }

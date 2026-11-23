@@ -24,8 +24,9 @@ interface AiService
      * @param  list<string>  $texts
      * @param  list<string>  $allowlist  authority names and facility to keep
      * @param  array<string, mixed>|null  $placeholderState  from the previous call for the same case
+     * @param  array{name: string|null, license_no: string|null}|null  $dentist  replaced by {{DENTIST_NAME}} / {{DENTIST_LICENSE}}
      */
-    public function mask(array $texts, array $allowlist = [], ?array $placeholderState = null): MaskedTexts;
+    public function mask(array $texts, array $allowlist = [], ?array $placeholderState = null, ?array $dentist = null): MaskedTexts;
 
     /** @return array{status: string, models: array<string, bool>, db: bool} */
     public function health(): array;
