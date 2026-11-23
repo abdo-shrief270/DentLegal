@@ -1,0 +1,66 @@
+# Laravel API: style, static analysis and tests against PostgreSQL + pgvector and Redis (PROJECT1_PLAN.md §8.4).
+name: Backend
+
+on:
+  push:
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend.yml"
+  pull_request:
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend.yml"
+
+concurrency:
+  group: backend-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: backend
+    services:
+      postgres:
+        image: pgvector/pgvector:0.8.1-pg17
+        env:
+          POSTGRES_USER: dentlegal
+          POSTGRES_PASSWORD: dentlegal
+          POSTGRES_DB: dentlegal_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U dentlegal"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+      redis:
+        image: redis:7.4-alpine
+        ports: ["6379:6379"]
+    env:
+      DB_HOST: 127.0.0.1
+      DB_USERNAME: dentlegal
+      DB_PASSWORD: dentlegal
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          extensions: pdo_pgsql, redis, intl, sodium, zip, pcntl
+          coverage: none
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/composer/files
+          key: composer-${{ hashFiles('backend/composer.lock') }}
+      - run: composer install --no-interaction --no-progress --prefer-dist
+      - run: cp .env.example .env && php artisan key:generate
+      - name: Style (Pint)
+        run: vendor/bin/pint --test
+      - name: Static analysis (Larastan level 6)
+        run: vendor/bin/phpstan analyse --no-progress --memory-limit=1G
+      - name: Tests
+        run: php artisan test
+      - name: Audit dependencies
+        run: composer audit --no-interaction
