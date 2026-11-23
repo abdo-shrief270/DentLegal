@@ -26,6 +26,7 @@ app/
     Cases/              cases, DL-YYYY-NNNN codes, state machine, policy
     Knowledge/          sources, versions, chunks (pgvector), publish/archive lifecycle, «نص المادة» endpoint
     Ai/                 typed port to ai-svc (retrieve, mask, consult, case analyze/draft, extract, ingest) with retries
+    Feedback/           ratings, app feedback, usage stats and the nightly roll-up
     Admin/              admin API: dentist and lawyer invites, account activation
     Review/             lawyer review: queue, claim, versions with citation checks, internal notes, approval
     Consultations/      «المستشار القانوني الذكي»: threads, questions, queued answers
@@ -56,10 +57,13 @@ Each module keeps `Models`, `Enums`, `Actions` (one class per business operation
 | S7.1 Users & invites | `/api/v1/admin/dentists`, `/lawyers` (accounts plus pending invitations, masked phones, case / consultation counts, lawyers' review load and average review time), invite a dentist (SMS with the download link; first OTP login accepts it) or a lawyer (email with a one-time link to set a password and enrol two-factor; the licence and firm go to the lawyer profile), resend (60 s cooldown; a new link replaces the old one), activate / deactivate (revokes API tokens and sessions; disabled dashboard users are refused on the next request) |
 | S1.5 Knowledge admin | Sources with versions, upload a PDF for an existing or a new source → `uploaded` → queued ingestion by ai-svc (`ingest` queue) → `review` with the ingestion report (or `failed` with the reason), chunk preview, publish (atomic switch), archive, re-index with another extraction method |
 | Queues | Horizon supervisors for `default`, `ai` (Claude calls, up to 15 min) and `ingest` (up to 30 min) on a `redis-long` connection whose `retry_after` stays above the job timeouts |
+| S6.1–S6.2 Ratings & feedback | `POST /ratings` (upsert: the last rating wins; only the dentist's own answers, analyses and the AI or approved draft versions), `POST /feedback` (category, screen, platform, app version). Free text is pattern-masked and stored encrypted |
+| S7.3 Admin views | `/api/v1/admin/ratings` and `/feedback` with filters and `?format=csv` (UTF-8 with BOM for Excel, formula cells neutralised), `PATCH /feedback/{id}` status |
+| S6.3 Usage stats | `/api/v1/admin/stats/overview?range=7d\|30d`: active and invited dentists, answers and refusal rate, cases, drafts generated and approved, useful % per type, submit → draft p50/p90, citation validity, AI cost, daily series. `stats:roll-up` runs nightly at 00:20 Riyadh (`--days=N` back-fills); the schedule needs `php artisan schedule:work` (or cron) on the server |
 
-103 tests, 465 assertions: `php artisan test`.
+108 tests, 503 assertions: `php artisan test`.
 
-Next: ratings, feedback and stats for the admin dashboard, the knowledge-base ingestion job (S1.5), push notifications.
+Next: push notifications (S5.5, needs the Firebase project), the original-document link for lawyers, the approved draft as PDF (S4.5), and the mobile app's real API layer, the knowledge-base ingestion job (S1.5), push notifications.
 
 ## Run locally
 

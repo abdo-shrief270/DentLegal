@@ -5,6 +5,9 @@ use App\Modules\Admin\Http\Controllers\AdminUserController;
 use App\Modules\Cases\Http\Controllers\CaseController;
 use App\Modules\Consultations\Http\Controllers\ConsultationController;
 use App\Modules\Documents\Http\Controllers\DocumentController;
+use App\Modules\Feedback\Http\Controllers\AdminFeedbackController;
+use App\Modules\Feedback\Http\Controllers\AdminStatsController;
+use App\Modules\Feedback\Http\Controllers\DentistFeedbackController;
 use App\Modules\Identity\Http\Controllers\MeController;
 use App\Modules\Identity\Http\Controllers\OtpController;
 use App\Modules\Knowledge\Http\Controllers\ChunkController;
@@ -49,6 +52,9 @@ Route::prefix('v1')->middleware('app.version')->group(function (): void {
         Route::get('cases/{case}/draft', [DraftController::class, 'show'])->name('draft.show');
         Route::post('cases/{case}/submit-review', [DraftController::class, 'submitReview'])->name('draft.submit');
 
+        Route::post('ratings', [DentistFeedbackController::class, 'rate'])->name('ratings.store');
+        Route::post('feedback', [DentistFeedbackController::class, 'feedback'])->middleware('throttle:uploads')->name('feedback.store');
+
         Route::get('knowledge/chunks/{chunk}', [ChunkController::class, 'show'])->whereNumber('chunk')->name('knowledge.chunks.show');
     });
 });
@@ -73,6 +79,11 @@ Route::prefix('v1/admin')->middleware(['auth:sanctum', 'two_factor', 'role:admin
     Route::post('users/{id}/resend-invite', [AdminUserController::class, 'resendInvite'])->whereUuid('id')->name('admin.users.resend');
     Route::post('users/{user}/activate', [AdminUserController::class, 'activate'])->whereUuid('user')->name('admin.users.activate');
     Route::post('users/{user}/deactivate', [AdminUserController::class, 'deactivate'])->whereUuid('user')->name('admin.users.deactivate');
+
+    Route::get('ratings', [AdminFeedbackController::class, 'ratings'])->name('admin.ratings');
+    Route::get('feedback', [AdminFeedbackController::class, 'feedback'])->name('admin.feedback');
+    Route::patch('feedback/{id}', [AdminFeedbackController::class, 'setStatus'])->whereUuid('id')->name('admin.feedback.status');
+    Route::get('stats/overview', [AdminStatsController::class, 'overview'])->name('admin.stats');
 
     Route::get('knowledge/sources', [AdminKnowledgeController::class, 'sources'])->name('admin.knowledge.sources');
     Route::post('knowledge/sources/{source}/versions', [AdminKnowledgeController::class, 'upload'])->where('source', 'new|[0-9a-fA-F-]{36}')->name('admin.knowledge.upload');

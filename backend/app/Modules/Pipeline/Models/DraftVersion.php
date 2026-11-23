@@ -44,6 +44,12 @@ class DraftVersion extends Model
         return $this->belongsTo(User::class, 'author_id');
     }
 
+    /** @return BelongsTo<Draft, $this> */
+    public function draft(): BelongsTo
+    {
+        return $this->belongsTo(Draft::class);
+    }
+
     protected static function booted(): void
     {
         static::updating(function (self $version): void {

@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\RequireAppVersion;
 use App\Http\Middleware\RequireTwoFactor;
+use App\Modules\Feedback\Console\RollUpUsageStats;
 use App\Support\Api\ErrorRenderer;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -26,6 +27,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => RoleMiddleware::class,
         ]);
     })
+    ->withCommands([
+        RollUpUsageStats::class,
+    ])
     ->withExceptions(function (Exceptions $exceptions): void {
         ErrorRenderer::register($exceptions);
     })->create();

@@ -1,6 +1,6 @@
 // Laravel API client (PROJECT1_PLAN.md §4.2). Sanctum SPA cookie mode: the session lives in an httpOnly
 // cookie; $fetch sends it with `credentials: 'include'` and Laravel's XSRF token header.
-// Auth and lawyer calls match the Laravel routes (backend/routes); the admin calls follow the plan's contract.
+// Every call matches the Laravel routes (backend/routes/web.php, backend/routes/api.php).
 import type { CitationRef, DentistRow, FeedbackRow, InternalNote, KnowledgeChunk, KnowledgeSource, LawyerRow, RatingRow, ReviewDetail, ReviewListItem, Role, SessionUser, SourceVersion, StatsOverview } from '~/types/api'
 import type { DashboardApi, TwoFactorSetup } from '~/types/client'
 import { ApiError } from '~/types/client'
@@ -92,7 +92,16 @@ export function createHttpApi(baseURL: string): DashboardApi {
       setVerdict: (id, verdict, note) => unwrap(request(`/api/v1/lawyer/citation-samples/${id}/verdict`, { method: 'POST', body: { verdict, note } })),
     },
     admin: {
-      stats: async (range) => camel(await unwrap(request<{ data: unknown }>('/api/v1/admin/stats/overview', { query: { range } }))) as StatsOverview,
+      async stats(range) {
+        const s = camel(await unwrap(request<{ data: unknown }>('/api/v1/admin/stats/overview', { query: { range } }))) as StatsOverview
+        // Rates and times are null while there is no data yet; the cards show 0.
+        const z = (n: number | null | undefined) => n ?? 0
+        return {
+          ...s, citationValidity: z(s.citationValidity),
+          usefulRate: { overall: z(s.usefulRate.overall), consult: z(s.usefulRate.consult), analysis: z(s.usefulRate.analysis), draft: z(s.usefulRate.draft) },
+          uploadToDraftMinutes: { p50: z(s.uploadToDraftMinutes.p50), p90: z(s.uploadToDraftMinutes.p90) },
+        }
+      },
       listDentists: async () => camel(await unwrap(request<{ data: unknown }>('/api/v1/admin/dentists'))) as DentistRow[],
       inviteDentist: async (input) => camel(await unwrap(request<{ data: unknown }>('/api/v1/admin/dentists', { method: 'POST', body: input }))) as DentistRow,
       listLawyers: async () => camel(await unwrap(request<{ data: unknown }>('/api/v1/admin/lawyers'))) as LawyerRow[],
@@ -115,7 +124,6 @@ export function createHttpApi(baseURL: string): DashboardApi {
       publishVersion: async (id) => { await request(`/api/v1/admin/knowledge/versions/${id}/publish`, { method: 'POST' }) },
       archiveVersion: async (id) => { await request(`/api/v1/admin/knowledge/versions/${id}/archive`, { method: 'POST' }) },
       reindexVersion: async (id) => { await request(`/api/v1/admin/knowledge/versions/${id}/reindex`, { method: 'POST' }) },
-      // Not built in the API yet (next: ratings, feedback, stats).
       listRatings: async () => camel(await unwrap(request<{ data: unknown }>('/api/v1/admin/ratings'))) as RatingRow[],
       listFeedback: async () => camel(await unwrap(request<{ data: unknown }>('/api/v1/admin/feedback'))) as FeedbackRow[],
       setFeedbackStatus: async (id, status) => { await request(`/api/v1/admin/feedback/${id}`, { method: 'PATCH', body: { status } }) },

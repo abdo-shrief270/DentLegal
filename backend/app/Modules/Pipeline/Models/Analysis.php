@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Modules\Pipeline\Models;
 
+use App\Modules\Cases\Models\DentalCase;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
 /**
@@ -19,6 +21,7 @@ use Illuminate\Support\Carbon;
  * @property bool $needs_attention
  * @property bool $is_current
  * @property Carbon $created_at
+ * @property-read DentalCase $case
  */
 class Analysis extends Model
 {
@@ -29,5 +32,11 @@ class Analysis extends Model
     protected function casts(): array
     {
         return ['result_json' => 'encrypted:array', 'source_chunk_ids' => 'array', 'sources_sufficient' => 'boolean', 'needs_attention' => 'boolean', 'is_current' => 'boolean'];
+    }
+
+    /** @return BelongsTo<DentalCase, $this> */
+    public function case(): BelongsTo
+    {
+        return $this->belongsTo(DentalCase::class, 'case_id');
     }
 }
