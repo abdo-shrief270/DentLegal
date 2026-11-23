@@ -46,8 +46,10 @@ watch(() => sources.value.some((s) => s.versions.some((v) => v.status === 'proce
 onMounted(load)
 onBeforeUnmount(() => { if (poll) clearInterval(poll) })
 
+const file = shallowRef<File | null>(null)
 function onFile(event: { files: File[] }) {
-  form.fileName = event.files[0]?.name ?? ''
+  file.value = event.files[0] ?? null
+  form.fileName = file.value?.name ?? ''
 }
 
 const canUpload = computed(() => !!form.fileName && !!form.edition.trim() && (form.sourceId !== '__new' ? !!form.sourceId : !!form.newSourceTitle.trim()))
@@ -57,8 +59,9 @@ async function upload() {
   try {
     await api.admin.uploadVersion({
       sourceId: form.sourceId === '__new' ? null : form.sourceId, newSourceTitle: form.newSourceTitle.trim(), edition: form.edition.trim(),
-      effectiveFrom: form.effectiveFrom ? form.effectiveFrom.toISOString().slice(0, 10) : null, fileName: form.fileName, extractionMethod: form.extractionMethod,
+      effectiveFrom: form.effectiveFrom ? form.effectiveFrom.toISOString().slice(0, 10) : null, fileName: form.fileName, extractionMethod: form.extractionMethod, file: file.value,
     })
+    file.value = null
     uploadOpen.value = false
     Object.assign(form, { sourceId: null, newSourceTitle: '', edition: '', effectiveFrom: null, fileName: '', extractionMethod: 'auto' })
     toast.add({ severity: 'info', summary: 'بدأت الفهرسة', detail: 'سيظهر الإصدار «بانتظار النشر» عند اكتمالها لتراجعه قبل النشر.', life: 4000 })
@@ -150,7 +153,7 @@ async function archive(version: SourceVersion) {
           <Select v-model="form.extractionMethod" input-id="k-method" :options="extractionOptions" option-label="label" option-value="value" />
           <small class="muted">«تلقائي» يفحص طبقة النص ويحوّل للتعرّف الضوئي إن كانت تالفة.</small></div>
         <div class="flex flex-col gap-1.5"><span class="text-[13px] font-semibold">الملف (PDF أو DOCX)</span>
-          <FileUpload mode="basic" accept=".pdf,.docx,.txt" :max-file-size="50_000_000" choose-label="اختيار ملف" :auto="false" custom-upload @select="onFile" />
+          <FileUpload mode="basic" accept=".pdf" :max-file-size="50_000_000" choose-label="اختيار ملف" :auto="false" custom-upload @select="onFile" />
           <small v-if="form.fileName" class="muted">{{ form.fileName }}</small></div>
       </div>
       <template #footer>

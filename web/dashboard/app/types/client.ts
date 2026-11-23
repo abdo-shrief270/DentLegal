@@ -41,7 +41,7 @@ export interface DashboardApi {
     listSources(): Promise<KnowledgeSource[]>
     getVersion(versionId: string): Promise<{ source: KnowledgeSource; version: SourceVersion }>
     listChunks(versionId: string): Promise<KnowledgeChunk[]>
-    uploadVersion(input: { sourceId: string | null; newSourceTitle: string; edition: string; effectiveFrom: string | null; fileName: string; extractionMethod: SourceVersion['extractionMethod'] }): Promise<SourceVersion>
+    uploadVersion(input: { sourceId: string | null; newSourceTitle: string; edition: string; effectiveFrom: string | null; fileName: string; extractionMethod: SourceVersion['extractionMethod']; file?: File | null }): Promise<SourceVersion>
     publishVersion(versionId: string): Promise<void>
     archiveVersion(versionId: string): Promise<void>
     reindexVersion(versionId: string): Promise<void>

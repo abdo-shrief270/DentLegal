@@ -146,6 +146,9 @@ final class DashboardAuthController
             }
             $user = User::query()->create(['name' => $invitation->name, 'email' => $email, 'password' => $data['password'], 'status' => UserStatus::Active]);
             $user->assignRole($invitation->role->value);
+            if ($invitation->role === Role::Lawyer) {
+                $user->lawyerProfile()->create(['license_no' => (string) ($invitation->meta['license_no'] ?? ''), 'firm_name' => $invitation->meta['firm_name'] ?? null]);
+            }
             $invitation->forceFill(['accepted_at' => now()])->save();
             $this->audit->record('invitation.accepted', $user, $invitation, ['role' => $invitation->role->value]);
 

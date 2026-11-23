@@ -210,6 +210,28 @@ return [
             'timeout' => 60,
             'nice' => 0,
         ],
+        // Claude calls: consultant answers and the case pipeline (job timeouts 150 and 900 s).
+        'supervisor-ai' => [
+            'connection' => 'redis-long',
+            'queue' => ['ai'],
+            'balance' => 'simple',
+            'maxProcesses' => 2,
+            'memory' => 256,
+            'tries' => 3,
+            'timeout' => 960,
+            'nice' => 0,
+        ],
+        // Knowledge-source ingestion: rare, long (up to 30 min), one at a time.
+        'supervisor-ingest' => [
+            'connection' => 'redis-long',
+            'queue' => ['ingest'],
+            'balance' => 'simple',
+            'maxProcesses' => 1,
+            'memory' => 256,
+            'tries' => 2,
+            'timeout' => 1950,
+            'nice' => 0,
+        ],
     ],
 
     'environments' => [
@@ -219,12 +241,16 @@ return [
                 'balanceMaxShift' => 1,
                 'balanceCooldown' => 3,
             ],
+            'supervisor-ai' => ['maxProcesses' => 6],
+            'supervisor-ingest' => [],
         ],
 
         'local' => [
             'supervisor-1' => [
                 'maxProcesses' => 3,
             ],
+            'supervisor-ai' => [],
+            'supervisor-ingest' => [],
         ],
     ],
 

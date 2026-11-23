@@ -26,6 +26,7 @@ app/
     Cases/              cases, DL-YYYY-NNNN codes, state machine, policy
     Knowledge/          sources, versions, chunks (pgvector), publish/archive lifecycle, «نص المادة» endpoint
     Ai/                 typed port to ai-svc (retrieve, mask, consult, case analyze/draft, extract, ingest) with retries
+    Admin/              admin API: dentist and lawyer invites, account activation
     Review/             lawyer review: queue, claim, versions with citation checks, internal notes, approval
     Consultations/      «المستشار القانوني الذكي»: threads, questions, queued answers
     Documents/          case uploads: type checked by bytes, encrypted at rest (per-file key wrapped by a master key)
@@ -52,10 +53,13 @@ Each module keeps `Models`, `Enums`, `Actions` (one class per business operation
 | S2.6 Consult API | Suggested questions (config), threads list (cursor), thread with messages, ask (new thread or follow-up) → 202 with the pending answer, poll `GET /consultation-messages/{id}`. Questions are pattern-masked before storage, then NER-masked by ai-svc with the thread's placeholder numbering before Claude sees them; the last 3 answered turns go as history. Consent `ai_processing`, 20/hour and 100/day per dentist, one open question per thread (409 `answer_pending`), `Idempotency-Key`. Answers are `answered` / `refused` (with the reason, no Claude call when retrieval is weak) / `failed` (with a code); only verified, cited sources are returned. Answers are stored encrypted |
 | S5.7 Dashboard auth | Cookie session (`GET /sanctum/csrf-cookie`, then `POST /login`), `POST /two-factor-challenge` (TOTP or a one-time recovery code; the pending login expires after 5 min), `GET /user`, `POST /logout`. Invite links: `GET /invitations/{token}`, `POST /invitations/{token}/accept` sets the password and starts enrolment (QR URI + 8 recovery codes shown once), `POST /user/confirmed-two-factor-authentication` turns it on. The `two_factor` middleware closes every lawyer and admin route until a code was checked in this session, and refuses API tokens. Throttled 5/min per email + IP and per user + IP; 2 h idle timeout (`SESSION_LIFETIME`). TOTP is RFC 6238 in `Identity/TwoFactor/Totp.php` (tested against the RFC vectors), so no Fortify: its current version pulls in passkey/WebAuthn packages we don't use |
 | S4.2–S4.4 Lawyer review | `/api/v1/lawyer/reviews` (tabs `unclaimed` / `mine` / `approved`, counts), detail (case, masked documents as D refs, the AI run's sources as S refs with scores, all versions, quality checks, internal notes), atomic claim (409 `already_claimed`), save an edited version (new immutable version; each citation re-checked against its source or document page; legal claims without a valid source flagged), internal notes (never shown to the dentist), approve (locks the version, case → `approved`, `DraftApproved` event for the push notification; unverified citations need `confirm_warnings`). Only the claiming lawyer edits; the dentist keeps seeing the AI draft until approval, then the approved version |
+| S7.1 Users & invites | `/api/v1/admin/dentists`, `/lawyers` (accounts plus pending invitations, masked phones, case / consultation counts, lawyers' review load and average review time), invite a dentist (SMS with the download link; first OTP login accepts it) or a lawyer (email with a one-time link to set a password and enrol two-factor; the licence and firm go to the lawyer profile), resend (60 s cooldown; a new link replaces the old one), activate / deactivate (revokes API tokens and sessions; disabled dashboard users are refused on the next request) |
+| S1.5 Knowledge admin | Sources with versions, upload a PDF for an existing or a new source → `uploaded` → queued ingestion by ai-svc (`ingest` queue) → `review` with the ingestion report (or `failed` with the reason), chunk preview, publish (atomic switch), archive, re-index with another extraction method |
+| Queues | Horizon supervisors for `default`, `ai` (Claude calls, up to 15 min) and `ingest` (up to 30 min) on a `redis-long` connection whose `retry_after` stays above the job timeouts |
 
-97 tests, 405 assertions: `php artisan test`.
+103 tests, 465 assertions: `php artisan test`.
 
-Next: admin API, the knowledge-base ingestion job (S1.5), push notifications.
+Next: ratings, feedback and stats for the admin dashboard, the knowledge-base ingestion job (S1.5), push notifications.
 
 ## Run locally
 

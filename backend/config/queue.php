@@ -73,6 +73,17 @@ return [
             'after_commit' => false,
         ],
 
+        // AI and ingestion jobs run for up to 15 and 30 minutes: retry_after must stay above their timeouts, or a job
+        // still running would be handed to a second worker. Jobs pick it via dentlegal.queues.long_connection.
+        'redis-long' => [
+            'driver' => 'redis',
+            'connection' => env('REDIS_QUEUE_CONNECTION', 'default'),
+            'queue' => 'ai',
+            'retry_after' => 2000,
+            'block_for' => null,
+            'after_commit' => false,
+        ],
+
         'deferred' => [
             'driver' => 'deferred',
         ],

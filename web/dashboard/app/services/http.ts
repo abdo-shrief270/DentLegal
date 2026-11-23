@@ -1,7 +1,7 @@
 // Laravel API client (PROJECT1_PLAN.md §4.2). Sanctum SPA cookie mode: the session lives in an httpOnly
 // cookie; $fetch sends it with `credentials: 'include'` and Laravel's XSRF token header.
 // Auth and lawyer calls match the Laravel routes (backend/routes); the admin calls follow the plan's contract.
-import type { CitationRef, InternalNote, ReviewDetail, ReviewListItem, Role, SessionUser } from '~/types/api'
+import type { CitationRef, DentistRow, FeedbackRow, InternalNote, KnowledgeChunk, KnowledgeSource, LawyerRow, RatingRow, ReviewDetail, ReviewListItem, Role, SessionUser, SourceVersion, StatsOverview } from '~/types/api'
 import type { DashboardApi, TwoFactorSetup } from '~/types/client'
 import { ApiError } from '~/types/client'
 
@@ -15,7 +15,7 @@ export function createHttpApi(baseURL: string): DashboardApi {
     try {
       const token = xsrfToken()
       return await $fetch<T>(path, {
-        baseURL, credentials: 'include', method: options.method ?? 'GET', body: options.body as Record<string, unknown> | undefined, query: options.query,
+        baseURL, credentials: 'include', method: options.method ?? 'GET', body: options.body as Record<string, unknown> | FormData | undefined, query: options.query,
         headers: { Accept: 'application/json', ...(token ? { 'X-XSRF-TOKEN': token } : {}) },
       })
     } catch (error: unknown) {
@@ -92,23 +92,33 @@ export function createHttpApi(baseURL: string): DashboardApi {
       setVerdict: (id, verdict, note) => unwrap(request(`/api/v1/lawyer/citation-samples/${id}/verdict`, { method: 'POST', body: { verdict, note } })),
     },
     admin: {
-      stats: (range) => unwrap(request('/api/v1/admin/stats/overview', { query: { range } })),
-      listDentists: () => unwrap(request('/api/v1/admin/dentists')),
-      inviteDentist: (input) => unwrap(request('/api/v1/admin/dentists', { method: 'POST', body: input })),
-      listLawyers: () => unwrap(request('/api/v1/admin/lawyers')),
-      inviteLawyer: (input) => unwrap(request('/api/v1/admin/lawyers', { method: 'POST', body: input })),
-      resendInvite: (id) => request(`/api/v1/admin/users/${id}/resend-invite`, { method: 'POST' }),
-      setActive: (id, active) => request(`/api/v1/admin/users/${id}/${active ? 'activate' : 'deactivate'}`, { method: 'POST' }),
-      listSources: () => unwrap(request('/api/v1/admin/knowledge/sources')),
-      getVersion: (id) => unwrap(request(`/api/v1/admin/knowledge/versions/${id}`)),
-      listChunks: (id) => unwrap(request(`/api/v1/admin/knowledge/versions/${id}/chunks`)),
-      uploadVersion: (input) => unwrap(request(`/api/v1/admin/knowledge/sources/${input.sourceId ?? 'new'}/versions`, { method: 'POST', body: input })),
-      publishVersion: (id) => request(`/api/v1/admin/knowledge/versions/${id}/publish`, { method: 'POST' }),
-      archiveVersion: (id) => request(`/api/v1/admin/knowledge/versions/${id}/archive`, { method: 'POST' }),
-      reindexVersion: (id) => request(`/api/v1/admin/knowledge/versions/${id}/reindex`, { method: 'POST' }),
-      listRatings: () => unwrap(request('/api/v1/admin/ratings')),
-      listFeedback: () => unwrap(request('/api/v1/admin/feedback')),
-      setFeedbackStatus: (id, status) => request(`/api/v1/admin/feedback/${id}`, { method: 'PATCH', body: { status } }),
+      stats: async (range) => camel(await unwrap(request<{ data: unknown }>('/api/v1/admin/stats/overview', { query: { range } }))) as StatsOverview,
+      listDentists: async () => camel(await unwrap(request<{ data: unknown }>('/api/v1/admin/dentists'))) as DentistRow[],
+      inviteDentist: async (input) => camel(await unwrap(request<{ data: unknown }>('/api/v1/admin/dentists', { method: 'POST', body: input }))) as DentistRow,
+      listLawyers: async () => camel(await unwrap(request<{ data: unknown }>('/api/v1/admin/lawyers'))) as LawyerRow[],
+      inviteLawyer: async (input) => camel(await unwrap(request<{ data: unknown }>('/api/v1/admin/lawyers', { method: 'POST', body: snake(input) }))) as LawyerRow,
+      resendInvite: async (id) => { await request(`/api/v1/admin/users/${id}/resend-invite`, { method: 'POST' }) },
+      setActive: async (id, active) => { await request(`/api/v1/admin/users/${id}/${active ? 'activate' : 'deactivate'}`, { method: 'POST' }) },
+      listSources: async () => camel(await unwrap(request<{ data: unknown }>('/api/v1/admin/knowledge/sources'))) as KnowledgeSource[],
+      getVersion: async (id) => camel(await unwrap(request<{ data: unknown }>(`/api/v1/admin/knowledge/versions/${id}`))) as { source: KnowledgeSource; version: SourceVersion },
+      listChunks: async (id) => camel(await unwrap(request<{ data: unknown }>(`/api/v1/admin/knowledge/versions/${id}/chunks`, { query: { per_page: '200' } }))) as KnowledgeChunk[],
+      async uploadVersion(input) {
+        if (!input.file) throw new ApiError('file_required', 'اختر ملف PDF أولًا.')
+        const form = new FormData()
+        form.append('file', input.file)
+        form.append('edition', input.edition)
+        form.append('extraction_method', input.extractionMethod)
+        if (input.effectiveFrom) form.append('effective_from', input.effectiveFrom)
+        if (!input.sourceId) form.append('new_source_title', input.newSourceTitle)
+        return camel(await unwrap(request<{ data: unknown }>(`/api/v1/admin/knowledge/sources/${input.sourceId ?? 'new'}/versions`, { method: 'POST', body: form }))) as SourceVersion
+      },
+      publishVersion: async (id) => { await request(`/api/v1/admin/knowledge/versions/${id}/publish`, { method: 'POST' }) },
+      archiveVersion: async (id) => { await request(`/api/v1/admin/knowledge/versions/${id}/archive`, { method: 'POST' }) },
+      reindexVersion: async (id) => { await request(`/api/v1/admin/knowledge/versions/${id}/reindex`, { method: 'POST' }) },
+      // Not built in the API yet (next: ratings, feedback, stats).
+      listRatings: async () => camel(await unwrap(request<{ data: unknown }>('/api/v1/admin/ratings'))) as RatingRow[],
+      listFeedback: async () => camel(await unwrap(request<{ data: unknown }>('/api/v1/admin/feedback'))) as FeedbackRow[],
+      setFeedbackStatus: async (id, status) => { await request(`/api/v1/admin/feedback/${id}`, { method: 'PATCH', body: { status } }) },
     },
   }
 }

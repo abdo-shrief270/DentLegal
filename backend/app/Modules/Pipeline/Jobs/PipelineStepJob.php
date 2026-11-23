@@ -30,7 +30,7 @@ abstract class PipelineStepJob implements ShouldQueue
 
     public function __construct(public string $pipelineJobId)
     {
-        $this->onQueue('ai');
+        $this->onQueue('ai')->onConnection(config('dentlegal.queues.long_connection'));
     }
 
     public function handle(): void

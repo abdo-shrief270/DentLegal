@@ -1,5 +1,7 @@
 <?php
 
+use App\Modules\Admin\Http\Controllers\AdminKnowledgeController;
+use App\Modules\Admin\Http\Controllers\AdminUserController;
 use App\Modules\Cases\Http\Controllers\CaseController;
 use App\Modules\Consultations\Http\Controllers\ConsultationController;
 use App\Modules\Documents\Http\Controllers\DocumentController;
@@ -60,4 +62,23 @@ Route::prefix('v1/lawyer')->middleware(['auth:sanctum', 'two_factor', 'role:lawy
     Route::post('reviews/{draft}/versions', [ReviewController::class, 'saveVersion'])->name('lawyer.reviews.versions');
     Route::post('reviews/{draft}/notes', [ReviewController::class, 'addNote'])->name('lawyer.reviews.notes');
     Route::post('reviews/{draft}/approve', [ReviewController::class, 'approve'])->name('lawyer.reviews.approve');
+});
+
+// Admin: dashboard cookie session with two-factor checked in this session.
+Route::prefix('v1/admin')->middleware(['auth:sanctum', 'two_factor', 'role:admin', 'throttle:dashboard'])->group(function (): void {
+    Route::get('dentists', [AdminUserController::class, 'dentists'])->name('admin.dentists.index');
+    Route::post('dentists', [AdminUserController::class, 'inviteDentist'])->name('admin.dentists.invite');
+    Route::get('lawyers', [AdminUserController::class, 'lawyers'])->name('admin.lawyers.index');
+    Route::post('lawyers', [AdminUserController::class, 'inviteLawyer'])->name('admin.lawyers.invite');
+    Route::post('users/{id}/resend-invite', [AdminUserController::class, 'resendInvite'])->whereUuid('id')->name('admin.users.resend');
+    Route::post('users/{user}/activate', [AdminUserController::class, 'activate'])->whereUuid('user')->name('admin.users.activate');
+    Route::post('users/{user}/deactivate', [AdminUserController::class, 'deactivate'])->whereUuid('user')->name('admin.users.deactivate');
+
+    Route::get('knowledge/sources', [AdminKnowledgeController::class, 'sources'])->name('admin.knowledge.sources');
+    Route::post('knowledge/sources/{source}/versions', [AdminKnowledgeController::class, 'upload'])->where('source', 'new|[0-9a-fA-F-]{36}')->name('admin.knowledge.upload');
+    Route::get('knowledge/versions/{version}', [AdminKnowledgeController::class, 'version'])->whereUuid('version')->name('admin.knowledge.version');
+    Route::get('knowledge/versions/{version}/chunks', [AdminKnowledgeController::class, 'chunks'])->whereUuid('version')->name('admin.knowledge.chunks');
+    Route::post('knowledge/versions/{version}/publish', [AdminKnowledgeController::class, 'publish'])->whereUuid('version')->name('admin.knowledge.publish');
+    Route::post('knowledge/versions/{version}/archive', [AdminKnowledgeController::class, 'archive'])->whereUuid('version')->name('admin.knowledge.archive');
+    Route::post('knowledge/versions/{version}/reindex', [AdminKnowledgeController::class, 'reindex'])->whereUuid('version')->name('admin.knowledge.reindex');
 });

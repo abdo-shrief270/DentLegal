@@ -73,6 +73,25 @@ return [
         ],
     ],
 
+    'invitations' => [
+        'dentist_days' => 30,
+        'dashboard_days' => 7,
+        // The SMS a dentist receives with the invite; the store links come with D9/D10.
+        'app_download_url' => env('APP_DOWNLOAD_URL', 'https://dentlegal.app/download'),
+        'dashboard_url' => env('DASHBOARD_URL', 'http://localhost:3000'),
+        'resend_cooldown_s' => 60,
+    ],
+
+    'queues' => [
+        // The queue connection for long AI jobs (`redis-long` in config/queue.php); tests use the default (sync).
+        'long_connection' => env('QUEUE_LONG_CONNECTION', 'redis-long'),
+    ],
+
+    'knowledge' => [
+        'disk' => env('KNOWLEDGE_DISK', 'knowledge'),
+        'max_mb' => 50,
+    ],
+
     'cases' => [
         'code_prefix' => 'DL',
     ],

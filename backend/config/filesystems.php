@@ -38,6 +38,13 @@ return [
             'report' => false,
         ],
 
+        // Public regulatory sources as uploaded (not personal data); ai-svc ingests them.
+        'knowledge' => [
+            'driver' => 'local',
+            'root' => storage_path('app/knowledge'),
+            'throw' => true,
+        ],
+
         // Case documents, encrypted per file by DocumentVault before they are written.
         'documents' => [
             'driver' => 'local',

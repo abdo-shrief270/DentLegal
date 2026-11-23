@@ -69,6 +69,7 @@ final class StartAnalysis
             ->catch(function (Throwable $e) use ($id): void {
                 app(MarkPipelineFailed::class)($id, $e);
             })
+            ->onConnection(config('dentlegal.queues.long_connection'))
             ->onQueue('ai')
             ->dispatch();
 

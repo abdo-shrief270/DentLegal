@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Modules\Identity\Models;
 
+use App\Modules\Cases\Models\DentalCase;
+use App\Modules\Consultations\Models\Consultation;
 use App\Modules\Identity\Enums\ConsentType;
 use App\Modules\Identity\Enums\Role;
 use App\Modules\Identity\Enums\UserStatus;
@@ -31,6 +33,7 @@ use Spatie\Permission\Traits\HasRoles;
  * @property Carbon|null $two_factor_confirmed_at
  * @property int|null $two_factor_last_step
  * @property-read DentistProfile|null $dentistProfile
+ * @property-read LawyerProfile|null $lawyerProfile
  */
 class User extends Authenticatable
 {
@@ -56,6 +59,24 @@ class User extends Authenticatable
     protected static function newFactory(): UserFactory
     {
         return UserFactory::new();
+    }
+
+    /** @return HasMany<DentalCase, $this> */
+    public function cases(): HasMany
+    {
+        return $this->hasMany(DentalCase::class, 'dentist_id');
+    }
+
+    /** @return HasMany<Consultation, $this> */
+    public function consultations(): HasMany
+    {
+        return $this->hasMany(Consultation::class);
+    }
+
+    /** @return HasOne<LawyerProfile, $this> */
+    public function lawyerProfile(): HasOne
+    {
+        return $this->hasOne(LawyerProfile::class);
     }
 
     /** @return HasOne<DentistProfile, $this> */
