@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 
@@ -122,6 +123,18 @@ class HttpCasesRepository implements CasesRepository {
       text: c['text'] as String? ?? '',
       score: 0,
     );
+  }
+
+  @override
+  Future<DocumentFile> openDocument(String documentId) async {
+    final link = await _api.get<Json>('/documents/$documentId/view-url');
+    try {
+      final r = await _api.dio.get<List<int>>(link['url'] as String, options: Options(responseType: ResponseType.bytes));
+      final mime = (r.headers.value('content-type') ?? 'application/octet-stream').split(';').first.trim();
+      return DocumentFile(bytes: Uint8List.fromList(r.data ?? const []), mime: mime, name: documentId);
+    } on DioException {
+      throw const ApiError('document_unavailable', 'تعذّر فتح المستند. حاول مرة أخرى.');
+    }
   }
 
   @override

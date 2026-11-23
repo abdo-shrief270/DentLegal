@@ -267,6 +267,65 @@ final class CasePipelineFamily extends $Family with $FunctionalFamilyOverride<St
   String toString() => r'casePipelineProvider';
 }
 
+/// Not kept alive: the bytes leave memory when the viewer closes.
+
+@ProviderFor(caseDocumentFile)
+final caseDocumentFileProvider = CaseDocumentFileFamily._();
+
+/// Not kept alive: the bytes leave memory when the viewer closes.
+
+final class CaseDocumentFileProvider extends $FunctionalProvider<AsyncValue<DocumentFile>, DocumentFile, FutureOr<DocumentFile>>
+    with $FutureModifier<DocumentFile>, $FutureProvider<DocumentFile> {
+  /// Not kept alive: the bytes leave memory when the viewer closes.
+  CaseDocumentFileProvider._({required CaseDocumentFileFamily super.from, required String super.argument})
+    : super(retry: null, name: r'caseDocumentFileProvider', isAutoDispose: true, dependencies: null, $allTransitiveDependencies: null);
+
+  @override
+  String debugGetCreateSourceHash() => _$caseDocumentFileHash();
+
+  @override
+  String toString() {
+    return r'caseDocumentFileProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<DocumentFile> $createElement($ProviderPointer pointer) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<DocumentFile> create(Ref ref) {
+    final argument = this.argument as String;
+    return caseDocumentFile(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is CaseDocumentFileProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$caseDocumentFileHash() => r'47f6e97a506be3ad202a51850122b31380295b29';
+
+/// Not kept alive: the bytes leave memory when the viewer closes.
+
+final class CaseDocumentFileFamily extends $Family with $FunctionalFamilyOverride<FutureOr<DocumentFile>, String> {
+  CaseDocumentFileFamily._() : super(retry: null, name: r'caseDocumentFileProvider', dependencies: null, $allTransitiveDependencies: null, isAutoDispose: true);
+
+  /// Not kept alive: the bytes leave memory when the viewer closes.
+
+  CaseDocumentFileProvider call(String documentId) => CaseDocumentFileProvider._(argument: documentId, from: this);
+
+  @override
+  String toString() => r'caseDocumentFileProvider';
+}
+
 @ProviderFor(regulationSource)
 final regulationSourceProvider = RegulationSourceFamily._();
 

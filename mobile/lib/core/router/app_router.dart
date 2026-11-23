@@ -16,6 +16,7 @@ import '../../features/cases/presentation/analysis_page.dart';
 import '../../features/cases/presentation/approved_page.dart';
 import '../../features/cases/presentation/case_details_page.dart';
 import '../../features/cases/presentation/cases_page.dart';
+import '../../features/cases/presentation/document_viewer_page.dart';
 import '../../features/cases/presentation/draft_page.dart';
 import '../../features/cases/presentation/home_page.dart';
 import '../../features/cases/presentation/processing_page.dart';
@@ -79,6 +80,13 @@ GoRouter appRouter(Ref ref) {
                         path: 'processing',
                         parentNavigatorKey: _rootKey,
                         builder: (_, state) => ProcessingPage(caseId: state.pathParameters['id']!),
+                      ),
+                      GoRoute(
+                        path: 'documents/:docId',
+                        parentNavigatorKey: _rootKey,
+                        builder: (_, state) => ScreenGuard(
+                          child: DocumentViewerPage(documentId: state.pathParameters['docId']!, title: state.uri.queryParameters['name'] ?? 'المستند'),
+                        ),
                       ),
                       GoRoute(
                         path: 'analysis',

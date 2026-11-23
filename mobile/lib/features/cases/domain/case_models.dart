@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'case_models.freezed.dart';
@@ -175,3 +177,15 @@ abstract class NewCaseInput with _$NewCaseInput {
 }
 
 enum RatingTarget { consultAnswer, analysis, draft }
+
+/// A case document's original bytes, held in memory only for the viewer (S3.12).
+class DocumentFile {
+  const DocumentFile({required this.bytes, required this.mime, required this.name});
+
+  final Uint8List bytes;
+  final String mime;
+  final String name;
+
+  bool get isPdf => mime == 'application/pdf';
+  bool get isImage => mime.startsWith('image/');
+}

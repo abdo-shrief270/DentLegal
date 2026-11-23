@@ -53,7 +53,8 @@ Protections (real API mode on a device):
 | | |
 |---|---|
 | Biometric lock (S5.4) | `local_auth`: locked on a signed-in cold start and after 5 minutes in the background; the switch in «حسابي» (on by default, turning it on asks for the biometric); «تسجيل الدخول برمز التحقق» signs out to the OTP flow. `lib/core/security/` |
-| Screenshot protection (S9.1) | `screen_protector` on the analysis, draft and approved screens (Android FLAG_SECURE, iOS screenshot protection); iOS app-switcher snapshot blurred |
+| Document viewer (S3.12) | Tap a document on the case screen: the original comes through the 5-minute signed link into memory (PDF with `pdfrx`, images with zoom), never to disk, with screenshots blocked |
+| Screenshot protection (S9.1) | `screen_protector` on the document viewer, analysis, draft and approved screens (Android FLAG_SECURE, iOS screenshot protection); iOS app-switcher snapshot blurred |
 
 Still to add: push (`firebase_messaging`, once the Firebase project exists) and the native document scanner. Not yet run on a physical device: camera, file picker, secure storage, biometrics and screenshot blocking are checked by the analyzer and unit tests only.
 

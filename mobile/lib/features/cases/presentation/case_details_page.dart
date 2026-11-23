@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -136,6 +137,7 @@ class _Documents extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.only(bottom: 8),
           child: AppCard(
+            onTap: d.id.startsWith('local-') ? null : () => context.push('/cases/${c.id}/documents/${d.id}?name=${Uri.encodeQueryComponent(d.name)}'),
             child: Row(
               children: [
                 Container(

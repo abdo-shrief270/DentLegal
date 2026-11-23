@@ -19,5 +19,9 @@ abstract interface class CasesRepository {
 
   /// Regulation text behind a citation (`GET /knowledge/chunks/{id}`), for the «نص المادة» sheet.
   Future<RegulationSource> getSource(Citation citation);
+
+  /// The original file through a 5-minute signed link (`GET /documents/{id}/view-url`), into memory, never to disk.
+  Future<DocumentFile> openDocument(String documentId);
+
   Future<void> rate({required RatingTarget target, required String targetId, required bool useful, String? comment});
 }

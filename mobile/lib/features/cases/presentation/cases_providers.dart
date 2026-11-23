@@ -30,6 +30,10 @@ Future<CaseDraft> caseDraft(Ref ref, String id) => ref.watch(casesRepositoryProv
 @riverpod
 Stream<PipelineProgress> casePipeline(Ref ref, String id) => ref.watch(casesRepositoryProvider).watchPipeline(id);
 
+/// Not kept alive: the bytes leave memory when the viewer closes.
+@riverpod
+Future<DocumentFile> caseDocumentFile(Ref ref, String documentId) => ref.watch(casesRepositoryProvider).openDocument(documentId);
+
 @riverpod
 Future<RegulationSource> regulationSource(Ref ref, Citation citation) => ref.watch(casesRepositoryProvider).getSource(citation);
 

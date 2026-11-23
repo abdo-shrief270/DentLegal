@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+import 'dart:convert';
 import 'dart:async';
 
 import '../../../core/fake/fake_latency.dart';
@@ -127,4 +129,12 @@ class FakeCasesRepository implements CasesRepository {
 
   @override
   Future<void> rate({required RatingTarget target, required String targetId, required bool useful, String? comment}) => fakeLatency(250);
+
+  /// Fake mode has no stored files: a text page stands in for the original.
+  @override
+  Future<DocumentFile> openDocument(String documentId) async {
+    await fakeLatency(400);
+    final text = 'معاينة تجريبية للمستند\n\nفي الوضع الحقيقي يُعرض الملف الأصلي (PDF أو صورة) من الخادم عبر رابط مؤقت، في الذاكرة فقط، مع منع لقطات الشاشة.';
+    return DocumentFile(bytes: Uint8List.fromList(utf8.encode(text)), mime: 'text/plain', name: 'معاينة');
+  }
 }

@@ -313,6 +313,25 @@ void main() {
     });
   });
 
+  test('a document opens from its signed link into memory', () async {
+    final repo = HttpCasesRepository(
+      client({
+        'GET /documents/d1/view-url': (_) => {
+          'data': {'url': 'http://api.test/api/v1/documents/d1/file?expires=1&u=x&signature=abc', 'expires_at': '2026-11-23T10:05:00Z'},
+        },
+        'GET /documents/d1/file': (r) {
+          expect(r.uri.queryParameters['signature'], 'abc');
+          return {'pdf': 'bytes'};
+        },
+      }),
+    );
+
+    final f = await repo.openDocument('d1');
+
+    expect(f.mime, 'application/json'); // the fake adapter answers JSON; the API sends the file's own type
+    expect(f.bytes, isNotEmpty);
+  });
+
   group('consultant', () {
     Map<String, Object?> answer(String status) => {
       'data': {
