@@ -25,7 +25,9 @@ app/
     Audit/              append-only audit log (database trigger blocks UPDATE/DELETE)
     Cases/              cases, DL-YYYY-NNNN codes, state machine, policy
     Knowledge/          sources, versions, chunks (pgvector), publish/archive lifecycle, «نص المادة» endpoint
-    Ai/                 typed port to ai-svc (retrieve, mask, health) with retries and fail-closed masking
+    Ai/                 typed port to ai-svc (retrieve, mask, consult, case analyze/draft, extract, ingest) with retries
+    Documents/          case uploads: type checked by bytes, encrypted at rest (per-file key wrapped by a master key)
+    Pipeline/           queued case pipeline (extract → analyze → draft → ready), AI run records, analyses, drafts
 ```
 
 Each module keeps `Models`, `Enums`, `Actions` (one class per business operation, used by controllers, jobs and tests), `Policies` and `Http` (controllers, form requests, resources). Controllers stay thin; every state change goes through an action that runs in a database transaction and writes the audit log.
@@ -42,10 +44,13 @@ Each module keeps `Models`, `Enums`, `Actions` (one class per business operation
 | S1.4 KB schema | `knowledge_*` tables, HNSW / GIN / trigram partial indexes on active chunks, generated Arabic `tsvector`, one active version per source, active chunks must be embedded |
 | S1.5 (Laravel side) | Publish archives the previous version and switches chunks in one transaction |
 | ai-svc client | `AiService` port + HTTP adapter: retrieve, mask, consult, analyzeCase, draftCase, extractDocument, ingestSource (service token, per-route timeouts, retries on 5xx/connection errors only) |
+| S3.2 Documents | Upload (PDF, JPEG, PNG by magic bytes; ≤ 20 MB; ≤ 15 per case; only while the case is a draft) and delete. Files are encrypted with XChaCha20-Poly1305 under a per-file key wrapped by `DOCUMENT_MASTER_KEY`, with the document id bound in, so a file can't be swapped onto another row |
+| S3.8 Pipeline | `POST /cases/{id}/analysis` (consent `ai_processing`, ≥ 1 document, 10/day, `Idempotency-Key`, one run per case at a time) queues a chain on the `ai` queue: extract + mask (only masked text is stored) → analysis → draft → `ai_ready`. Overload and network errors retry with backoff; refusals and invalid output fail the run and the case with a code. A retry skips documents already extracted. Every Claude call is an `ai_runs` row with its sources |
+| Results | `GET …/analysis/status` (steps, progress), `GET …/analysis`, `GET …/draft` (placeholders rendered: dentist name, licence, «المريض (الرمز P-…)»), `POST …/submit-review` (consent `lawyer_access`; case → `lawyer_review`) |
 
-58 tests, 182 assertions: `php artisan test`.
+69 tests, 238 assertions: `php artisan test`.
 
-Next: documents and uploads (S3.2), the analysis pipeline jobs (S3.8), consultations (S2.6), dashboard auth + 2FA (S5.7), lawyer and admin APIs, and ai-svc itself.
+Next: consultations (S2.6), dashboard auth + 2FA (S5.7), lawyer and admin APIs, the knowledge-base ingestion job (S1.5), push notifications.
 
 ## Run locally
 

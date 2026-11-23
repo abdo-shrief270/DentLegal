@@ -52,6 +52,12 @@ return [
         'retries' => 2,
     ],
 
+    'documents' => [
+        'disk' => env('DOCUMENTS_DISK', 'documents'),
+        // 32 random bytes, base64. Separate from APP_KEY; kept offline with the backup key (§8.7). Losing it loses the files.
+        'master_key' => env('DOCUMENT_MASTER_KEY'),
+    ],
+
     'cases' => [
         'code_prefix' => 'DL',
     ],

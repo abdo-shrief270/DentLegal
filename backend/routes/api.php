@@ -1,9 +1,12 @@
 <?php
 
 use App\Modules\Cases\Http\Controllers\CaseController;
+use App\Modules\Documents\Http\Controllers\DocumentController;
 use App\Modules\Identity\Http\Controllers\MeController;
 use App\Modules\Identity\Http\Controllers\OtpController;
 use App\Modules\Knowledge\Http\Controllers\ChunkController;
+use App\Modules\Pipeline\Http\Controllers\AnalysisController;
+use App\Modules\Pipeline\Http\Controllers\DraftController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -27,6 +30,13 @@ Route::prefix('v1')->middleware('app.version')->group(function (): void {
         Route::get('cases', [CaseController::class, 'index'])->name('cases.index');
         Route::post('cases', [CaseController::class, 'store'])->name('cases.store');
         Route::get('cases/{case}', [CaseController::class, 'show'])->name('cases.show');
+        Route::post('cases/{case}/documents', [DocumentController::class, 'store'])->middleware('throttle:uploads')->name('documents.store');
+        Route::delete('cases/{case}/documents/{document}', [DocumentController::class, 'destroy'])->name('documents.destroy');
+        Route::post('cases/{case}/analysis', [AnalysisController::class, 'start'])->name('analysis.start');
+        Route::get('cases/{case}/analysis/status', [AnalysisController::class, 'status'])->name('analysis.status');
+        Route::get('cases/{case}/analysis', [AnalysisController::class, 'show'])->name('analysis.show');
+        Route::get('cases/{case}/draft', [DraftController::class, 'show'])->name('draft.show');
+        Route::post('cases/{case}/submit-review', [DraftController::class, 'submitReview'])->name('draft.submit');
 
         Route::get('knowledge/chunks/{chunk}', [ChunkController::class, 'show'])->whereNumber('chunk')->name('knowledge.chunks.show');
     });

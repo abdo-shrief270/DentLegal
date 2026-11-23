@@ -6,6 +6,7 @@ use App\Modules\Ai\AiService;
 use App\Modules\Ai\HttpAiService;
 use App\Modules\Cases\Models\DentalCase;
 use App\Modules\Cases\Policies\CasePolicy;
+use App\Modules\Documents\Models\Document;
 use App\Modules\Identity\Sms\LogSmsGateway;
 use App\Modules\Identity\Sms\SmsGateway;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -34,8 +35,11 @@ class AppServiceProvider extends ServiceProvider
 
         Gate::policy(DentalCase::class, CasePolicy::class);
         Route::model('case', DentalCase::class);
+        Route::model('document', Document::class);
 
         // Authenticated API: 120 requests / minute per token (PROJECT1_PLAN.md §4.7).
+        // Uploads: 60 files / hour per dentist (§4.7).
+        RateLimiter::for('uploads', fn (Request $request) => Limit::perHour(60)->by((string) ($request->user()?->getAuthIdentifier() ?? $request->ip())));
         RateLimiter::for('api', fn (Request $request) => Limit::perMinute(120)->by($request->user()?->currentAccessToken()?->getKey() ?? $request->ip()));
     }
 }

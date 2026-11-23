@@ -38,6 +38,15 @@ return [
             'report' => false,
         ],
 
+        // Case documents, encrypted per file by DocumentVault before they are written.
+        'documents' => [
+            'driver' => 'local',
+            'root' => env('DOCUMENTS_ROOT', storage_path('app/documents')),
+            'serve' => false,
+            'throw' => true,
+            'report' => false,
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),

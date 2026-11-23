@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Modules\Cases\Http\Resources;
 
 use App\Modules\Cases\Models\DentalCase;
+use App\Modules\Documents\Http\Resources\DocumentResource;
+use App\Modules\Documents\Models\Document;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -37,6 +39,7 @@ final class CaseResource extends JsonResource
                 'patient_code' => $this->patient_code,
                 'facts' => $this->facts_masked,
                 'masked_entities' => (object) $this->facts_entity_counts,
+                'documents' => DocumentResource::collection(Document::query()->where('case_id', $this->id)->orderBy('created_at')->get()),
                 'actions' => [
                     'can_upload_documents' => $this->status->acceptsDocuments(),
                     'next_statuses' => array_map(fn ($s) => $s->value, $this->status->allowedNext()),
