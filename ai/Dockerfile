@@ -13,6 +13,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends tesseract-ocr t
  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /srv/ai
+
+# Local stack (compose.yaml): no model weights, stand-in embedder/reranker, the code mounted, reload on change.
+FROM base AS dev
+COPY pyproject.toml ./
+COPY app ./app
+COPY config ./config
+RUN pip install -e ".[dev]"
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
+FROM base AS prod
 COPY pyproject.toml ./
 COPY app ./app
 COPY config ./config
