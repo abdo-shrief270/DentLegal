@@ -5,6 +5,7 @@ use App\Modules\Admin\Http\Controllers\AdminUserController;
 use App\Modules\Cases\Http\Controllers\CaseController;
 use App\Modules\Consultations\Http\Controllers\ConsultationController;
 use App\Modules\Documents\Http\Controllers\DocumentController;
+use App\Modules\Documents\Http\Controllers\DocumentViewController;
 use App\Modules\Feedback\Http\Controllers\AdminFeedbackController;
 use App\Modules\Feedback\Http\Controllers\AdminStatsController;
 use App\Modules\Feedback\Http\Controllers\DentistFeedbackController;
@@ -46,6 +47,7 @@ Route::prefix('v1')->middleware('app.version')->group(function (): void {
         Route::get('cases/{case}', [CaseController::class, 'show'])->name('cases.show');
         Route::post('cases/{case}/documents', [DocumentController::class, 'store'])->middleware('throttle:uploads')->name('documents.store');
         Route::delete('cases/{case}/documents/{document}', [DocumentController::class, 'destroy'])->name('documents.destroy');
+        Route::get('documents/{document}/view-url', [DocumentViewController::class, 'forDentist'])->whereUuid('document')->name('documents.view-url');
         Route::post('cases/{case}/analysis', [AnalysisController::class, 'start'])->name('analysis.start');
         Route::get('cases/{case}/analysis/status', [AnalysisController::class, 'status'])->name('analysis.status');
         Route::get('cases/{case}/analysis', [AnalysisController::class, 'show'])->name('analysis.show');
@@ -59,6 +61,10 @@ Route::prefix('v1')->middleware('app.version')->group(function (): void {
     });
 });
 
+// The original file behind a 5-minute signed link (issued by the view-url routes above and below).
+Route::get('v1/documents/{document}/file', [DocumentViewController::class, 'file'])->whereUuid('document')
+    ->middleware(['signed', 'throttle:uploads'])->name('documents.file');
+
 // Lawyer: dashboard cookie session (no X-App-Version) with two-factor checked in this session.
 Route::prefix('v1/lawyer')->middleware(['auth:sanctum', 'two_factor', 'role:lawyer', 'throttle:dashboard'])->group(function (): void {
     Route::get('reviews', [ReviewController::class, 'index'])->name('lawyer.reviews.index');
@@ -68,6 +74,7 @@ Route::prefix('v1/lawyer')->middleware(['auth:sanctum', 'two_factor', 'role:lawy
     Route::post('reviews/{draft}/versions', [ReviewController::class, 'saveVersion'])->name('lawyer.reviews.versions');
     Route::post('reviews/{draft}/notes', [ReviewController::class, 'addNote'])->name('lawyer.reviews.notes');
     Route::post('reviews/{draft}/approve', [ReviewController::class, 'approve'])->name('lawyer.reviews.approve');
+    Route::get('documents/{document}/view-url', [DocumentViewController::class, 'forLawyer'])->whereUuid('document')->name('lawyer.documents.view-url');
 });
 
 // Admin: dashboard cookie session with two-factor checked in this session.

@@ -87,7 +87,7 @@ export function createHttpApi(baseURL: string): DashboardApi {
       addNote: async (id, text) => camel(await unwrap(request<{ data: unknown }>(`/api/v1/lawyer/reviews/${id}/notes`, { method: 'POST', body: { text } }))) as InternalNote,
       // The approve dialog has the lawyer tick «أؤكد…» with the quality checks in view, so warnings count as confirmed.
       approve: (id) => review(request(`/api/v1/lawyer/reviews/${id}/approve`, { method: 'POST', body: { confirm_warnings: true } })),
-      documentViewUrl: (id) => unwrap(request(`/api/v1/lawyer/documents/${id}/view-url`)),
+      documentViewUrl: async (id) => camel(await unwrap(request<{ data: unknown }>(`/api/v1/lawyer/documents/${id}/view-url`))) as { url: string; expiresAt: string },
       listCitationSamples: () => unwrap(request('/api/v1/lawyer/citation-samples')),
       setVerdict: (id, verdict, note) => unwrap(request(`/api/v1/lawyer/citation-samples/${id}/verdict`, { method: 'POST', body: { verdict, note } })),
     },

@@ -13,10 +13,16 @@ use App\Modules\Identity\Models\User;
 use App\Modules\Identity\Sms\LogSmsGateway;
 use App\Modules\Identity\Sms\SmsGateway;
 use App\Modules\Knowledge\Models\KnowledgeSourceVersion;
+use App\Modules\Notifications\Listeners\NotifyDentistOfApproval;
+use App\Modules\Notifications\Push\FcmPushGateway;
+use App\Modules\Notifications\Push\LogPushGateway;
+use App\Modules\Notifications\Push\PushGateway;
 use App\Modules\Pipeline\Models\Draft;
+use App\Modules\Review\Events\DraftApproved;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
@@ -27,6 +33,9 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(AiService::class, HttpAiService::class);
+        $this->app->singleton(PushGateway::class, fn () => config('dentlegal.push.driver') === 'fcm'
+            ? FcmPushGateway::fromFile((string) config('dentlegal.push.fcm_credentials'))
+            : new LogPushGateway);
         $this->app->singleton(SmsGateway::class, fn () => match (config('dentlegal.sms.driver')) {
             'log' => new LogSmsGateway,
             default => throw new \RuntimeException('Unknown SMS driver: '.config('dentlegal.sms.driver')),
@@ -40,6 +49,8 @@ class AppServiceProvider extends ServiceProvider
 
         Gate::policy(DentalCase::class, CasePolicy::class);
         Route::model('case', DentalCase::class);
+        Event::listen(DraftApproved::class, NotifyDentistOfApproval::class);
+
         Route::model('document', Document::class);
         Route::model('consultation', Consultation::class);
         Route::model('message', ConsultationMessage::class);

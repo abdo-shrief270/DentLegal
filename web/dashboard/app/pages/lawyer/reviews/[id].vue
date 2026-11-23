@@ -75,6 +75,7 @@ async function addNote(text: string) {
 async function viewOriginal(doc: CaseDocumentRef) {
   try {
     const link = await api.lawyer.documentViewUrl(doc.documentId)
+    if (link.url && !link.url.startsWith('#')) window.open(link.url, '_blank', 'noopener,noreferrer')
     toast.add({ severity: 'info', summary: 'رابط مؤقت للمستند الأصلي', detail: `صالح حتى ${formatTime(link.expiresAt)} · يُسجَّل الاطلاع في سجل التدقيق`, life: 4000 })
   } catch (e) {
     toast.add({ severity: 'error', summary: errorMessage(e), life: 4000 })

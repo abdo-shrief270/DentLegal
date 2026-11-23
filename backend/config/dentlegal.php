@@ -52,6 +52,12 @@ return [
         'retries' => 2,
     ],
 
+    'push' => [
+        // log until the client's Firebase project exists (§8.8); fcm with the service-account JSON on the server.
+        'driver' => env('PUSH_DRIVER', 'log'),
+        'fcm_credentials' => env('FCM_CREDENTIALS', storage_path('app/private/fcm-service-account.json')),
+    ],
+
     'documents' => [
         'disk' => env('DOCUMENTS_DISK', 'documents'),
         // 32 random bytes, base64. Separate from APP_KEY; kept offline with the backup key (§8.7). Losing it loses the files.

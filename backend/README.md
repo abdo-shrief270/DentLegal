@@ -26,6 +26,7 @@ app/
     Cases/              cases, DL-YYYY-NNNN codes, state machine, policy
     Knowledge/          sources, versions, chunks (pgvector), publish/archive lifecycle, «نص المادة» endpoint
     Ai/                 typed port to ai-svc (retrieve, mask, consult, case analyze/draft, extract, ingest) with retries
+    Notifications/      push port (log, FCM HTTP v1) and the «رد معتمد جاهز» push
     Feedback/           ratings, app feedback, usage stats and the nightly roll-up
     Admin/              admin API: dentist and lawyer invites, account activation
     Review/             lawyer review: queue, claim, versions with citation checks, internal notes, approval
@@ -60,10 +61,12 @@ Each module keeps `Models`, `Enums`, `Actions` (one class per business operation
 | S6.1–S6.2 Ratings & feedback | `POST /ratings` (upsert: the last rating wins; only the dentist's own answers, analyses and the AI or approved draft versions), `POST /feedback` (category, screen, platform, app version). Free text is pattern-masked and stored encrypted |
 | S7.3 Admin views | `/api/v1/admin/ratings` and `/feedback` with filters and `?format=csv` (UTF-8 with BOM for Excel, formula cells neutralised), `PATCH /feedback/{id}` status |
 | S6.3 Usage stats | `/api/v1/admin/stats/overview?range=7d\|30d`: active and invited dentists, answers and refusal rate, cases, drafts generated and approved, useful % per type, submit → draft p50/p90, citation validity, AI cost, daily series. `stats:roll-up` runs nightly at 00:20 Riyadh (`--days=N` back-fills); the schedule needs `php artisan schedule:work` (or cron) on the server |
+| Original documents | `GET /documents/{id}/view-url` (dentist, own case) and `GET /api/v1/lawyer/documents/{id}/view-url` (only the lawyer who claimed the case) return a 5-minute signed link that streams the decrypted file with `no-store` and a sandboxing CSP. Issuing and opening are audited |
+| S5.5 Push | `DraftApproved` → queued «رد معتمد جاهز» to each of the dentist's devices: generic text with the case code, payload `{type: draft_approved, case_id}`; dead tokens are cleared. `PUSH_DRIVER=log` until the Firebase project exists, then `fcm` with the service-account JSON at `FCM_CREDENTIALS` (FCM HTTP v1; the OAuth token comes from an RS256 JWT, cached 50 min) |
 
-108 tests, 503 assertions: `php artisan test`.
+112 tests, 530 assertions: `php artisan test`.
 
-Next: push notifications (S5.5, needs the Firebase project), the original-document link for lawyers, the approved draft as PDF (S4.5), and the mobile app's real API layer, the knowledge-base ingestion job (S1.5), push notifications.
+Next: the approved draft as PDF (S4.5, Should; needs a PDF library) and the mobile app's real API layer, the knowledge-base ingestion job (S1.5), push notifications.
 
 ## Run locally
 
