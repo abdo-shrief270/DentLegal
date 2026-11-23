@@ -58,6 +58,21 @@ return [
         'master_key' => env('DOCUMENT_MASTER_KEY'),
     ],
 
+    'consultant' => [
+        // §4.7: per dentist.
+        'per_hour' => 20,
+        'per_day' => 100,
+        'history_turns' => 3,
+        // «أسئلة مقترحة» on the empty chat. Admin-editable with the admin API; these are the defaults.
+        'suggested_questions' => [
+            'هل يحق لي الإفصاح عن ملف المريض للدفاع عن نفسي؟',
+            'هل التأمين ضد الأخطاء الطبية إلزامي لطبيب الأسنان؟',
+            'ما المهلة المتاحة للتظلم من قرار الهيئة الصحية الشرعية؟',
+            'ما الذي يُعد خطأً مهنيًا صحيًا؟',
+            'هل يمكن تأجيل سفري بسبب شكوى؟ وكيف أعترض؟',
+        ],
+    ],
+
     'cases' => [
         'code_prefix' => 'DL',
     ],

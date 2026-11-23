@@ -1,6 +1,7 @@
 <?php
 
 use App\Modules\Cases\Http\Controllers\CaseController;
+use App\Modules\Consultations\Http\Controllers\ConsultationController;
 use App\Modules\Documents\Http\Controllers\DocumentController;
 use App\Modules\Identity\Http\Controllers\MeController;
 use App\Modules\Identity\Http\Controllers\OtpController;
@@ -26,6 +27,13 @@ Route::prefix('v1')->middleware('app.version')->group(function (): void {
         Route::post('me/consents', [MeController::class, 'consents'])->name('me.consents');
         Route::put('me/devices/current', [MeController::class, 'updateDevice'])->name('me.device');
         Route::delete('me', [MeController::class, 'destroy'])->name('me.destroy');
+
+        Route::get('consultations/suggested-questions', [ConsultationController::class, 'suggestedQuestions'])->name('consultations.suggested');
+        Route::get('consultations', [ConsultationController::class, 'index'])->name('consultations.index');
+        Route::post('consultations', [ConsultationController::class, 'store'])->name('consultations.store');
+        Route::get('consultations/{consultation}', [ConsultationController::class, 'show'])->name('consultations.show');
+        Route::post('consultations/{consultation}/messages', [ConsultationController::class, 'ask'])->name('consultations.ask');
+        Route::get('consultation-messages/{message}', [ConsultationController::class, 'message'])->name('consultations.message');
 
         Route::get('cases', [CaseController::class, 'index'])->name('cases.index');
         Route::post('cases', [CaseController::class, 'store'])->name('cases.store');

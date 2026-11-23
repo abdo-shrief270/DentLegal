@@ -26,6 +26,7 @@ app/
     Cases/              cases, DL-YYYY-NNNN codes, state machine, policy
     Knowledge/          sources, versions, chunks (pgvector), publish/archive lifecycle, «نص المادة» endpoint
     Ai/                 typed port to ai-svc (retrieve, mask, consult, case analyze/draft, extract, ingest) with retries
+    Consultations/      «المستشار القانوني الذكي»: threads, questions, queued answers
     Documents/          case uploads: type checked by bytes, encrypted at rest (per-file key wrapped by a master key)
     Pipeline/           queued case pipeline (extract → analyze → draft → ready), AI run records, analyses, drafts
 ```
@@ -47,10 +48,11 @@ Each module keeps `Models`, `Enums`, `Actions` (one class per business operation
 | S3.2 Documents | Upload (PDF, JPEG, PNG by magic bytes; ≤ 20 MB; ≤ 15 per case; only while the case is a draft) and delete. Files are encrypted with XChaCha20-Poly1305 under a per-file key wrapped by `DOCUMENT_MASTER_KEY`, with the document id bound in, so a file can't be swapped onto another row |
 | S3.8 Pipeline | `POST /cases/{id}/analysis` (consent `ai_processing`, ≥ 1 document, 10/day, `Idempotency-Key`, one run per case at a time) queues a chain on the `ai` queue: extract + mask (only masked text is stored) → analysis → draft → `ai_ready`. Overload and network errors retry with backoff; refusals and invalid output fail the run and the case with a code. A retry skips documents already extracted. Every Claude call is an `ai_runs` row with its sources |
 | Results | `GET …/analysis/status` (steps, progress), `GET …/analysis`, `GET …/draft` (placeholders rendered: dentist name, licence, «المريض (الرمز P-…)»), `POST …/submit-review` (consent `lawyer_access`; case → `lawyer_review`) |
+| S2.6 Consult API | Suggested questions (config), threads list (cursor), thread with messages, ask (new thread or follow-up) → 202 with the pending answer, poll `GET /consultation-messages/{id}`. Questions are pattern-masked before storage, then NER-masked by ai-svc with the thread's placeholder numbering before Claude sees them; the last 3 answered turns go as history. Consent `ai_processing`, 20/hour and 100/day per dentist, one open question per thread (409 `answer_pending`), `Idempotency-Key`. Answers are `answered` / `refused` (with the reason, no Claude call when retrieval is weak) / `failed` (with a code); only verified, cited sources are returned. Answers are stored encrypted |
 
-69 tests, 238 assertions: `php artisan test`.
+78 tests, 280 assertions: `php artisan test`.
 
-Next: consultations (S2.6), dashboard auth + 2FA (S5.7), lawyer and admin APIs, the knowledge-base ingestion job (S1.5), push notifications.
+Next: dashboard auth + 2FA (S5.7), lawyer and admin APIs, the knowledge-base ingestion job (S1.5), push notifications.
 
 ## Run locally
 

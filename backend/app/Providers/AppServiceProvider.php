@@ -6,6 +6,8 @@ use App\Modules\Ai\AiService;
 use App\Modules\Ai\HttpAiService;
 use App\Modules\Cases\Models\DentalCase;
 use App\Modules\Cases\Policies\CasePolicy;
+use App\Modules\Consultations\Models\Consultation;
+use App\Modules\Consultations\Models\ConsultationMessage;
 use App\Modules\Documents\Models\Document;
 use App\Modules\Identity\Sms\LogSmsGateway;
 use App\Modules\Identity\Sms\SmsGateway;
@@ -36,6 +38,10 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(DentalCase::class, CasePolicy::class);
         Route::model('case', DentalCase::class);
         Route::model('document', Document::class);
+        Route::model('consultation', Consultation::class);
+        Route::model('message', ConsultationMessage::class);
+        Route::pattern('consultation', '[0-9a-fA-F-]{36}');
+        Route::pattern('message', '[0-9a-fA-F-]{36}');
 
         // Authenticated API: 120 requests / minute per token (PROJECT1_PLAN.md §4.7).
         // Uploads: 60 files / hour per dentist (§4.7).
