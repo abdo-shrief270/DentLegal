@@ -11,6 +11,7 @@ use App\Modules\Cases\Models\DentalCase;
 use App\Modules\Identity\Enums\ConsentType;
 use App\Modules\Identity\Models\User;
 use App\Modules\Pipeline\Models\Draft;
+use App\Modules\Pipeline\Models\DraftVersion;
 use App\Modules\Pipeline\Support\DraftRenderer;
 use App\Support\Api\ApiException;
 use Illuminate\Http\JsonResponse;
@@ -25,8 +26,12 @@ final class DraftController
     {
         Gate::authorize('view', $case);
         /** @var Draft $draft */
-        $draft = Draft::query()->where('case_id', $case->id)->with('currentVersion')->firstOrFail();
-        $version = $draft->currentVersion ?? abort(404);
+        $draft = Draft::query()->where('case_id', $case->id)->firstOrFail();
+        // The dentist sees the AI draft until a lawyer approves; lawyer work in progress is not shown (§4.2).
+        $version = $draft->status === 'approved'
+            ? DraftVersion::query()->find($draft->approved_version_id)
+            : DraftVersion::query()->where('draft_id', $draft->id)->where('author_type', 'ai')->orderByDesc('version_no')->first();
+        abort_if($version === null, 404);
 
         return response()->json(['data' => [
             'draft_id' => $draft->id,

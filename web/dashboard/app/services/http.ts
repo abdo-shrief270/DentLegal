@@ -1,7 +1,7 @@
 // Laravel API client (PROJECT1_PLAN.md §4.2). Sanctum SPA cookie mode: the session lives in an httpOnly
 // cookie; $fetch sends it with `credentials: 'include'` and Laravel's XSRF token header.
-// Auth calls match the Laravel routes (backend/routes/web.php); the lawyer and admin calls follow the plan's contract.
-import type { Role, SessionUser } from '~/types/api'
+// Auth and lawyer calls match the Laravel routes (backend/routes); the admin calls follow the plan's contract.
+import type { CitationRef, InternalNote, ReviewDetail, ReviewListItem, Role, SessionUser } from '~/types/api'
 import type { DashboardApi, TwoFactorSetup } from '~/types/client'
 import { ApiError } from '~/types/client'
 
@@ -33,6 +33,23 @@ export function createHttpApi(baseURL: string): DashboardApi {
     const initials = name.replace(/^(أ|م|د)\.\s*/, '').split(/\s+/).map((w) => w.replace(/^ال/, '')[0] ?? '').join('').slice(0, 2)
     return { id: u.id, name, email: u.email, role: u.role, initials, subtitle: u.role === 'admin' ? 'إدارة المنصة' : 'محامٍ مراجِع' }
   }
+  // Lawyer and admin payloads are snake_case (Laravel); the dashboard types are camelCase.
+  const camel = (v: unknown): unknown => Array.isArray(v) ? v.map(camel)
+    : v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).map(([k, x]) => [k.replace(/_([a-z])/g, (_, c: string) => c.toUpperCase()), camel(x)]))
+      : v
+  const snake = (v: unknown): unknown => Array.isArray(v) ? v.map(snake)
+    : v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).map(([k, x]) => [k.replace(/[A-Z]/g, (c) => `_${c.toLowerCase()}`), snake(x)]))
+      : v
+  // A citation's check result sits under `verification` in the API; the editor reads `reason` on the citation.
+  const withReasons = (detail: ReviewDetail): ReviewDetail => {
+    for (const version of detail.versions) {
+      for (const p of [version.content.intro, ...version.content.sections.flatMap((s) => s.paragraphs)]) {
+        for (const c of p.citations as (CitationRef & { verification?: { reason?: CitationRef['reason'] | null } })[]) c.reason = c.verification?.reason ?? undefined
+      }
+    }
+    return detail
+  }
+  const review = async (promise: Promise<{ data: unknown }>) => withReasons(camel(await unwrap(promise)) as ReviewDetail)
   const toSetup = (s: ApiTwoFactorSetup): TwoFactorSetup => ({
     secret: s.secret.replace(/(.{4})/g, '$1 ').trim(), otpauthUrl: s.otpauth_uri, recoveryCodes: s.recovery_codes,
   })
@@ -62,13 +79,14 @@ export function createHttpApi(baseURL: string): DashboardApi {
       confirmTwoFactor: async (code) => toSessionUser(await unwrap(request<{ data: ApiSessionUser }>('/user/confirmed-two-factor-authentication', { method: 'POST', body: { code } }))),
     },
     lawyer: {
-      listReviews: (tab) => unwrap(request('/api/v1/lawyer/reviews', { query: { tab } })),
+      listReviews: async (tab) => camel(await unwrap(request<{ data: unknown }>('/api/v1/lawyer/reviews', { query: { tab } }))) as ReviewListItem[],
       counts: () => unwrap(request('/api/v1/lawyer/reviews/counts')),
-      claim: (id) => request(`/api/v1/lawyer/reviews/${id}/claim`, { method: 'POST' }),
-      getReview: (id) => unwrap(request(`/api/v1/lawyer/reviews/${id}`)),
-      saveVersion: (id, content, note) => unwrap(request(`/api/v1/lawyer/reviews/${id}/versions`, { method: 'POST', body: { content, note } })),
-      addNote: (id, text) => unwrap(request(`/api/v1/lawyer/reviews/${id}/notes`, { method: 'POST', body: { text } })),
-      approve: (id) => unwrap(request(`/api/v1/lawyer/reviews/${id}/approve`, { method: 'POST' })),
+      claim: async (id) => { await request(`/api/v1/lawyer/reviews/${id}/claim`, { method: 'POST' }) },
+      getReview: (id) => review(request(`/api/v1/lawyer/reviews/${id}`)),
+      saveVersion: (id, content, note) => review(request(`/api/v1/lawyer/reviews/${id}/versions`, { method: 'POST', body: { content: snake(content), note: note || null } })),
+      addNote: async (id, text) => camel(await unwrap(request<{ data: unknown }>(`/api/v1/lawyer/reviews/${id}/notes`, { method: 'POST', body: { text } }))) as InternalNote,
+      // The approve dialog has the lawyer tick «أؤكد…» with the quality checks in view, so warnings count as confirmed.
+      approve: (id) => review(request(`/api/v1/lawyer/reviews/${id}/approve`, { method: 'POST', body: { confirm_warnings: true } })),
       documentViewUrl: (id) => unwrap(request(`/api/v1/lawyer/documents/${id}/view-url`)),
       listCitationSamples: () => unwrap(request('/api/v1/lawyer/citation-samples')),
       setVerdict: (id, verdict, note) => unwrap(request(`/api/v1/lawyer/citation-samples/${id}/verdict`, { method: 'POST', body: { verdict, note } })),

@@ -8,11 +8,12 @@ use App\Modules\Identity\Http\Controllers\OtpController;
 use App\Modules\Knowledge\Http\Controllers\ChunkController;
 use App\Modules\Pipeline\Http\Controllers\AnalysisController;
 use App\Modules\Pipeline\Http\Controllers\DraftController;
+use App\Modules\Review\Http\Controllers\ReviewController;
 use Illuminate\Support\Facades\Route;
 
 /*
 | /api/v1 — PROJECT1_PLAN.md §4.2. Mobile routes require X-App-Version; dentist routes require a token with the
-| `dentist` ability and the dentist role. Lawyer and admin routes (cookie session + 2FA) are added with S5.7.
+| `dentist` ability and the dentist role. Lawyer and admin routes use the dashboard cookie session + two-factor.
 */
 
 Route::prefix('v1')->middleware('app.version')->group(function (): void {
@@ -48,4 +49,15 @@ Route::prefix('v1')->middleware('app.version')->group(function (): void {
 
         Route::get('knowledge/chunks/{chunk}', [ChunkController::class, 'show'])->whereNumber('chunk')->name('knowledge.chunks.show');
     });
+});
+
+// Lawyer: dashboard cookie session (no X-App-Version) with two-factor checked in this session.
+Route::prefix('v1/lawyer')->middleware(['auth:sanctum', 'two_factor', 'role:lawyer', 'throttle:dashboard'])->group(function (): void {
+    Route::get('reviews', [ReviewController::class, 'index'])->name('lawyer.reviews.index');
+    Route::get('reviews/counts', [ReviewController::class, 'counts'])->name('lawyer.reviews.counts');
+    Route::get('reviews/{draft}', [ReviewController::class, 'show'])->name('lawyer.reviews.show');
+    Route::post('reviews/{draft}/claim', [ReviewController::class, 'claim'])->name('lawyer.reviews.claim');
+    Route::post('reviews/{draft}/versions', [ReviewController::class, 'saveVersion'])->name('lawyer.reviews.versions');
+    Route::post('reviews/{draft}/notes', [ReviewController::class, 'addNote'])->name('lawyer.reviews.notes');
+    Route::post('reviews/{draft}/approve', [ReviewController::class, 'approve'])->name('lawyer.reviews.approve');
 });

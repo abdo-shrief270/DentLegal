@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Modules\Pipeline\Models;
 
+use App\Modules\Cases\Models\DentalCase;
+use App\Modules\Identity\Models\User;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -21,7 +23,10 @@ use Illuminate\Support\Carbon;
  * @property string|null $reviewer_id
  * @property Carbon|null $claimed_at
  * @property Carbon|null $approved_at
+ * @property Carbon $created_at
  * @property-read DraftVersion|null $currentVersion
+ * @property-read DentalCase $case
+ * @property-read User|null $reviewer
  */
 class Draft extends Model
 {
@@ -32,6 +37,24 @@ class Draft extends Model
     protected function casts(): array
     {
         return ['claimed_at' => 'datetime', 'approved_at' => 'datetime'];
+    }
+
+    /** @return BelongsTo<DentalCase, $this> */
+    public function case(): BelongsTo
+    {
+        return $this->belongsTo(DentalCase::class, 'case_id');
+    }
+
+    /** @return BelongsTo<User, $this> */
+    public function reviewer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'reviewer_id');
+    }
+
+    /** @return BelongsTo<DraftVersion, $this> */
+    public function approvedVersion(): BelongsTo
+    {
+        return $this->belongsTo(DraftVersion::class, 'approved_version_id');
     }
 
     /** @return BelongsTo<DraftVersion, $this> */

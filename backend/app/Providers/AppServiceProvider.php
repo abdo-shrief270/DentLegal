@@ -11,6 +11,7 @@ use App\Modules\Consultations\Models\ConsultationMessage;
 use App\Modules\Documents\Models\Document;
 use App\Modules\Identity\Sms\LogSmsGateway;
 use App\Modules\Identity\Sms\SmsGateway;
+use App\Modules\Pipeline\Models\Draft;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -40,6 +41,8 @@ class AppServiceProvider extends ServiceProvider
         Route::model('document', Document::class);
         Route::model('consultation', Consultation::class);
         Route::model('message', ConsultationMessage::class);
+        Route::model('draft', Draft::class);
+        Route::pattern('draft', '[0-9a-fA-F-]{36}');
         Route::pattern('consultation', '[0-9a-fA-F-]{36}');
         Route::pattern('message', '[0-9a-fA-F-]{36}');
 
@@ -49,6 +52,7 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('dashboard-login', fn (Request $request) => Limit::perMinute(5)->by(mb_strtolower((string) $request->input('email')).'|'.$request->ip()));
         RateLimiter::for('dashboard-2fa', fn (Request $request) => Limit::perMinute(5)->by((string) ($request->user()?->getAuthIdentifier() ?? $request->session()->get('login.pending_id', '')).'|'.$request->ip()));
         RateLimiter::for('invitations', fn (Request $request) => Limit::perMinute(10)->by($request->ip()));
+        RateLimiter::for('dashboard', fn (Request $request) => Limit::perMinute(120)->by((string) ($request->user()?->getAuthIdentifier() ?? $request->ip())));
         RateLimiter::for('uploads', fn (Request $request) => Limit::perHour(60)->by((string) ($request->user()?->getAuthIdentifier() ?? $request->ip())));
         RateLimiter::for('api', fn (Request $request) => Limit::perMinute(120)->by($request->user()?->currentAccessToken()?->getKey() ?? $request->ip()));
     }
