@@ -2,6 +2,7 @@ import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../security/screen_guard.dart';
 import '../../features/account/presentation/account_page.dart';
 import '../../features/account/presentation/feedback_page.dart';
 import '../../features/auth/domain/auth_models.dart';
@@ -82,17 +83,17 @@ GoRouter appRouter(Ref ref) {
                       GoRoute(
                         path: 'analysis',
                         parentNavigatorKey: _rootKey,
-                        builder: (_, state) => AnalysisPage(caseId: state.pathParameters['id']!),
+                        builder: (_, state) => ScreenGuard(child: AnalysisPage(caseId: state.pathParameters['id']!)),
                       ),
                       GoRoute(
                         path: 'draft',
                         parentNavigatorKey: _rootKey,
-                        builder: (_, state) => DraftPage(caseId: state.pathParameters['id']!),
+                        builder: (_, state) => ScreenGuard(child: DraftPage(caseId: state.pathParameters['id']!)),
                       ),
                       GoRoute(
                         path: 'approved',
                         parentNavigatorKey: _rootKey,
-                        builder: (_, state) => ApprovedPage(caseId: state.pathParameters['id']!),
+                        builder: (_, state) => ScreenGuard(child: ApprovedPage(caseId: state.pathParameters['id']!)),
                       ),
                     ],
                   ),

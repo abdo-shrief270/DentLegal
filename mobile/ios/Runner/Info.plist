@@ -6,6 +6,8 @@
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>لفتح DentLegal بأمان دون إدخال رمز التحقق في كل مرة.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>لتصوير خطاب الشكوى أو المستندات وإرفاقها بالقضية.</string>
 	<key>NSPhotoLibraryUsageDescription</key>

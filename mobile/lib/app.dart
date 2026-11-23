@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'core/router/app_router.dart';
+import 'core/security/lock_gate.dart';
 import 'core/theme/app_theme.dart';
 
 class DentLegalApp extends ConsumerWidget {
@@ -17,5 +18,7 @@ class DentLegalApp extends ConsumerWidget {
     supportedLocales: const [Locale('ar')],
     localizationsDelegates: GlobalMaterialLocalizations.delegates,
     routerConfig: ref.watch(appRouterProvider),
+    // Biometric lock over the whole app (S5.4).
+    builder: (context, child) => LockGate(child: child ?? const SizedBox.shrink()),
   );
 }

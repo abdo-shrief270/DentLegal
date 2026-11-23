@@ -98,6 +98,15 @@ return [
         'max_mb' => 50,
     ],
 
+    // §9.7 (proposal; D18 to confirm). The grace period lets support undo a mistaken deletion; it stays under 30 days.
+    'retention' => [
+        'otp_hours' => 24,
+        'token_idle_days' => 30,
+        'account_grace_days' => (int) env('RETENTION_ACCOUNT_GRACE_DAYS', 7),
+        'ai_runs_months' => 12,
+        'audit_years' => 2,
+    ],
+
     'cases' => [
         'code_prefix' => 'DL',
     ],

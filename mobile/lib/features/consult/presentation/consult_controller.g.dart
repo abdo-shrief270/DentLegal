@@ -103,7 +103,7 @@ final class ConsultControllerProvider extends $NotifierProvider<ConsultControlle
   }
 }
 
-String _$consultControllerHash() => r'fcfa8a24ffc4cacebc34f5eeece3f2cb5e8644e5';
+String _$consultControllerHash() => r'529cdd93a910ce0d382af9e6b967324dd967ce5f';
 
 abstract class _$ConsultController extends $Notifier<ConsultState> {
   ConsultState build();

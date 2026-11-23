@@ -20,9 +20,11 @@ dependencies:
   hijri: ^3.0.1
   image_picker: ^1.2.4
   intl: ^0.20.3
+  local_auth: ^3.0.2
   lucide_icons_flutter: ^4.0.3
   material_ui: ^1.1.0
   riverpod_annotation: ^4.0.8
+  screen_protector: ^1.5.3
 
 dev_dependencies:
   flutter_test:

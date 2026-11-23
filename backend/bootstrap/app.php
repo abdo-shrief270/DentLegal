@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\RequireAppVersion;
 use App\Http\Middleware\RequireTwoFactor;
+use App\Modules\Compliance\Console\PurgeExpiredData;
 use App\Modules\Feedback\Console\RollUpUsageStats;
 use App\Support\Api\ErrorRenderer;
 use Illuminate\Foundation\Application;
@@ -29,6 +30,7 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withCommands([
         RollUpUsageStats::class,
+        PurgeExpiredData::class,
     ])
     ->withExceptions(function (Exceptions $exceptions): void {
         ErrorRenderer::register($exceptions);

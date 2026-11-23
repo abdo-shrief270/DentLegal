@@ -10,3 +10,6 @@ Artisan::command('inspire', function () {
 
 // Nightly roll-up for «إحصائيات الاستخدام» (S6.3), after midnight Riyadh time.
 Schedule::command('stats:roll-up')->dailyAt('00:20')->timezone('Asia/Riyadh')->onOneServer()->withoutOverlapping();
+
+// Retention (§9.7, S9.2): nightly, after the stats roll-up.
+Schedule::command('retention:purge')->dailyAt('01:10')->timezone('Asia/Riyadh')->onOneServer()->withoutOverlapping();

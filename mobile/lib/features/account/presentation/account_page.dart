@@ -9,6 +9,7 @@ import '../../../core/widgets/mock_badge.dart';
 import '../../../core/widgets/section_title.dart';
 import '../../../core/widgets/tone_badge.dart';
 import '../../auth/presentation/auth_controller.dart';
+import '../../../core/security/app_lock.dart';
 import '../../../core/utils/bidi.dart';
 
 /// «حسابي»: profile, security, feedback, legal pages, logout and account deletion (store requirement).
@@ -20,8 +21,6 @@ class AccountPage extends ConsumerStatefulWidget {
 }
 
 class _AccountPageState extends ConsumerState<AccountPage> {
-  // UI only for now; real value comes from local_auth + secure storage.
-  bool _biometric = true;
   bool _notifications = true;
 
   Future<void> _confirmDelete() async {
@@ -100,12 +99,17 @@ class _AccountPageState extends ConsumerState<AccountPage> {
             padding: EdgeInsets.zero,
             child: Column(
               children: [
-                SwitchListTile(
-                  value: _biometric,
-                  onChanged: (v) => setState(() => _biometric = v),
-                  secondary: const Icon(LucideIcons.fingerprint),
-                  title: const Text('الدخول بالبصمة أو الوجه'),
-                  subtitle: const Text('يُطلب عند فتح التطبيق'),
+                Builder(
+                  builder: (context) {
+                    final lock = ref.watch(appLockProvider);
+                    return SwitchListTile(
+                      value: lock.available && lock.enabled,
+                      onChanged: lock.available ? (v) => ref.read(appLockProvider.notifier).setEnabled(v) : null,
+                      secondary: const Icon(LucideIcons.fingerprint),
+                      title: const Text('الدخول بالبصمة أو الوجه'),
+                      subtitle: Text(lock.available ? 'يُطلب عند فتح التطبيق وبعد 5 دقائق في الخلفية' : 'غير متاح على هذا الجهاز'),
+                    );
+                  },
                 ),
                 const Divider(height: 1),
                 SwitchListTile(
