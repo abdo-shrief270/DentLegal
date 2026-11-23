@@ -23,7 +23,7 @@ final class RequireTwoFactor
     {
         $user = $request->user();
         // Signed in through the dashboard session (the web guard), never through a mobile API token.
-        if (! $user instanceof User || ! Auth::guard('web')->check() || Auth::guard('web')->id() !== $user->id) {
+        if (! $user instanceof User || ! $request->hasSession() || ! Auth::guard('web')->check() || Auth::guard('web')->id() !== $user->id) {
             throw ApiException::forbidden('session_required', 'هذه الصفحة متاحة من لوحة التحكم فقط.');
         }
         if ($user->status !== UserStatus::Active) {
