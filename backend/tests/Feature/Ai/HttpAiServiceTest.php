@@ -92,4 +92,24 @@ class HttpAiServiceTest extends TestCase
         $this->assertSame('answered', $result['status']);
         Http::assertSent(fn (Request $r) => $r['question'] === 'سؤال مقنّع' && count($r['history']) === 1);
     }
+
+    public function test_documents_and_sources_are_uploaded_as_multipart(): void
+    {
+        Http::fake([
+            'ai-svc.test/v1/extract' => Http::response(['page_count' => 1, 'pages' => [['page_no' => 1, 'text' => 'نص [PHONE_1]']], 'low_quality' => false]),
+            'ai-svc.test/v1/kb/ingest' => Http::response(['chunk_count' => 165, 'extraction_method' => 'text_layer']),
+        ]);
+
+        $doc = app(AiService::class)->extractDocument('%PDF-1.7 fake', 'letter.pdf', ['allowlist' => ['جدة']]);
+        $kb = app(AiService::class)->ingestSource('%PDF-1.7 fake', [
+            'version_id' => 'v-1', 'source_code' => 'HPPL', 'source_title' => 'نظام مزاولة المهن الصحية', 'version_label' => '1440',
+        ]);
+
+        $this->assertSame('نص [PHONE_1]', $doc['pages'][0]['text']);
+        $this->assertSame(165, $kb['chunk_count']);
+        Http::assertSent(fn (Request $r) => str_ends_with($r->url(), '/v1/extract') && $r->isMultipart()
+            && collect($r->data())->firstWhere('name', 'file')['filename'] === 'letter.pdf');
+        Http::assertSent(fn (Request $r) => str_ends_with($r->url(), '/v1/kb/ingest')
+            && json_decode((string) collect($r->data())->firstWhere('name', 'options')['contents'], true)['source_code'] === 'HPPL');
+    }
 }

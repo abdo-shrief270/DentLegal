@@ -45,6 +45,10 @@ return [
         'consult_timeout' => 90,
         // Analysis and draft run with effort high and up to 32k output tokens, plus one repair call (§5.6).
         'case_timeout' => (int) env('AI_SERVICE_CASE_TIMEOUT', 600),
+        // OCR runs at about 3 s per scanned page on CPU; a 50-page case document stays well inside this.
+        'extract_timeout' => (int) env('AI_SERVICE_EXTRACT_TIMEOUT', 300),
+        // A 40-page source with OCR-guided repair took about 2 minutes in testing; Claude transcription is slower.
+        'ingest_timeout' => (int) env('AI_SERVICE_INGEST_TIMEOUT', 1800),
         'retries' => 2,
     ],
 

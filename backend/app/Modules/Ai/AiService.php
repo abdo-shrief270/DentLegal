@@ -56,6 +56,23 @@ interface AiService
      */
     public function draftCase(array $case, array $documents, array $analysis, array $sourceChunkIds): array;
 
+    /**
+     * A case document (PDF, JPEG, PNG) → masked text per page (raw text never leaves ai-svc), OCR confidence,
+     * low-quality flags and the case's updated placeholder state.
+     *
+     * @param  array{allowlist?: list<string>, dentist?: array{name: string|null, license_no: string|null}|null, placeholder_state?: array<string, mixed>|null}  $options
+     * @return array<string, mixed> {mime, page_count, pages[{page_no, text, method, confidence, low_quality}], ocr_confidence, low_quality, entity_counts, placeholder_state}
+     */
+    public function extractDocument(string $contents, string $filename, array $options = []): array;
+
+    /**
+     * A public regulatory source (PDF) → chunks written with status `review` for that version. Long-running.
+     *
+     * @param  array{version_id: string, source_code: string, source_title: string, version_label: string, mode?: string}  $options
+     * @return array<string, mixed> {chunk_count, chunks_by_type, extraction_method, pages, warnings, preview, transcription}
+     */
+    public function ingestSource(string $contents, array $options): array;
+
     /** @return array{status: string, models: array<string, bool>, db: bool} */
     public function health(): array;
 }

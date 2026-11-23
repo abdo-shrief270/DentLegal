@@ -14,6 +14,7 @@ BIDI_CONTROLS = re.compile("[‎‏‪-‮⁦-⁩؜﻿]")
 TATWEEL = "ـ"
 DIACRITICS = re.compile("[ً-ْٰۖ-ۭ]")
 ARABIC_INDIC = str.maketrans("٠١٢٣٤٥٦٧٨٩۰۱۲۳۴۵۶۷۸۹", "01234567890123456789")
+PERSIAN_FORMS = str.maketrans({"ی": "ي", "ک": "ك", "ۀ": "ه"})  # PDF fonts sometimes map Arabic letters to these
 # Extracted PDF text often stores lam-alef with hamza in visual order: «اإل» for «الإ», «األ» for «الأ».
 REVERSED_LAM_ALEF = re.compile("ا([إأآ])ل")
 PAGE_NUMBER_LINE = re.compile(r"^[ \t]*(?:صفحة|ص)?[ \t]*[-–]?[ \t]*\d{1,4}[ \t]*[-–]?[ \t]*(?:\n|$)", re.MULTILINE)
@@ -34,7 +35,7 @@ PUNCTUATION_FOLD = str.maketrans({"،": ",", "؛": ";", "؟": "?", "«": '"', "�
 
 def display_text(raw: str) -> str:
     text = unicodedata.normalize("NFKC", raw)  # also turns presentation forms (ﻻ, ﻹ) into base letters
-    text = BIDI_CONTROLS.sub("", text).replace(TATWEEL, "")
+    text = BIDI_CONTROLS.sub("", text).replace(TATWEEL, "").translate(PERSIAN_FORMS)
     text = REVERSED_LAM_ALEF.sub(r"ال\1", text)
     for wrong, right in KNOWN_FIXES.items():
         text = text.replace(wrong, right)

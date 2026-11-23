@@ -9,6 +9,7 @@ import anthropic
 from psycopg_pool import ConnectionPool
 
 from app.core.config import Settings
+from app.extract.ocr import Ocr, TesseractOcr
 from app.llm.client import ClaudeClient
 from app.masking.masker import Masker
 from app.masking.ner import CamelNer, Ner, NoNer
@@ -23,6 +24,7 @@ class Container:
     reranker: Reranker
     masker: Masker
     claude: ClaudeClient
+    ocr: Ocr | None  # None only when Tesseract is missing in a local/test environment
 
     def close(self) -> None:
         self.pool.close()
@@ -42,4 +44,11 @@ def build_container(settings: Settings, anthropic_client: Any | None = None) -> 
         use_fallbacks=settings.use_fallbacks,
         prices=settings.prices,
     )
-    return Container(settings, pool, embedder, reranker, masker, claude)
+    ocr: Ocr | None
+    try:
+        ocr = TesseractOcr(settings.ocr_languages)
+    except Exception:
+        if not settings.is_test_like():
+            raise
+        ocr = None
+    return Container(settings, pool, embedder, reranker, masker, claude, ocr)

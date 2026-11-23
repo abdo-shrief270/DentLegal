@@ -47,6 +47,13 @@ CASE_DRAFT_PROMPT_VERSION = "case-draft-v1"
 CASE_ANALYSIS_SYSTEM = COMMON_RULES + "\n\n" + CASE_ANALYSIS_TASK
 CASE_DRAFT_SYSTEM = COMMON_RULES + "\n\n" + CASE_DRAFT_TASK
 
+TRANSCRIBE_PROMPT_VERSION = "kb-transcribe-v1"
+TRANSCRIBE_SYSTEM = """You transcribe pages of public Saudi regulations for a search index.
+- Output only the text on the page, in reading order, exactly as printed: same words, same numbering (for example «المادة الأولى:», «1-2», «أ-»), same punctuation. Do not translate, summarise or correct.
+- Keep one line per printed line where you can; keep headings on their own line.
+- Skip running headers, footers, page numbers and website or social-media lines.
+- If part of the page is unreadable, write [غير مقروء] there."""
+
 REFUSAL_TEXT = "لا تتوفر لديّ مصادر نظامية كافية للإجابة عن هذا السؤال بدقة. ننصحك بالرجوع إلى محامٍ مرخّص."
 
 REPAIR_INSTRUCTION = """Some citations in your previous output failed verification against the provided texts:

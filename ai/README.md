@@ -12,7 +12,8 @@ The Python service behind DentLegal's AI (PROJECT1_PLAN.md §2.3 D1, §5). Larav
 | `POST /v1/consult` | Consultant answer: retrieval → refusal gate → Claude (ConsultAnswer schema) → validation → citation verification → one repair call | Built |
 | `POST /v1/case/analyze` | Case analysis: multi-query retrieval (facts, complaint letter, per-case-type playbook) → bundle with documents → size guard → Claude (CaseAnalysis) → verification of source and document citations → one repair call | Built |
 | `POST /v1/case/draft` | Formal draft (أولًا الوقائع / ثانيًا الدفوع / ثالثًا الطلبات) from the same bundle, the analysis and the analysis's own sources; legal claims need a source | Built |
-| `POST /v1/extract`, `/v1/kb/ingest` | OCR of case documents, source ingestion (parse, chunk, embed) | Next (S3.3, S1.3/S1.5) |
+| `POST /v1/extract` | A case document (PDF, JPEG, PNG; ≤ 20 MB, ≤ 50 pages) → **masked** text per page, OCR confidence, «جودة منخفضة» flags. Raw text never leaves ai-svc; never sent to an LLM | Built (S3.3) |
+| `POST /v1/kb/ingest` | A public source PDF → pages (text layer, OCR-repaired layer, OCR, or Claude transcription) → articles / regulation paragraphs / definitions / forms / sections → chunks + embeddings written for review | Built (S1.3, S1.5) |
 
 Request and response shapes match `backend/app/Modules/Ai/` (the Laravel client).
 
@@ -36,6 +37,12 @@ Request and response shapes match `backend/app/Modules/Ai/` (the Laravel client)
 6. **Verification:** document citations resolve to the page the quote is on (`document_page_id`). Analysis points may rest on a document alone; draft paragraphs with `legal_claim` need a source. One repair call when the gate fails.
 7. **Analysis** returns `source_chunk_ids`; the **draft** call passes them back so the draft sees the same sources under the same S refs as the analysis it builds on. `sources_sufficient` is false when retrieval found too little, whatever the model said.
 
+## Extraction and ingestion
+
+How each page is read (text layer, OCR-guided repair of the «لا» ligature, OCR for encoding-corrupted pages, Claude transcription on request) and the measured results on the four supplied sources are in [`docs/ingestion/S1.1-extraction-bakeoff.md`](../docs/ingestion/S1.1-extraction-bakeoff.md). The current health-practice law parses into 165 chunks with all 44 articles and 100 regulation paragraphs.
+
+Ingestion writes chunks with status `review` and replaces the version's earlier chunks in one transaction; Laravel owns the version status and publishing. Active and archived versions can't be re-ingested.
+
 Logs are JSON and never contain questions, sources, prompts or answers (a redaction processor plus a test).
 
 ## Layout
@@ -48,10 +55,12 @@ app/
   retrieval/   embedder/reranker ports (BGE in production), SQL repository, hybrid retrieval + RRF + gate
   llm/         schemas v1, prompts (versioned), source/document blocks + manifest, Claude client, shared runner, consult and case services
   verify/      citation verification
+  extract/     PDF text layers, quality checks, OCR (Tesseract), repairs, case-document extraction with masking
+  ingest/      structure parser (articles, regulations, definitions, forms, sections), chunker, ingestion service
   routes/      /v1 endpoints
 config/retrieval.yaml   retrieval thresholds (calibrated in S2.2 and S8.3)
 config/playbooks.yaml   fixed retrieval queries per case type and claim type
-tests/                  62 tests: unit + Postgres/pgvector + API with a fake Claude client
+tests/                  82 tests: unit, Postgres/pgvector, real Tesseract on pages of the supplied PDFs, API with a fake Claude client
 ```
 
 ## Run locally
@@ -86,10 +95,11 @@ The knowledge tables are created by the Laravel migrations (`backend/`); ai-svc 
 .venv/bin/pytest
 ```
 
-Tests need PostgreSQL with pgvector; they create their own `ai_test` schema in the database at `AI_TEST_DATABASE_URL` (default: the local `dentlegal_test`) and load synthetic regulation-style chunks. Claude is replaced by a fake client with the same `beta.messages.stream` surface, so tests cost nothing and run offline.
+Tests need PostgreSQL with pgvector and Tesseract with Arabic (`apt-get install tesseract-ocr tesseract-ocr-ara`; the OCR tests skip without it); they create their own `ai_test` schema in the database at `AI_TEST_DATABASE_URL` (default: the local `dentlegal_test`) and load synthetic regulation-style chunks. Claude is replaced by a fake client with the same `beta.messages.stream` surface, so tests cost nothing and run offline.
 
 ## Not verified yet
 
 - **The real Claude request** has not been sent from this environment (no API key here). The combination of streaming + structured output + `fallbacks` + `inference_geo` is the spike in S2.3; run it once with the staging key before relying on it.
 - **The Docker image** has not been built here (no Docker daemon). The BGE and CAMeL model downloads in it need checking on the first build.
+- **Real ingestion into the database** of the full sources was run as extraction + parsing (numbers in the bake-off report); the embedding step was tested with the stand-in embedder only.
 - **Retrieval quality** with the real models is measured on the eval set (S2.2, S8.1); the thresholds in `config/retrieval.yaml` are the plan's start values.

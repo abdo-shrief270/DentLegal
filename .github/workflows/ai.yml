@@ -6,6 +6,7 @@ on:
     paths:
       - "ai/**"
       - "backend/database/migrations/*knowledge*"
+      - "*.pdf"
       - ".github/workflows/ai.yml"
   pull_request:
     paths:
@@ -41,6 +42,8 @@ jobs:
       AI_TEST_DATABASE_URL: postgresql://dentlegal:dentlegal@127.0.0.1:5432/dentlegal_test
     steps:
       - uses: actions/checkout@v4
+      - name: Tesseract with Arabic (OCR tests run on pages of the supplied PDFs)
+        run: sudo apt-get update -q && sudo apt-get install -y -q tesseract-ocr tesseract-ocr-ara tesseract-ocr-eng
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"

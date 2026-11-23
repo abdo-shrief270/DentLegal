@@ -57,6 +57,22 @@ final class HttpAiService implements AiService
         ], (int) config('dentlegal.ai_service.case_timeout'));
     }
 
+    public function extractDocument(string $contents, string $filename, array $options = []): array
+    {
+        return $this->send(
+            fn (PendingRequest $r): Response => $r->attach('file', $contents, $filename)->post('/v1/extract', ['options' => json_encode((object) $options)]),
+            (int) config('dentlegal.ai_service.extract_timeout'),
+        );
+    }
+
+    public function ingestSource(string $contents, array $options): array
+    {
+        return $this->send(
+            fn (PendingRequest $r): Response => $r->attach('file', $contents, 'source.pdf')->post('/v1/kb/ingest', ['options' => json_encode($options)]),
+            (int) config('dentlegal.ai_service.ingest_timeout'),
+        );
+    }
+
     public function health(): array
     {
         /** @var array{status: string, models: array<string, bool>, db: bool} $body */

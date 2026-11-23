@@ -7,6 +7,11 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     HF_HOME=/opt/models/hf \
     CAMELTOOLS_DATA=/opt/models/camel
 
+# OCR (S3.3, D6): Tesseract 5 with Arabic and English. tessdata_best can replace the default models later if the
+# bake-off shows a gain on scanned case documents.
+RUN apt-get update && apt-get install -y --no-install-recommends tesseract-ocr tesseract-ocr-ara tesseract-ocr-eng \
+ && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /srv/ai
 COPY pyproject.toml ./
 COPY app ./app

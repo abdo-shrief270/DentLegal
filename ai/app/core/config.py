@@ -65,6 +65,7 @@ class Settings(BaseSettings):
     reranker: Literal["bge-reranker-v2-m3", "lexical"] = "bge-reranker-v2-m3"
     # Arabic NER for masking (§5.10, layer 4). "none" is refused outside local/testing: masking fails closed.
     ner: Literal["camel", "none"] = "camel"
+    ocr_languages: str = "ara+eng"
 
     # Claude (§5.6). The API key is read by the SDK from ANTHROPIC_API_KEY.
     anthropic_model: str = "claude-opus-5-5"

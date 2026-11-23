@@ -91,6 +91,49 @@ class ClaudeClient:
             return retry
         return result
 
+    def transcribe_page(self, png: bytes, system: str, effort: str = "low", max_tokens: int = 8000) -> tuple[str, dict[str, Any]]:
+        """Plain-text transcription of one page image (public sources only, never case documents: §5.6 kb_transcribe)."""
+        import base64
+
+        kwargs: dict[str, Any] = {
+            "model": self.model,
+            "max_tokens": max_tokens,
+            "inference_geo": self.inference_geo,
+            "output_config": {"effort": effort},
+            "system": [{"type": "text", "text": system, "cache_control": {"type": "ephemeral"}}],
+            "messages": [
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "image", "source": {"type": "base64", "media_type": "image/png", "data": base64.b64encode(png).decode()}},
+                        {"type": "text", "text": "Transcribe this page."},
+                    ],
+                }
+            ],
+        }
+        if self.use_fallbacks:
+            kwargs["betas"] = [FALLBACK_BETA]
+            kwargs["fallbacks"] = "default"
+        started = time.monotonic()
+        try:
+            with self.client.beta.messages.stream(**kwargs) as stream:
+                message = stream.get_final_message()
+        except (anthropic.RateLimitError, anthropic.InternalServerError, anthropic.APIConnectionError) as exc:
+            raise LlmUnavailable(type(exc).__name__) from exc
+        except anthropic.APIStatusError as exc:
+            raise LlmRequestError(f"status {exc.status_code}") from exc
+        if getattr(message, "stop_reason", None) == "refusal":
+            raise LlmRequestError("transcription refused")
+        usage = self._usage(message)
+        text = "\n".join(b.text for b in message.content if getattr(b, "type", None) == "text")
+        meta = {
+            "model_served": getattr(message, "model", self.model),
+            **usage,
+            "cost_usd": round(self._cost(usage), 6),
+            "latency_ms": int((time.monotonic() - started) * 1000),
+        }
+        return text, meta
+
     def count_tokens(self, call: LlmCall) -> int:
         """Exact input size of a call (system + messages + output schema), for the bundle size guard."""
         try:
