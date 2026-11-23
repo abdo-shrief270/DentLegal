@@ -1,0 +1,39 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "IBM Plex Sans Arabic", "Segoe UI", Tahoma, system-ui, sans-serif;
+  --color-navy-950: #061f28;
+  --color-navy-900: #0a2e3b;
+  --color-navy-800: #0f3d4c;
+  --color-teal-700: #0d6b5d;
+  --color-teal-600: #12806f;
+  --color-teal-500: #16a08a;
+  --color-teal-100: #d3efe9;
+  --color-teal-50: #ebf7f4;
+  --color-gold-500: #b8924f;
+  --color-gold-100: #f5ecdc;
+  --color-ink: #10242c;
+  --color-ink-2: #33474f;
+  --color-muted: #5d7079;
+  --color-line: #e2e9eb;
+  --color-bg: #f3f6f7;
+}
+
+@layer base {
+  body { font-size: 16px; line-height: 1.8; }
+  h1, h2, h3 { line-height: 1.35; font-weight: 700; color: var(--color-ink); }
+  a { color: var(--color-teal-700); }
+  :focus-visible { outline: 3px solid var(--color-teal-500); outline-offset: 2px; border-radius: 6px; }
+}
+
+@layer components {
+  .container-page { max-width: 1100px; margin-inline: auto; padding-inline: 20px; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; border-radius: 12px; padding: 12px 20px; font-weight: 600; text-decoration: none; }
+  .btn-primary { background: var(--color-teal-600); color: #fff; }
+  .btn-primary:hover { background: var(--color-teal-700); }
+  .btn-ghost { background: rgba(255, 255, 255, 0.1); color: #fff; border: 1px solid rgba(255, 255, 255, 0.22); }
+  .card { background: #fff; border: 1px solid var(--color-line); border-radius: 18px; padding: 22px; box-shadow: 0 1px 2px rgba(10, 46, 59, 0.06); }
+  .prose-legal h2 { font-size: 1.25rem; margin-top: 2rem; margin-bottom: 0.5rem; }
+  .prose-legal p, .prose-legal li { color: var(--color-ink-2); }
+  .prose-legal ul { list-style: disc; padding-inline-start: 1.4rem; margin-block: 0.5rem; }
+}

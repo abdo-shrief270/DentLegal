@@ -5,8 +5,10 @@
   "scripts": {
     "dev": "pnpm --filter @dentlegal/dashboard dev",
     "build": "pnpm --filter @dentlegal/dashboard generate",
+    "site:dev": "pnpm --filter @dentlegal/site dev",
+    "site:build": "pnpm --filter @dentlegal/site generate",
     "preview": "pnpm --filter @dentlegal/dashboard preview",
-    "typecheck": "pnpm --filter @dentlegal/dashboard typecheck",
+    "typecheck": "pnpm --filter @dentlegal/dashboard typecheck && pnpm --filter @dentlegal/site typecheck",
     "test": "pnpm -r --if-present test"
   }
 }

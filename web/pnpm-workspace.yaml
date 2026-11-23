@@ -1,6 +1,7 @@
 packages:
   - base
   - dashboard
+  - site
 
 onlyBuiltDependencies:
   - '@parcel/watcher'

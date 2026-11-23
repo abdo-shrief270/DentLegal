@@ -3,7 +3,7 @@
 Legal-protection platform for dentists in Saudi Arabia. This repository holds **Project 1**: the AI core (RAG over Saudi regulations) and the simplified release (Flutter dentist app, Vue web dashboard for lawyers and admins, Nuxt landing page).
 
 - **Plan:** [`PROJECT1_PLAN.md`](PROJECT1_PLAN.md) (approved, 9 weeks).
-- **Web dashboard (lawyer + admin):** [`web/`](web/README.md) — Nuxt + PrimeVue; calls the Laravel API (fake data mode for previews).
+- **Web (dashboard + marketing site):** [`web/`](web/README.md) — Nuxt + PrimeVue dashboard for lawyers and admins (calls the Laravel API; fake data mode for previews) and the pre-rendered marketing site with the privacy notice and terms.
 - **AI service (Python):** [`ai/`](ai/README.md) — OCR, masking, hybrid retrieval over the regulations, Claude consultant and case analysis/draft with verified citations, ingestion, eval harness.
 - **API (Laravel):** [`backend/`](backend/README.md) — OTP and dashboard auth (2FA), cases, encrypted documents, the analysis pipeline, consultant, lawyer review, admin, ratings, stats, retention.
 - **Dentist app (Flutter):** [`mobile/`](mobile/README.md) — real API layer, biometric lock, screenshot protection (fake data mode for previews).

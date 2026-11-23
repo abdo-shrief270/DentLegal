@@ -40,10 +40,19 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm build
+      - name: Build the marketing site under /site/
+        run: pnpm site:build
+        env:
+          NUXT_APP_BASE_URL: /site/
       - uses: actions/upload-artifact@v4
         with:
           name: portal
           path: web/dashboard/.output/public
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        with:
+          name: site
+          path: web/site/.output/public
           retention-days: 7
 
   app:
@@ -96,6 +105,10 @@ jobs:
         with:
           name: app
           path: out/app
+      - uses: actions/download-artifact@v4
+        with:
+          name: site
+          path: out/site
       - name: Configure SSH
         env:
           SSH_KEY: ${{ secrets.PREVIEW_SSH_KEY }}
@@ -108,16 +121,17 @@ jobs:
       - name: Upload builds and config
         run: |
           RSH="ssh -p $SSH_PORT -o StrictHostKeyChecking=yes"
-          ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "mkdir -p '$REMOTE_DIR/sites/portal' '$REMOTE_DIR/sites/app'"
+          ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "mkdir -p '$REMOTE_DIR/sites/portal' '$REMOTE_DIR/sites/app' '$REMOTE_DIR/sites/site'"
           rsync -az --delete -e "$RSH" out/portal/ "$SSH_USER@$SSH_HOST:$REMOTE_DIR/sites/portal/"
           rsync -az --delete -e "$RSH" out/app/ "$SSH_USER@$SSH_HOST:$REMOTE_DIR/sites/app/"
+          rsync -az --delete -e "$RSH" out/site/ "$SSH_USER@$SSH_HOST:$REMOTE_DIR/sites/site/"
           rsync -az -e "$RSH" infra/preview/Caddyfile infra/preview/compose.yaml "$SSH_USER@$SSH_HOST:$REMOTE_DIR/"
       - name: Start or reload Caddy
         run: |
           ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "cd '$REMOTE_DIR' && printf 'PREVIEW_HOST=%s\n' '$HOST' > .env && docker compose up -d && docker compose exec -T caddy caddy reload --config /etc/caddy/Caddyfile"
       - name: Smoke check
         run: |
-          for path in / /app/; do
+          for path in / /app/ /site/; do
             curl -fsS --retry 5 --retry-delay 5 --retry-all-errors -o /dev/null "https://$HOST$path"
             echo "ok https://$HOST$path"
           done

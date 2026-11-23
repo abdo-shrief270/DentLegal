@@ -1,6 +1,7 @@
 # UI preview on the staging VPS: fake data only, no API yet (PROJECT1_PLAN.md §8.2).
 #   https://{$PREVIEW_HOST}/      -> web dashboard (lawyer + admin), Nuxt SPA
 #   https://{$PREVIEW_HOST}/app/  -> dentist app, Flutter web build
+#   https://{$PREVIEW_HOST}/site/ -> marketing site (pre-rendered Nuxt)
 {$PREVIEW_HOST} {
 	encode zstd gzip
 
@@ -14,6 +15,13 @@
 	}
 
 	redir /app /app/ 308
+	redir /site /site/ 308
+
+	handle_path /site/* {
+		root * /srv/site
+		try_files {path} {path}/index.html /404.html
+		file_server
+	}
 
 	handle_path /app/* {
 		root * /srv/app
