@@ -12,6 +12,8 @@ class HttpFeedbackRepository implements FeedbackRepository {
   final ApiClient _api;
 
   @override
-  Future<void> send({required FeedbackCategory category, required String message, required String screen}) =>
-      _api.post<Json>('/feedback', body: {'category': category.name, 'message': message, 'screen': screen, 'platform': !kIsWeb && Platform.isIOS ? 'ios' : 'android'});
+  Future<void> send({required FeedbackCategory category, required String message, required String screen}) => _api.post<Json>(
+    '/feedback',
+    body: {'category': category.name, 'message': message, 'screen': screen, 'platform': !kIsWeb && Platform.isIOS ? 'ios' : 'android'},
+  );
 }
