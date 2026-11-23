@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Status** | **Approved** by Abdelrahman on 22 Nov 2026. The client agreed to 9 weeks at the same price and payment amounts. Build starts with the web dashboard UI (§10.3, build order). |
-| **Version / date** | v1.0 · 22 Nov 2026. v1.0: plan approved; 9 weeks agreed by the client; old proposals removed from the repo. v0.4: schedule extended to 9 weeks (D27 option B), pending client approval. v0.3: PrimeVue confirmed for the dashboard; a Nuxt marketing landing page added (S9.7). v0.2: the lawyer portal and admin dashboard move from Filament to a Vue 3 dashboard (Nuxt 4, SPA mode); the mobile app stays Flutter. Estimates and schedule updated (§11.1, D27). |
+| **Version / date** | v1.1 · 22 Nov 2026. v1.1: hosting moves to a Hostinger VPS outside KSA, agreed by the client (D3, §8); GitHub milestones and issues created with internal target dates (§10.1, Appendix B). v1.0: plan approved; 9 weeks agreed by the client; old proposals removed from the repo. v0.4: schedule extended to 9 weeks (D27 option B), pending client approval. v0.3: PrimeVue confirmed for the dashboard; a Nuxt marketing landing page added (S9.7). v0.2: the lawyer portal and admin dashboard move from Filament to a Vue 3 dashboard (Nuxt 4, SPA mode); the mobile app stays Flutter. Estimates and schedule updated (§11.1, D27). |
 | **Contract** | Project 1 (A1): 7,000 SAR · 8 weeks from start of work (**extended to 9 weeks**, agreed by the client; price unchanged) · M0 2,000 / M1 3,000 / M2 2,000 SAR |
 | **Sources of truth** | The planning brief (authoritative for price, timeline, payments and scope), then `site/docs/prd.html`, `site/docs/user-flows.html`, `site/docs/architecture.html` and the prototype in `site/prototype/`. |
 | **Repo cleanup** | The old proposals, price quote, Phase 1/Phase 2 offer pages and the sales presentation were removed from the repo on 22 Nov 2026 (they remain in git history). The approved prototype, screenshots, PRD, user flows, architecture doc and regulation sources stay as the reference for Project 1. |
@@ -12,7 +12,7 @@
 
 ## 0. Summary
 
-- **What ships:** a Flutter dentist app (iOS + Android, Arabic RTL) with an AI legal consultant and a "case → analysis → draft" flow. A Laravel back end serving a REST API. A **Vue 3 web dashboard** (Nuxt 4 in SPA mode) with two areas: lawyer review and admin. A **Nuxt marketing landing page** (pre-rendered, Arabic RTL) that also hosts the privacy, terms and support pages the stores require. A Python AI service doing OCR, PII masking, hybrid RAG over the supplied Saudi regulations, Claude generation and citation verification. Everything is hosted in a KSA cloud region.
+- **What ships:** a Flutter dentist app (iOS + Android, Arabic RTL) with an AI legal consultant and a "case → analysis → draft" flow. A Laravel back end serving a REST API. A **Vue 3 web dashboard** (Nuxt 4 in SPA mode) with two areas: lawyer review and admin. A **Nuxt marketing landing page** (pre-rendered, Arabic RTL) that also hosts the privacy, terms and support pages the stores require. A Python AI service doing OCR, PII masking, hybrid RAG over the supplied Saudi regulations, Claude generation and citation verification. Everything runs on Hostinger VPS servers outside KSA, as agreed by the client (D3, §8.1).
 - **Recommended stack changes from the approved direction:** none to the layers. Three lean choices:
   - The AI part is a **separate, stateless FastAPI service** called synchronously from Horizon jobs, with no second queue (**Decision needed: D1**).
   - The lawyer portal and admin are **one Vue dashboard** with two role-based areas, rather than two separate apps.
@@ -55,7 +55,7 @@ None block writing this plan; every non-blocking unknown is stated as an assumpt
 | 5 | Accounts & login | Admin invites dentists. Dentists log in with SMS OTP. Lawyers and admins use email + password + MFA. | m01, m02 |
 | 6 | Feedback tools | «مفيدة / غير مفيدة» plus a comment on every answer, analysis and draft. A general «ملاحظاتك» form. Usage statistics in admin. | — |
 | 7 | Basic admin | Manage pilot dentists and lawyers. Upload regulatory sources, index them, publish or archive versions. View ratings and feedback. | w06–w08 (simplified) |
-| 8 | Publishing & pilot report | Dentist app on the App Store and Google Play under the client's accounts. Lawyer portal and admin on the web. Hosting in KSA. Pilot report after the 2–3-week pilot. | — |
+| 8 | Publishing & pilot report | Dentist app on the App Store and Google Play under the client's accounts. Lawyer portal and admin on the web. ~~Hosting in KSA.~~ **Hosting on a Hostinger VPS outside KSA, agreed by the client on 22 Nov 2026 (D3).** Pilot report after the 2–3-week pilot. | — |
 
 **Added by Abdelrahman (not a contract item):** a Nuxt marketing landing page at `<domain>` (S9.7, §7.3). The privacy, terms and support pages the stores require live on it.
 
@@ -120,9 +120,9 @@ Any new request during the build is logged in a change log, then either added to
 |---|---|
 | Q-A1 | Is 40 focused h/week realistic? If not, approve cut list A plus B (§11.1). |
 | Q-A2 | Do you have a Mac for iOS builds? Otherwise Codemagic's free tier (**Decision needed: D15**). |
-| Q-A3 | Do you agree with D1 (separate FastAPI service), D2 (Riverpod 3), and D3 (OCI)? (D26 PrimeVue: decided.) |
+| Q-A3 | Do you agree with D1 (separate FastAPI service), D2 (Riverpod 3)? (D26 PrimeVue and D3 Hostinger VPS: decided.) |
 | Q-A6 | ~~How do we absorb the extra 40 h (D27)?~~ Decided: ask the client for 9 weeks. |
-| Q-A4 | Sentry SaaS with scrubbing, or self-hosted GlitchTip in KSA (**Decision needed: D14**)? |
+| Q-A4 | Sentry SaaS with scrubbing, or self-hosted GlitchTip on our VPS (**Decision needed: D14**)? |
 | Q-A5 | Repo: a new private repo in a client-owned GitHub organisation (**Decision needed: D21**)? |
 
 ---
@@ -137,17 +137,17 @@ flowchart LR
     D["Dentist app<br/>Flutter iOS / Android"]
     WD["Web dashboard<br/>Vue 3 + Nuxt 4 SPA<br/>/lawyer and /admin"]
   end
-  subgraph KSA1["OCI Riyadh (KSA) - prod host, Docker Compose"]
+  subgraph KSA1["Hostinger VPS KVM 8 (Europe, D3) - prod host, Docker Compose"]
     CD["Caddy<br/>TLS 1.2+, HSTS<br/>serves dashboard static build"]
     LA["Laravel 12 app<br/>REST /api/v1, Sanctum, Fortify, Policies"]
     HZ["Horizon workers<br/>queues: ai, ocr, ingest, notify"]
     AI["ai-svc (FastAPI)<br/>OCR, normalise, PII mask, embed,<br/>retrieve, rerank, generate, verify"]
     PG[("PostgreSQL 17<br/>pgvector + Arabic FTS + pg_trgm")]
     RD[("Redis")]
-    OS[("Object Storage<br/>S3-compatible, CMK-encrypted")]
+    OS[("Documents volume<br/>encrypted per file by the app")]
   end
-  subgraph KSA2["OCI Jeddah (KSA)"]
-    BK[("Encrypted DB dumps<br/>+ replicated documents")]
+  subgraph KSA2["Off-site bucket (D29) + Hostinger backups"]
+    BK[("age-encrypted DB dumps<br/>+ encrypted documents")]
   end
   subgraph EXT["External services"]
     ANT["Anthropic API<br/>claude-opus-5-5<br/>de-identified text only"]
@@ -170,7 +170,7 @@ flowchart LR
   LA --> SMS
   HZ --> FCM
   PG -. "nightly encrypted dump" .-> BK
-  OS -. "bucket replication" .-> BK
+  OS -. "nightly encrypted copy" .-> BK
   LA -.-> MON
   AI -.-> MON
   D -.-> MON
@@ -188,7 +188,7 @@ flowchart LR
 | **ai-svc (FastAPI)** | Stateless compute: PDF/image text extraction and OCR, Arabic normalisation, PII masking, embeddings, hybrid retrieval, reranking, Claude calls (structured outputs, streaming, refusal fallback), citation verification, eval harness. Receives case data **in the request**, returns results, and persists none of it. | Only the knowledge index (`knowledge_chunks` embeddings, written during ingestion) |
 | **PostgreSQL 17** | Relational data + `pgvector` (HNSW) + Arabic `tsvector` + `pg_trgm` | — |
 | **Redis** | Queues, cache, rate-limiter counters | — |
-| **Object Storage** | Uploaded documents and source PDFs. Private buckets, customer-managed key, served only via Laravel temporary signed routes. | — |
+| **Documents volume** | Uploaded documents and source PDFs on the VPS disk, each file encrypted by the app with its own data key (§9.3), served only via Laravel temporary signed routes. | — |
 | **Anthropic API** | Generation for the consultant, analysis and draft, plus a one-off transcription of public regulation pages. Never receives raw case text, images or identities. | — |
 
 ### 2.3 Decision needed (D1): a separate FastAPI service, or AI inside Laravel?
@@ -197,7 +197,7 @@ flowchart LR
 
 **Why not inside Laravel:**
 - BGE-M3 embeddings, the cross-encoder reranker, Arabic NER for PII masking (CAMeL Tools), Tesseract/PaddleOCR bindings and the eval tooling are Python-native.
-- Doing them from PHP means shelling out or calling external APIs, which would push queries and document text outside KSA.
+- Doing them from PHP means shelling out or calling external APIs, which would send queries and document text to more third parties.
 
 **Why it is still lean for one developer:**
 - It is one container with no queue or database of its own beyond the KB index.
@@ -218,7 +218,7 @@ flowchart LR
 | Separate HA services, horizontal scaling | One host per environment, vertical sizing, nightly backups (RPO 24 h, RTO 4 h) |
 | Certificate pinning, root/jailbreak detection, pen test | Secure storage, biometric lock, screenshot blocking, OWASP checklist; pen test in P2 |
 | AI settings UI, admin KPIs | Config files + read-only stats widgets |
-| Managed database with PITR | Self-hosted PG 17 in Docker, nightly encrypted dumps to Jeddah, block-volume backups |
+| Managed database with PITR | Self-hosted PG 17 in Docker, nightly encrypted dumps off-site, Hostinger VPS backups |
 
 ### 2.5 How Project 2 extends this without a rewrite
 
@@ -234,19 +234,20 @@ flowchart LR
 | More notifications, reminders | The `devices` table, FCM channel and Laravel Notifications are in place. P2 adds notification classes and scheduled jobs. |
 | Remaining mobile screens | Feature-first Flutter structure: new features plug into go_router and ship as an app update. |
 | Subscriptions | A new isolated module with no coupling to P1 tables. |
-| Larger infrastructure or another KSA cloud | Everything is containerised. Moving clouds means redeploying images plus restoring the DB and buckets. |
+| Larger infrastructure, or a move to a Saudi cloud | Everything is containerised. Moving hosts means redeploying images plus restoring the DB and the documents volume. |
 
-### 2.6 Data flows and residency: what leaves KSA
+### 2.6 Data flows and residency
 
 | Data | Destination | Location | Content |
 |---|---|---|---|
 | De-identified case text, retrieved regulation text, questions | Anthropic API | US (`inference_geo: "us"`, D4) or global | Patient identifiers and dentist identity already replaced with tokens; no images |
 | Public regulation page images (ingestion only, D5) | Anthropic API | US / global | Public government documents, no personal data |
 | Push notifications | FCM / APNs | Global | Generic text + case code; no patient data |
-| Error telemetry | Sentry (EU/US) or GlitchTip in KSA (**Decision needed: D14**) | Per D14 | Scrubbed: no request bodies, no document text |
+| Error telemetry | Sentry (EU/US) or GlitchTip on our VPS (**Decision needed: D14**) | Per D14 | Scrubbed: no request bodies, no document text |
 | Lawyer/admin emails (invites, MFA codes) | Email provider (**Decision needed: D17**) | Bahrain or abroad | Name + email only |
 | OTP SMS | Saudi SMS gateway | KSA | Phone + code |
-| Everything else (documents, OCR text, cases, drafts, DB, backups) | OCI Riyadh / Jeddah | **KSA** | — |
+| Everything else (documents, OCR text, cases, drafts, DB) | Hostinger VPS (D3) | **Outside KSA**: the Hostinger data centre chosen at purchase (recommended Europe, D3a); agreed by the client on 22 Nov 2026 | Full case data, encrypted at rest |
+| Backups | Hostinger backups + off-site bucket (D29) | Same region as the VPS / provider's EU region | age-encrypted |
 
 ---
 
@@ -668,11 +669,11 @@ sequenceDiagram
 
 **Expected size:** roughly 900–1,100 chunks across the three sources (the prototype estimated 947). Indexing on CPU takes about 10 minutes.
 
-### 5.4 Embeddings and reranker (self-hosted in KSA)
+### 5.4 Embeddings and reranker (self-hosted on our VPS)
 
 | Role | Model | Licence | Why | Runtime |
 |---|---|---|---|---|
-| Embeddings | `BAAI/bge-m3` (dense 1024-d; 8k tokens) | MIT | Strong multilingual model incl. Arabic; handles English queries against the job description; no data leaves KSA | CPU (about 2.3 GB RAM), ~100–200 ms per query |
+| Embeddings | `BAAI/bge-m3` (dense 1024-d; 8k tokens) | MIT | Strong multilingual model incl. Arabic; handles English queries against the job description; no data leaves our server | CPU (about 2.3 GB RAM), ~100–200 ms per query |
 | Reranker | `BAAI/bge-reranker-v2-m3` (cross-encoder) | Apache-2.0 | Big precision gain on short legal passages; its score drives the refusal threshold | CPU, ~1–2 s for 30 pairs |
 
 Both are loaded once at ai-svc start-up through `FlagEmbedding`. If the reranker turns out too slow on CPU in the W2 spike, the fallback is to rerank only the top 20, or to use the ONNX int8 export.
@@ -902,7 +903,7 @@ For each run, ai-svc keeps a **manifest** mapping local refs to real IDs: `S3 �
 
 ### 5.10 PII masking pipeline (fail-closed)
 
-**Rule:** the **only** processing of unmasked text is text extraction and OCR, done in ai-svc inside KSA, in memory. Masking happens before anything is stored, embedded, retrieved with, or sent to an LLM. The same masker runs on typed facts and consultant questions.
+**Rule:** the **only** processing of unmasked text is text extraction and OCR, done in ai-svc on our own server, in memory. Masking happens before anything is stored, embedded, retrieved with, or sent to an LLM. The same masker runs on typed facts and consultant questions.
 
 | Layer | Detects | Replacement |
 |---|---|---|
@@ -1001,7 +1002,7 @@ For each run, ai-svc keeps a **manifest** mapping local refs to real IDs: `S3 �
   3. Request **ZDR** through Anthropic sales in W1. Opus 5.5 is eligible; if it is not granted in time, the standard commercial terms apply.
   4. Never use Batches or the Files API with case data.
   5. Get written sign-off from the client's lawyer before any real case data is processed (before M2).
-- **If the client's lawyer requires in-KSA processing only:** P1 would need a self-hosted open model on a GPU in KSA. That is a price, timeline and quality change, so it goes back to the client as a scope question and is not absorbed.
+- **If the client's lawyer refuses any transfer to Anthropic:** P1 would need a self-hosted open model on a GPU server. That is a price, timeline and quality change, so it goes back to the client as a scope question and is not absorbed.
 - **Cheaper models** (**Decision needed: D7**): PII detection will **never** use an API model, because that would send unmasked text out. Routing the consultant to `claude-sonnet-5-5` is evaluated in W9 or the pilot and presented to Abdelrahman as a decision, with an eval table. It is never switched silently.
 
 ---
@@ -1079,7 +1080,7 @@ For each run, ai-svc keeps a **manifest** mapping local refs to real IDs: `S3 �
 - **Upload:** multipart per document with a progress bar; retry on failure; up to 15 documents and 50 pages per case. Files go straight from memory to upload; temp files are deleted immediately.
 - **Server-side:**
   - MIME is sniffed from magic bytes; only PDF/JPEG/PNG/HEIC are accepted (HEIC converted server-side).
-  - Each file gets a SHA-256 hash and is stored in a private bucket under `cases/{case_id}/{document_id}`. Server-side encryption uses an OCI Vault customer-managed key.
+  - Each file gets a SHA-256 hash and is stored in a private bucket under `cases/{case_id}/{document_id}`. The app encrypts each file with its own data key before writing it to the documents volume (§9.3).
   - An audit entry is written.
 - **The «المستندات» tab** lists files with «مشفّر» and «جودة منخفضة» badges. Viewing (Should, S3.12) downloads into memory through a temporary signed URL, with screenshot protection on.
 
@@ -1202,33 +1203,38 @@ No «تجريبي» / beta / pilot wording on the page, for the same App Store r
 
 ## 8. Infrastructure & DevOps
 
-### 8.1 KSA hosting comparison and recommendation (**Decision needed: D3**)
+### 8.1 Hosting: Hostinger VPS (**Decided: D3**, 22 Nov 2026)
 
-| Option | KSA region(s) | Onboarding for this client | Fit for P1 (VMs, S3-compatible storage, KMS) | Notes |
-|---|---|---|---|---|
-| **Oracle Cloud (OCI)** | Jeddah (live since 2020), Riyadh (live since Aug 2024) | Self-serve signup with card | Flex VMs, Object Storage with an S3-compatibility API, Vault (KMS), block-volume backups, container registry | Two in-country regions give in-KSA backups. List prices are the same in every region (E5.Flex about $0.039 per OCPU-hour + $0.0026 per GB-hour at the time of writing). |
-| Google Cloud Dammam (`me-central2`) | Dammam | KSA-based customers must buy through the reseller **CNTXT**, on invoiced billing | Compute, GCS, KMS available; confirm Cloud SQL and Cloud Run | CST-licensed. The reseller contract adds lead time a W1 start can't absorb. |
-| STC Cloud | Several KSA sites | Sales-led contract | IaaS + object storage; managed services vary | Strong local option for P2 or enterprise; slow procurement |
-| Microsoft Azure Saudi Arabia East | Eastern Province (announced for Q4 2026) | Self-serve once GA | Full | Not confirmed GA when this was written; re-evaluate for P2 |
-| AWS Saudi Arabia region | Announced for Dec 2026 | Self-serve once GA | Full | Opens at the end of our window; too new for P1 |
+**Decision:** the project runs on **Hostinger KVM VPS** servers, one per environment, with the code in this repository (D21). The client has agreed that hosting is **outside KSA** (contract item 8 originally said "Hosting in KSA"); see §2.6 and §9.8 for what this means for data. Abdelrahman should keep the client's agreement **in writing** (email or WhatsApp) with the project records.
 
-**Recommendation:** OCI **Riyadh** as primary and OCI **Jeddah** for backups.
-- It is the only option with self-serve signup and two live KSA regions today.
-- Because the system is containers on a VM, P2 can move to STC, Azure or AWS without code changes.
-- **To confirm at signup:** that the tenancy can choose Riyadh as its home region; whether Always Free Ampere capacity exists there (**Decision needed: D19**); and the client's regulatory comfort with OCI KSA (CST registration status).
+| Item | Choice |
+|---|---|
+| Product | Hostinger **VPS (KVM)**, Ubuntu 24.04 LTS, root access, Docker Compose. Shared web hosting can't run PostgreSQL, Redis or the AI service. |
+| Data centre | Hostinger has no Saudi location; its VPS regions are in North America, South America, Europe and Asia. **Recommended: a European location** (for example Germany or France): lowest latency to KSA among Hostinger's regions and a GDPR jurisdiction. Chosen at purchase; the location can't be changed later without a rebuild (**Decision needed: D3a**). |
+| Prod size | **KVM 8** (8 vCPU, 32 GB RAM, 400 GB NVMe). The AI service keeps BGE-M3, the reranker and the NER model in memory (about 5 GB) and OCR is CPU-bound; 8 vCPU keeps the < 10 min upload → draft target with headroom. |
+| Staging size | **KVM 4** (4 vCPU, 16 GB RAM, 200 GB NVMe). Same stack, synthetic data only. |
+| Object storage / KMS | Hostinger VPS has neither. Documents are stored on the VPS disk, **encrypted per file by the app** (§9.3), and served only through Laravel signed routes (§9.5). |
+| Container registry | GitHub Container Registry (GHCR) in this repository. |
+| Backups | Hostinger's automatic VPS backups as the first layer, plus nightly app-level encrypted dumps copied **off the server** (§8.5). |
+
+- **Why Hostinger:** simple to buy and run, fixed monthly price, enough CPU and RAM for the self-hosted models at a fraction of the cloud cost (§13).
+- **What we give up compared with the earlier OCI plan:** in-country hosting, managed KMS, object storage with replication, and cloud alarms. They are replaced by app-level encryption, off-site encrypted backups and a small monitoring setup (§8.5–8.6).
+- **Moving later:** everything is containers on one VM, so P2 (or a future KSA requirement) can move to a Saudi provider by redeploying images and restoring the database and documents.
 
 ### 8.2 Environments
 
 | Env | Where | Data | Purpose |
 |---|---|---|---|
 | dev | Abdelrahman's machine, Docker Compose (same images) | Synthetic | Development; dev Anthropic key with a low spend cap |
-| staging | OCI Riyadh, VM 2 OCPU / 16 GB (stoppable) | **Synthetic only** | CI deploys from `main`; TestFlight / Play internal builds point here; M1 demo |
-| prod | OCI Riyadh, VM 4 OCPU / 24 GB (+ 150 GB block volume) | Real pilot data after M2 | Launch and pilot; deploy from tags with manual approval |
+| preview | Staging VPS, static builds only | **Fake data in the browser** | The current UI previews (dashboard and app web build) until the API exists; replaced by staging in W4 |
+| staging | Hostinger KVM 4 | **Synthetic only** | CI deploys from `main`; TestFlight / Play internal builds point here; M1 demo |
+| prod | Hostinger KVM 8 | Real pilot data after M2 | Launch and pilot; deploy from tags with manual approval |
 
 ### 8.3 Production host layout (Docker Compose)
 
 - **Containers:** `caddy` (TLS, HTTP/2, security headers) → `app` (PHP 8.4-FPM + nginx unit, or FrankenPHP), plus the dashboard's and landing page's static builds (served by Caddy), `horizon`, `scheduler`, `ai-svc` (uvicorn, 2 workers, models preloaded), `postgres:17` with pgvector, `redis:7`, and `gotenberg` (PDF, if S4.5).
-- **Network:** only Caddy publishes ports 80 and 443. SSH uses a key, restricted to an allowlist of IPs or through the OCI Bastion service.
+- **Network:** only Caddy publishes ports 80 and 443. Hostinger's VPS firewall (hPanel) plus `ufw` allow only 22, 80 and 443. SSH is key-only for a non-root `deploy` user, password login and root login are disabled, and `fail2ban` runs.
+- **Disk:** documents live in an encrypted-at-the-app-level volume mounted at `/srv/dentlegal/documents`; database and documents are both covered by the backups in §8.5.
 - **RAM:** about 12 GB at load, mostly models: BGE-M3 2.3 GB, reranker 2.3 GB, NER 0.5 GB, Postgres, PHP.
 
 ### 8.4 CI/CD (GitHub Actions)
@@ -1239,38 +1245,40 @@ No «تجريبي» / beta / pilot wording on the page, for the same App Store r
 | `web.yml` | `pnpm install` → ESLint → `vue-tsc --noEmit` → Vitest → `nuxi generate` for `web/dashboard` and `web/landing` → both static bundles packed into the Caddy image |
 | `ai.yml` | ruff → mypy → pytest (unit; verification, normaliser, parser, masking test set) → build image |
 | `mobile.yml` | `flutter analyze` → `flutter test` → (on tag) build AAB and IPA, upload to Play internal and TestFlight via fastlane (macOS runner or Codemagic, D15) |
-| `deploy.yml` | Push images to OCIR (in-region) → SSH to the host → `docker compose pull && up -d` → `php artisan migrate --force` → smoke check `/health`. Staging on merge to `main`; prod on a `v*` tag behind a GitHub Environment approval. |
+| `deploy.yml` | Push images to GHCR → SSH to the VPS as `deploy` → `docker compose pull && up -d` → `php artisan migrate --force` → smoke check `/health`. Staging on merge to `main`; prod on a `v*` tag behind a GitHub Environment approval. |
+| `preview.yml` (now) | Builds the dashboard (fake API) and the Flutter web build (fake data) and copies them to the staging VPS with `rsync` over SSH. See `infra/preview/README.md`. |
 
 Dependency scanning: Dependabot, plus `composer audit`, `pip-audit`, `pnpm audit` and `flutter pub outdated` in CI.
 
 ### 8.5 Backups and DR
 
-- **Database:** nightly `pg_dump -Fc`, encrypted with `age` (the key is kept offline by the client and Abdelrahman), uploaded to an **OCI Jeddah** bucket with a 30-day lifecycle.
-- **Documents:** cross-region replication of the documents bucket from Riyadh to Jeddah, plus a daily block-volume backup policy (7 days).
-- **Restore test:** in W9 before go-live, a dump is restored into staging and verified. Restores are then repeated monthly in the pilot.
+- **Layer 1, Hostinger:** the VPS's automatic backups (weekly on the base plan; daily backups if bought as an add-on) and a manual snapshot before every prod release.
+- **Layer 2, off-site (Decision needed: D29):** nightly `pg_dump -Fc` plus an `rsync` of the documents directory (already encrypted per file), both encrypted with `age` (the key is kept offline by the client and Abdelrahman), copied to an S3-compatible bucket at another provider with a 30-day lifecycle. Recommended: Backblaze B2 or Cloudflare R2, EU region. This keeps a copy if the Hostinger account or server is lost.
+- **Restore test:** in W9 before go-live, a dump and the documents are restored into staging and verified. Restores are then repeated monthly in the pilot.
 - **Targets (P1):** RPO 24 h, RTO 4 h. WAL archiving and PITR are P2.
 
 ### 8.6 Monitoring
 
-- **Errors:** Laravel, ai-svc and Flutter report to Sentry (or GlitchTip, D14), with PII scrubbing and no request bodies.
+- **Errors:** Laravel, ai-svc and Flutter report to Sentry (or self-hosted GlitchTip, D14), with PII scrubbing and no request bodies.
 - **Uptime:** an external check on `/health` and the portal login page every minute (UptimeRobot or Better Stack free tier).
 - **Performance and queues:** Laravel Pulse (slow requests, queues) and the Horizon dashboard (failed jobs), both admin-only.
-- **Host alarms:** OCI Monitoring for CPU > 85%, memory > 90%, disk > 80%, and instance down, emailed to Abdelrahman and the client.
+- **Host alerts:** hPanel's resource graphs, plus a cron script on the VPS that emails Abdelrahman and the client when CPU > 85%, memory > 90% or disk > 80% for 10 minutes. "Server down" is covered by the uptime check.
 - **AI health:** a daily job flags refusal rate > 10%, citation validity < 95% or cost per day > the threshold, and emails a digest.
 
 ### 8.7 Secrets
 
-- **On the host:** per-environment `.env` files, root-only (`0600`), never in git. A sealed copy is kept as an OCI Vault secret.
-- **In CI:** GitHub Actions secrets hold only the deploy SSH key and registry token.
+- **On the host:** per-environment `.env` files owned by `deploy`, mode `0600`, never in git. A copy is kept in the client's and Abdelrahman's password manager.
+- **Document encryption key:** a separate key (not `APP_KEY`), stored the same way. Losing it makes the documents unreadable, so it is also kept offline with the backup key.
+- **In CI:** GitHub Actions secrets hold only the deploy SSH key, the VPS host and the GHCR token.
 - **Anthropic:** a separate API key per workspace (staging and prod), held only by ai-svc.
-- **Storage:** OCI customer secret keys for the S3 API, scoped to the app's buckets.
+- **Off-site backup bucket:** a write-only key scoped to the backup bucket.
 - **Rotation:** every key is rotated at handover (M2) and after any personnel change.
 
 ### 8.8 Domains and TLS
 
 - **Domain** (**Decision needed: D16**): the client registers one domain. `.com` is immediate; `.sa` needs a CR via SaudiNIC.
 - **Hosts:** `api.<domain>` (mobile API), `portal.<domain>` (Vue dashboard: lawyer and admin; must share the parent domain with `api.` so Sanctum cookie sessions work), and `<domain>` (the Nuxt landing page, including the privacy policy, terms and support pages the stores require).
-- **DNS** can sit at any registrar or Cloudflare in **DNS-only** mode. Proxying through a CDN would terminate TLS outside KSA.
+- **DNS** can sit at any registrar, at Hostinger, or at Cloudflare in **DNS-only** mode (proxying would let a third party terminate TLS and see API traffic).
 - **TLS:** Let's Encrypt certificates, automatic via Caddy.
 
 ### 8.9 Email and SMS providers
@@ -1320,7 +1328,7 @@ Dependency scanning: Dependabot, plus `composer audit`, `pip-audit`, `pnpm audit
 | Data | Class | P1 handling |
 |---|---|---|
 | Patient identity (name, ID, phone, DOB, address) | Sensitive health-related personal data | **Not collected by design.** The patient code is entered by the dentist, and identifiers inside documents are masked before storage of text. The originals stay encrypted for the owner and the claimed lawyer only. |
-| Medical facts in documents | Sensitive | Masked text encrypted at column level; original files encrypted in the bucket |
+| Medical facts in documents | Sensitive | Masked text encrypted at column level; original files encrypted per file on the documents volume |
 | Dentist identity (name, phone, licence) | Personal | Minimal profile; never sent to the LLM (placeholders) |
 | Lawyer and admin accounts | Personal | Email, name, licence no. |
 | Regulations | Public | — |
@@ -1339,7 +1347,7 @@ The texts are drafted by Abdelrahman for the client's lawyer to finalise (S9.2).
 
 - **In transit:** TLS 1.2+ everywhere, including the internal network for ai-svc to Postgres where it crosses hosts (single host in P1). HSTS is on.
 - **At rest:**
-  - OCI block volumes and Object Storage are encrypted, with a customer-managed key in OCI Vault for the document bucket;
+  - every uploaded file is encrypted by the app (AES-256-GCM via libsodium) with its own data key, wrapped by a document master key kept outside the database (§8.7); the VPS disk itself has no provider-managed encryption we control, so this app-level layer is the one that counts;
   - Laravel `encrypted` casts (AES-256-GCM) on `facts_masked`, `text_masked` and `consultation_messages.text_masked`;
   - backups are age-encrypted.
 - **Dashboard sessions:** httpOnly, `Secure`, `SameSite=Lax` cookies; CSRF via Sanctum's XSRF token; 2 h idle timeout for lawyer and admin sessions.
@@ -1363,8 +1371,8 @@ Every policy denial returns 404 for resources of other users. Policies are cover
 ### 9.5 Signed URLs
 
 - Documents are never public. The app asks `/documents/{id}/view-url` and gets a Laravel **temporary signed route**, valid 5 minutes and bound to the user.
-- That route streams the file from the bucket after re-checking the policy, and writes `document.viewed` to the audit log.
-- This avoids depending on S3 presigned URL support in OCI and keeps every view audited.
+- That route decrypts and streams the file after re-checking the policy, and writes `document.viewed` to the audit log.
+- Files never have a direct URL, so every view is audited.
 
 ### 9.6 Audit log
 
@@ -1394,13 +1402,14 @@ A nightly `PurgeExpiredData` job enforces the table (S9.2).
 ### 9.8 Cross-border processing (PDPL)
 
 - **Roles:** the client (DentLegal operator) is the controller for platform data. Patient data inside documents is supplied by dentists for their own defence (the disclosure exception in المادة 21 of the health practice law).
-- **What leaves KSA:** de-identified text only, to Anthropic (§2.6).
+- **What leaves KSA:** all platform data, because the servers are on a Hostinger VPS outside the Kingdom (D3, agreed by the client on 22 Nov 2026), plus de-identified text to Anthropic (§2.6).
 - **Recommendation** (client's lawyer decides):
   1. treat the de-identified text conservatively as personal data;
   2. record a transfer risk assessment;
   3. rely on Anthropic's commercial terms / DPA;
   4. pin the inference geo to `us` and request ZDR;
-  5. state the transfer in the privacy notice and consent 2.
+  5. state the transfer in the privacy notice and consent 2;
+  6. for hosting: keep the client's written agreement, choose a European data centre (GDPR jurisdiction), and name the hosting country in the privacy notice and consent 1. Whether PDPL's transfer rules allow this without further steps is for the client's lawyer to confirm before real patient data is uploaded (M2).
 - **Further checks for the client's lawyer:** whether SDAIA registration or other controller obligations apply to the client, and data-subject request procedures (access, correction, deletion). Deletion is built in-app.
 
 ### 9.9 Incident handling (runbook in S9.6)
@@ -1486,7 +1495,7 @@ gantt
 
 | Week | Developer tasks (h) | Depends on | Client inputs due this week |
 |---|---|---|---|
-| **W1** (41 h) | S0.1 monorepo + compose (6), S0.2 CI (5), S0.3 OCI provisioning (6), S0.6 Laravel skeleton (4), S0.7 Flutter shell (8), S0.8 ai-svc skeleton (3), S1.1 extraction bake-off on the 4 PDFs (5), S1.2 Arabic normaliser (4) | M0; 9-week approval; OCI tenancy for S0.3 | **Day 1:** confirm B1–B5; open OCI tenancy (Riyadh home), Anthropic org, Apple + Google **organization** enrolment (D-U-N-S), Firebase project; add Abdelrahman. **By Thu:** any additional sources (end of W1 cut-off); domain purchase; SMS provider account + **sender ID request**; name the pilot lawyer; decisions D3, D4 (start legal review), D12, D13, D16 |
+| **W1** (41 h) | S0.1 monorepo + compose (6), S0.2 CI (5), S0.3 Hostinger VPS provisioning (6), S0.6 Laravel skeleton (4), S0.7 Flutter shell (8), S0.8 ai-svc skeleton (3), S1.1 extraction bake-off on the 4 PDFs (5), S1.2 Arabic normaliser (4) | M0; 9-week approval; Hostinger VPS purchased for S0.3 | **Day 1:** confirm B1–B5; buy the Hostinger VPS (KVM 4 staging now, KVM 8 prod by W8), Anthropic org, Apple + Google **organization** enrolment (D-U-N-S), Firebase project; add Abdelrahman. **By Thu:** any additional sources (end of W1 cut-off); domain purchase; SMS provider account + **sender ID request**; name the pilot lawyer; decisions D3, D4 (start legal review), D12, D13, D16 |
 | **W2** (39 h) | S1.3 parser + chunker (9), S1.4 KB schema + embeddings (4), S1.5 ingestion lifecycle (5), S1.6 index sources + lawyer spot-check (3), S2.1 hybrid retrieval (5), S2.3 Claude wrapper spike: structured + stream + fallback + geo (7), S5.1 OTP API (6) | S1.1–S1.2; Anthropic key | Lawyer: **2 h** spot-check of 30 chunks. ZDR request sent to Anthropic. Email provider (D17). |
 | **W3** (39 h) | S2.2 reranker + thresholds (4), S2.4 citation verifier (5), S2.5 consultant route (5), S2.6 consult API (5), S5.2 invitations + consents (4), S5.3 mobile auth screens (7), S5.6 RBAC + audit (4), S3.1 case API (5) | S2.1, S2.3, S5.1 | Lawyer: **3 h** validating 50 eval questions + gold articles. App name, logo and store text draft (Q-C3). Style reference (Q-C10). D22. |
 | **W4** (38 h) | S2.7 mobile consultant (9), S0.9 Vue dashboard shell (8), S0.4 deploy pipeline (5), S3.2 upload API (4), S3.3 OCR pipeline (7), S8.1 eval harness (5) | S2.6, S0.3, S3.1 | Lawyer: **1 h** reviewing the case-type playbook queries. Client's lawyer: comments on privacy notice/consent drafts. |
@@ -1564,8 +1573,8 @@ If a client input arrives late, its dependent tasks move. When that affects a mi
   | Cut | Saves |
   |---|---|
   | Eval consult set 50 → 40 questions (30 + 10), still within the brief's 40–60 (S8.2) | 2 h |
-  | Monitoring on free SaaS only, no OCI alarm tuning (S0.5) | 2 h |
-  | Staging on the same OCI VM shape as dev compose, without separate hardening (S0.3) | 2 h |
+  | Monitoring on free SaaS only, no host alert script (S0.5) | 2 h |
+  | Staging set up from the same compose file as dev, without separate hardening (S0.3) | 2 h |
   | Admin «إعادة إرسال الدعوة» becomes "delete invite and re-invite" (S7.1) | 1 h |
   | Mobile integration test replaced by a manual script (S0.7/S9.4) | 2 h |
 
@@ -1593,9 +1602,9 @@ Priority uses MoSCoW: M = Must, S = Should, C = Could. "Deps" lists stories or c
 |---|---|---|---|---|---|
 | S0.1 | Monorepo with `backend/`, `ai/`, `mobile/`, `infra/`, `eval/`, `docs/`; Docker Compose dev stack | `make up` starts Laravel, ai-svc, PG 17 + pgvector, Redis; health endpoints green; README covers setup | 6 | M | Plan approval |
 | S0.2 | CI for backend, ai, mobile | Lint + tests run on every PR in < 10 min; a failing test blocks merge; images built on `main` | 5 | M | S0.1 |
-| S0.3 | OCI provisioning (staging + prod) | VCN, 2 VMs, buckets (Riyadh docs + Jeddah backups), Vault CMK, OCIR; only 443 public; documented in `infra/README.md` | 6 | M | OCI tenancy |
+| S0.3 | Hostinger VPS provisioning (staging + prod) | 2 VPS (KVM 4 staging, KVM 8 prod) in the D3a location; Ubuntu 24.04, Docker, `deploy` user, key-only SSH, hPanel firewall + ufw (22/80/443), fail2ban; documents volume; GHCR access; documented in `infra/README.md` | 6 | M | VPS purchased |
 | S0.4 | Deploy pipeline + Caddy TLS + domains | Merge to `main` deploys staging; `v*` tag deploys prod after approval; valid TLS on `api.` and `portal.`; migrations automatic | 5 | M | S0.2, S0.3, domain |
-| S0.5 | Backups, restore test, monitoring | Nightly encrypted dump lands in Jeddah; restore into staging verified; Sentry/GlitchTip, uptime and OCI alarms send a test alert | 6 | M | S0.3 |
+| S0.5 | Backups, restore test, monitoring | Hostinger backups on; nightly age-encrypted dump + documents copy land in the off-site bucket (D29); restore into staging verified; Sentry/GlitchTip, uptime and the host alert script send a test alert | 6 | M | S0.3 |
 | S0.6 | Laravel skeleton | Modules, Sanctum, Horizon, Pulse, spatie/permission, Scramble OpenAPI, error envelope, Pest + Larastan configured | 4 | M | S0.1 |
 | S0.7 | Flutter app shell | ar locale + RTL, prototype theme + IBM Plex Sans Arabic, go_router guards, dio client with interceptors, Riverpod, staging/prod flavors, Hijri/Gregorian formatter with tests, error/empty states | 8 | M | S0.1 |
 | S0.8 | ai-svc skeleton | FastAPI app, service-token auth, structlog with redaction, BGE-M3 + reranker loaded at start-up, `/v1/health` | 3 | M | S0.1 |
@@ -1718,14 +1727,14 @@ Priority uses MoSCoW: M = Must, S = Should, C = Could. "Deps" lists stories or c
 | R8 | **SMS sender ID registration** (about 20 business days) delays real OTP | High / Medium | Request in W1; log driver + test numbers until then; fallback: the provider's pre-approved generic sender if available |
 | R9 | **AI quality or safety:** wrong legal reasoning, weak drafts, or classifier false-positive refusals | Medium / High | Retrieval threshold + `answerable`; citation verification + repair; mandatory lawyer approval; server-side fallback `default`; eval runs before M1 and M2, weekly in the pilot; prompts versioned |
 | R10 | **Single developer, tight capacity, scope creep** toward P2 features (stages, notifications, revisions). The Vue dashboard (+32 h) and landing page (+8 h) are absorbed by a 9th week, which the client may refuse. | Medium / High | Ask for the 9th week before M0 (B5); 13 h buffer + 9 h reserve (cut list A′); drift table (§1.2) and change log; weekly demo; if the client refuses, apply the 8-week fallback (§11.1) |
-| R11 | **KSA cloud onboarding friction** (card verification, home-region availability) | Low–Medium / Medium | OCI signup on day 1; fallback to Jeddah as home region; GCP via CNTXT or STC as alternatives (§8.1) |
+| R11 | **Hosting outside KSA** (D3): a regulator, a hospital partner or the client's lawyer later requires in-country hosting | Low–Medium / High | Client's written agreement on file; European data centre; app-level encryption; everything containerised so a move to a Saudi provider is a redeploy plus restore (about 1–2 days), handled as a change request |
 | R12 | **Runaway LLM spend** (abuse or loops) | Low / Medium | Per-user rate limits, `max_tokens` caps, one repair retry only, workspace spend limits, daily cost digest |
 
 ---
 
 ## 13. Monthly running-cost estimate (pilot, 10–20 dentists)
 
-Prices are list prices at the time of writing, at 1 USD = 3.75 SAR. They must be verified in the providers' calculators at signup.
+Prices are list prices at the time of writing, at 1 USD = 3.75 SAR. They must be verified at purchase; Hostinger's VPS prices depend on the term (the figures assume 24 months) and rise at renewal.
 
 ### 13.1 Usage assumptions
 
@@ -1749,16 +1758,16 @@ Prices are list prices at the time of writing, at 1 USD = 3.75 SAR. They must be
 
 | Item | Assumption | USD / month | SAR / month |
 |---|---|---|---|
-| **Hosting: prod VM** | OCI E5.Flex 4 OCPU / 24 GB, always on | ≈ 160 | ≈ 600 |
-| **Hosting: staging VM** | 2 OCPU / 16 GB, stopped outside working hours (about 250 h) | ≈ 30 | ≈ 115 |
-| **Hosting: storage + backups** | 2 × 100 GB block volumes, about 100 GB object storage (Riyadh + Jeddah), egress within the free 10 TB | ≈ 10 | ≈ 40 |
+| **Hosting: prod VPS** | Hostinger KVM 8 (8 vCPU / 32 GB / 400 GB), 24-month term; renews at about $50 | ≈ 26 | ≈ 98 |
+| **Hosting: staging VPS** | Hostinger KVM 4 (4 vCPU / 16 GB / 200 GB), 24-month term; renews at about $29 | ≈ 13 | ≈ 49 |
+| **Backups** | Off-site bucket (D29), about 100 GB; optional Hostinger daily-backup add-on | ≈ 2–5 | ≈ 8–19 |
 | **LLM (Anthropic)** | 300 answers × $0.05 + 40 cases × $0.50 + 20% re-runs ≈ $42; × 1.1 for `us` geo ≈ $46; weekly pilot eval runs ≈ $25 | ≈ 70 (spend limit set at $150) | ≈ 265 |
-| **Embeddings & OCR** | Self-hosted BGE-M3, reranker, Tesseract on the prod VM | 0 marginal | 0 |
+| **Embeddings & OCR** | Self-hosted BGE-M3, reranker, Tesseract on the prod VPS | 0 marginal | 0 |
 | **SMS OTP** | ≈ 160 SMS × 0.11–0.25 SAR | ≈ 5–11 | ≈ 18–40 |
 | **Store fees (amortised)** | Apple $99/yr; Google $25 one-time | ≈ 8 | ≈ 31 |
 | **Domain, email, monitoring** | Domain ~100 SAR/yr; SES/ZeptoMail and Sentry/Uptime free tiers | ≈ 3 | ≈ 10 |
-| **Total (expected)** | | **≈ 290** | **≈ 1,080** |
-| Lean variant | Staging stopped during the pilot (or Always Free, D19); `global` geo | ≈ 255 | ≈ 955 |
+| **Total (expected)** | | **≈ 135** | **≈ 505** |
+| After the intro term | VPS renewal prices | ≈ 175 | ≈ 655 |
 
 **One-off costs (client):**
 - Apple Developer Program: $99/yr (≈ 371 SAR).
@@ -1800,13 +1809,13 @@ Prices are list prices at the time of writing, at 1 USD = 3.75 SAR. They must be
 |---|---|---|
 | 1 | iOS app live | Live on the App Store under the client's account (public or unlisted per D11); installed from the store link on a real iPhone |
 | 2 | Android app live | Live on Google Play production under the client's organisation account; installed from the Play link on a real Android device |
-| 3 | Web live in KSA | `portal.<domain>/lawyer` and `/admin`, `api.<domain>`, and the landing page at `<domain>` (with `/privacy`, `/terms`, `/support`) served over valid TLS from OCI Riyadh (shown in the OCI console) |
+| 3 | Web live | `portal.<domain>/lawyer` and `/admin`, `api.<domain>`, and the landing page at `<domain>` (with `/privacy`, `/terms`, `/support`) served over valid TLS from the prod Hostinger VPS |
 | 4 | Production end-to-end by the client | On prod: dentist invited → real SMS OTP → consultant answer with sources → case with documents → analysis + draft with citations → lawyer edits and approves → dentist receives the approved response |
 | 5 | Feedback in admin | Ratings and a feedback message from step 4 appear in admin; usage stats reflect the activity |
 | 6 | Sources updatable from admin | Upload a new version of a source → review → «نشر الإصدار» → previous version archived; retrieval uses the new version |
-| 7 | Operations running | Nightly encrypted backup present in Jeddah; restore test record; uptime check, error tracking and alarms active (test alert received) |
+| 7 | Operations running | Nightly encrypted backup present in the off-site bucket; Hostinger backups enabled; restore test record; uptime check, error tracking and alarms active (test alert received) |
 | 8 | Security basics | Screenshot blocking on document/draft screens, biometric lock, OTP rate limits, audit-log entries for login/upload/approve, `pii_v1` suite green, no document text in logs |
-| 9 | Accounts and handover | Client owns and can log in to OCI, Anthropic, SMS, Apple, Google, Firebase, domain and the repository; secrets rotated; runbook + admin guide delivered |
+| 9 | Accounts and handover | Client can log in to the Hostinger account (or has the access agreed with Abdelrahman), Anthropic, SMS, Apple, Google, Firebase, domain and the repository; secrets rotated; runbook + admin guide delivered |
 | 10 | Pilot ready | Pilot lawyer active; first pilot invitations sent (or ready to send on the client's go); no open critical or high defects |
 
 **Acceptance:** the client confirms in writing within 3 working days of items 1–10 passing. The launch date is the day both store listings are live and item 4 has passed on prod. Store review time is outside the 8 weeks. How M2 is handled if review is delayed by the store is open question **Q-C8**, to be agreed by the client and Abdelrahman, not assumed here.
@@ -1821,7 +1830,8 @@ Every row below is a **Decision needed**. Body text marks each one where it aris
 |---|---|---|---|---|
 | D1 | AI service: separate FastAPI vs inside Laravel | Separate, stateless ai-svc called from Horizon jobs | Abdelrahman | Plan approval |
 | D2 | Flutter state management | Riverpod 3 + codegen | Abdelrahman | Plan approval |
-| D3 | KSA hosting | OCI Riyadh (+ Jeddah backups) | Client + Abdelrahman | W1 day 1 |
+| D3 | Hosting | **Decided: Hostinger VPS** (KVM 8 prod, KVM 4 staging), outside KSA, agreed by the client on 22 Nov 2026 | Client + Abdelrahman | Done |
+| D3a | Hostinger data centre | A European location (Germany or France) | Abdelrahman | At purchase |
 | D4 | LLM processing location | De-identify; `us` geo pinned; request ZDR; client's lawyer sign-off before real data | Client | W2 (sign-off before W8) |
 | D5 | Source extraction method | Text layer + fixes for the law; Claude page transcription for the corrupted dental regulation; human spot-check | Abdelrahman (client informed) | W1 |
 | D6 | OCR engine for case documents | Bake-off Tesseract vs PaddleOCR; text layer first; handwriting best-effort | Abdelrahman | W4 |
@@ -1832,12 +1842,12 @@ Every row below is a **Decision needed**. Body text marks each one where it aris
 | D11 | App Store distribution | Public listing with invite-only login (simplest); Unlisted only if discoverability must be avoided (irreversible) | Client | W7 |
 | D12 | Developer account type | Organisation accounts for both stores | Client | W1 day 1 |
 | D13 | SMS provider | Taqnyat or Authentica for low volume; Unifonic if the client prefers enterprise | Client | W1 |
-| D14 | Error tracking | Sentry SaaS with scrubbing (fast); GlitchTip in KSA if the client prefers no telemetry abroad | Abdelrahman + client | W1 |
+| D14 | Error tracking | Sentry SaaS with scrubbing (fast); GlitchTip on our VPS if the client prefers no third-party telemetry | Abdelrahman + client | W1 |
 | D15 | iOS build pipeline | Own Mac + fastlane; else Codemagic free tier | Abdelrahman | W1 |
 | D16 | Domain | `.com` now (`.sa` if a CR exists and the client prefers it) | Client | W1 |
 | D17 | Email provider | Amazon SES (Bahrain) or ZeptoMail; content-free emails | Client | W2 |
 | D18 | Pilot data retention | End of pilot + 90 days, then delete or migrate with consent | Client | W8 |
-| D19 | Staging hosting | Small paid VM, stopped off-hours; Always Free Ampere if available in the KSA home region | Abdelrahman | W1 |
+| D19 | Staging hosting | **Decided:** Hostinger KVM 4 (also serves the UI previews now) | Abdelrahman | Done |
 | D20 | PDF of the approved response | Build if contingency allows (Should) | Client + Abdelrahman | W8 |
 | D21 | Repository ownership | **Decided: build in this repository** (`abdo-shrief270/DentLegal`); transfer to the client after full payment, as in the contract | Abdelrahman | Done |
 | D22 | Consultant "talk to a lawyer" | Suggestion text only (default); Could: record request for admin | Client | W3 |
@@ -1846,6 +1856,7 @@ Every row below is a **Decision needed**. Body text marks each one where it aris
 | D25 | Older law edition | Index as archived (versioning proof), never retrieved | Abdelrahman | W2 |
 | D26 | Dashboard UI kit | **Decided: PrimeVue 4 + Tailwind** | Abdelrahman | Done |
 | D27 | Absorbing the extra hours (+32 h Vue dashboard, +8 h landing page) | **Decided: 9 weeks, agreed by the client** (same price) | Done | Done |
+| D29 | Off-site backup location | Backblaze B2 or Cloudflare R2, EU region, write-only key | Abdelrahman | W8 |
 | D28 | Pilot timing around Ramadan | Accept a short overlap, start earlier, or pilot after Eid al-Fitr | Client | W8 |
 
 ## Appendix B: After approval

@@ -1,0 +1,29 @@
+# UI preview on the staging VPS: fake data only, no API yet (PROJECT1_PLAN.md §8.2).
+#   https://{$PREVIEW_HOST}/      -> web dashboard (lawyer + admin), Nuxt SPA
+#   https://{$PREVIEW_HOST}/app/  -> dentist app, Flutter web build
+{$PREVIEW_HOST} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		X-Frame-Options "DENY"
+		# Preview only: keep it out of search engines.
+		X-Robots-Tag "noindex, nofollow"
+	}
+
+	redir /app /app/ 308
+
+	handle_path /app/* {
+		root * /srv/app
+		try_files {path} /index.html
+		file_server
+	}
+
+	handle {
+		root * /srv/portal
+		try_files {path} {path}/ /200.html /index.html
+		file_server
+	}
+}

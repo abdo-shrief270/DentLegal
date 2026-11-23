@@ -1,0 +1,123 @@
+# Builds the UI previews (fake data) and deploys them to the staging Hostinger VPS.
+# Setup and required secrets: infra/preview/README.md
+name: UI preview
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "web/**"
+      - "mobile/**"
+      - "infra/preview/**"
+      - ".github/workflows/preview.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ui-preview
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  dashboard:
+    name: Build web dashboard
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: web/package.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: web/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: portal
+          path: web/dashboard/.output/public
+          retention-days: 7
+
+  app:
+    name: Build dentist app (web)
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.50.1
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test
+      - run: flutter build web --release --no-web-resources-cdn --base-href /app/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: app
+          path: mobile/build/web
+          retention-days: 7
+
+  deploy:
+    name: Deploy to staging VPS
+    needs: [dashboard, app]
+    # Skipped until the VPS is configured (repository variable PREVIEW_HOST).
+    if: vars.PREVIEW_HOST != ''
+    runs-on: ubuntu-24.04
+    environment:
+      name: preview
+      url: https://${{ vars.PREVIEW_HOST }}/
+    env:
+      HOST: ${{ vars.PREVIEW_HOST }}
+      SSH_HOST: ${{ vars.PREVIEW_SSH_HOST || vars.PREVIEW_HOST }}
+      SSH_USER: ${{ vars.PREVIEW_SSH_USER || 'deploy' }}
+      SSH_PORT: ${{ vars.PREVIEW_SSH_PORT || '22' }}
+      REMOTE_DIR: ${{ vars.PREVIEW_DIR || '/srv/dentlegal-preview' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: infra/preview
+      - uses: actions/download-artifact@v4
+        with:
+          name: portal
+          path: out/portal
+      - uses: actions/download-artifact@v4
+        with:
+          name: app
+          path: out/app
+      - name: Configure SSH
+        env:
+          SSH_KEY: ${{ secrets.PREVIEW_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.PREVIEW_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+      - name: Upload builds and config
+        run: |
+          RSH="ssh -p $SSH_PORT -o StrictHostKeyChecking=yes"
+          ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "mkdir -p '$REMOTE_DIR/sites/portal' '$REMOTE_DIR/sites/app'"
+          rsync -az --delete -e "$RSH" out/portal/ "$SSH_USER@$SSH_HOST:$REMOTE_DIR/sites/portal/"
+          rsync -az --delete -e "$RSH" out/app/ "$SSH_USER@$SSH_HOST:$REMOTE_DIR/sites/app/"
+          rsync -az -e "$RSH" infra/preview/Caddyfile infra/preview/compose.yaml "$SSH_USER@$SSH_HOST:$REMOTE_DIR/"
+      - name: Start or reload Caddy
+        run: |
+          ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "cd '$REMOTE_DIR' && printf 'PREVIEW_HOST=%s\n' '$HOST' > .env && docker compose up -d && docker compose exec -T caddy caddy reload --config /etc/caddy/Caddyfile"
+      - name: Smoke check
+        run: |
+          for path in / /app/; do
+            curl -fsS --retry 5 --retry-delay 5 --retry-all-errors -o /dev/null "https://$HOST$path"
+            echo "ok https://$HOST$path"
+          done

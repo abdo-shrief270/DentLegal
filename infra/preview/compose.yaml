@@ -1,0 +1,23 @@
+# UI preview: Caddy serves the two static builds and gets the TLS certificate automatically.
+name: dentlegal-preview
+
+services:
+  caddy:
+    image: caddy:2.10.2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      PREVIEW_HOST: ${PREVIEW_HOST:?set PREVIEW_HOST in .env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./sites/portal:/srv/portal:ro
+      - ./sites/app:/srv/app:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  caddy_data:
+  caddy_config:
