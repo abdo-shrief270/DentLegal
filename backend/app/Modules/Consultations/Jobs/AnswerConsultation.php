@@ -6,6 +6,7 @@ namespace App\Modules\Consultations\Jobs;
 
 use App\Modules\Ai\AiService;
 use App\Modules\Ai\AiServiceException;
+use App\Modules\Citations\Support\CitationRecorder;
 use App\Modules\Consultations\Models\ConsultationMessage;
 use App\Modules\Pipeline\Support\AiRunRecorder;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -75,6 +76,9 @@ final class AnswerConsultation implements ShouldQueue
                 'ai_run_id' => $run?->id,
                 'answered_at' => now(),
             ]);
+            if (! $refused && $answer->answer_json !== null) {
+                CitationRecorder::consult($answer->id, $answer->answer_json);
+            }
         });
     }
 

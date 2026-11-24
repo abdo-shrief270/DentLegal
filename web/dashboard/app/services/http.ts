@@ -1,7 +1,7 @@
 // Laravel API client (PROJECT1_PLAN.md §4.2). Sanctum SPA cookie mode: the session lives in an httpOnly
 // cookie; $fetch sends it with `credentials: 'include'` and Laravel's XSRF token header.
 // Every call matches the Laravel routes (backend/routes/web.php, backend/routes/api.php).
-import type { CitationRef, DentistRow, FeedbackRow, InternalNote, KnowledgeChunk, KnowledgeSource, LawyerRow, RatingRow, ReviewDetail, ReviewListItem, Role, SessionUser, SourceVersion, StatsOverview } from '~/types/api'
+import type { CitationRef, CitationSample, DentistRow, FeedbackRow, InternalNote, KnowledgeChunk, KnowledgeSource, LawyerRow, RatingRow, ReviewDetail, ReviewListItem, Role, SessionUser, SourceVersion, StatsOverview } from '~/types/api'
 import type { DashboardApi, TwoFactorSetup } from '~/types/client'
 import { ApiError } from '~/types/client'
 
@@ -37,6 +37,7 @@ export function createHttpApi(baseURL: string): DashboardApi {
   const camel = (v: unknown): unknown => Array.isArray(v) ? v.map(camel)
     : v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).map(([k, x]) => [k.replace(/_([a-z])/g, (_, c: string) => c.toUpperCase()), camel(x)]))
       : v
+  const toSample = (row: unknown): CitationSample => { const c = camel(row) as CitationSample; return { ...c, note: c.note ?? '' } }
   const snake = (v: unknown): unknown => Array.isArray(v) ? v.map(snake)
     : v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).map(([k, x]) => [k.replace(/[A-Z]/g, (c) => `_${c.toLowerCase()}`), snake(x)]))
       : v
@@ -88,8 +89,9 @@ export function createHttpApi(baseURL: string): DashboardApi {
       // The approve dialog has the lawyer tick «أؤكد…» with the quality checks in view, so warnings count as confirmed.
       approve: (id) => review(request(`/api/v1/lawyer/reviews/${id}/approve`, { method: 'POST', body: { confirm_warnings: true } })),
       documentViewUrl: async (id) => camel(await unwrap(request<{ data: unknown }>(`/api/v1/lawyer/documents/${id}/view-url`))) as { url: string; expiresAt: string },
-      listCitationSamples: () => unwrap(request('/api/v1/lawyer/citation-samples')),
-      setVerdict: (id, verdict, note) => unwrap(request(`/api/v1/lawyer/citation-samples/${id}/verdict`, { method: 'POST', body: { verdict, note } })),
+      // Rows are snake_case and `note` may be null; the sampling meta (accuracy so far) is not shown on this screen yet.
+      listCitationSamples: async () => (await unwrap(request<{ data: unknown[] }>('/api/v1/lawyer/citation-samples'))).map(toSample),
+      setVerdict: async (id, verdict, note) => toSample(await unwrap(request<{ data: unknown }>(`/api/v1/lawyer/citation-samples/${id}/verdict`, { method: 'POST', body: { verdict, note: note || null } }))),
     },
     admin: {
       async stats(range) {

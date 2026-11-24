@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Pipeline\Jobs;
 
 use App\Modules\Ai\AiService;
+use App\Modules\Citations\Support\CitationRecorder;
 use App\Modules\Pipeline\Enums\PipelineStep;
 use App\Modules\Pipeline\Models\Analysis;
 use App\Modules\Pipeline\Models\Draft;
@@ -43,6 +44,7 @@ final class DraftCaseResponse extends PipelineStepJob
                 'ai_run_id' => $run?->id,
             ]);
             $draft->update(['current_version_id' => $version->id, 'analysis_id' => $analysis->id, 'status' => 'ai_generated']);
+            CitationRecorder::draft($version->id, $case->id, $version->content_json);
         });
         $job->stepDone(PipelineStep::Verification, null);
     }

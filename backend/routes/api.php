@@ -3,6 +3,7 @@
 use App\Modules\Admin\Http\Controllers\AdminKnowledgeController;
 use App\Modules\Admin\Http\Controllers\AdminUserController;
 use App\Modules\Cases\Http\Controllers\CaseController;
+use App\Modules\Citations\Http\Controllers\CitationSampleController;
 use App\Modules\Consultations\Http\Controllers\ConsultationController;
 use App\Modules\Documents\Http\Controllers\DocumentController;
 use App\Modules\Documents\Http\Controllers\DocumentViewController;
@@ -74,6 +75,8 @@ Route::prefix('v1/lawyer')->middleware(['auth:sanctum', 'two_factor', 'role:lawy
     Route::post('reviews/{draft}/versions', [ReviewController::class, 'saveVersion'])->name('lawyer.reviews.versions');
     Route::post('reviews/{draft}/notes', [ReviewController::class, 'addNote'])->name('lawyer.reviews.notes');
     Route::post('reviews/{draft}/approve', [ReviewController::class, 'approve'])->name('lawyer.reviews.approve');
+    Route::get('citation-samples', [CitationSampleController::class, 'index'])->name('lawyer.citations.index');
+    Route::post('citation-samples/{citation}/verdict', [CitationSampleController::class, 'verdict'])->whereNumber('citation')->name('lawyer.citations.verdict');
     Route::get('documents/{document}/view-url', [DocumentViewController::class, 'forLawyer'])->whereUuid('document')->name('lawyer.documents.view-url');
 });
 

@@ -3,6 +3,7 @@
 use App\Http\Middleware\RequireAppVersion;
 use App\Http\Middleware\RequireTwoFactor;
 use App\Http\Middleware\SecurityHeaders;
+use App\Modules\Citations\Console\BackfillCitations;
 use App\Modules\Compliance\Console\PurgeExpiredData;
 use App\Modules\Compliance\Console\SecurityCheck;
 use App\Modules\Feedback\Console\RollUpUsageStats;
@@ -41,6 +42,7 @@ return Application::configure(basePath: dirname(__DIR__))
         RollUpUsageStats::class,
         PurgeExpiredData::class,
         SecurityCheck::class,
+        BackfillCitations::class,
     ])
     ->withExceptions(function (Exceptions $exceptions): void {
         ErrorRenderer::register($exceptions);

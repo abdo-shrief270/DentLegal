@@ -51,6 +51,10 @@ final class UsageStats
                 'draft' => self::rate($useful->get('draft_version')),
             ],
             'upload_to_draft_minutes' => ['p50' => self::round($durations->p50 ?? null), 'p90' => self::round($durations->p90 ?? null)],
+            // Pilot KPI (§5.14): the share of sampled citations the lawyer judged correct (S4.6), all time.
+            'citation_accuracy_lawyer' => self::round(DB::table('citations')->whereNotNull('lawyer_verdict')
+                ->selectRaw("avg(case when lawyer_verdict = 'correct' then 1.0 else 0.0 end) as a")->value('a'), 3),
+            'citations_judged' => (int) DB::table('citations')->whereNotNull('lawyer_verdict')->count(),
             'citation_validity' => self::round(DB::table('ai_runs')->whereNotNull('citation_validity')->where('created_at', '>=', $from)->avg('citation_validity'), 3),
             'ai_cost_usd' => round((float) DB::table('ai_runs')->where('created_at', '>=', $from)->sum('cost_usd'), 2),
             'daily' => $this->daily($from, $days),

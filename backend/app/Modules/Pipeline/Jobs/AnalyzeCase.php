@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Pipeline\Jobs;
 
 use App\Modules\Ai\AiService;
+use App\Modules\Citations\Support\CitationRecorder;
 use App\Modules\Pipeline\Enums\PipelineStep;
 use App\Modules\Pipeline\Models\Analysis;
 use App\Modules\Pipeline\Models\PipelineJob;
@@ -45,6 +46,7 @@ final class AnalyzeCase extends PipelineStepJob
             ]);
             $run = app(AiRunRecorder::class)->record($response['run'], $response['sources'] ?? [], (string) $response['status'], $analysis);
             $analysis->update(['ai_run_id' => $run?->id]);
+            CitationRecorder::analysis($analysis->id, $case->id, $a);
         });
         $job->stepDone(PipelineStep::Analysis, (int) ((hrtime(true) - $started) / 1_000_000));
     }

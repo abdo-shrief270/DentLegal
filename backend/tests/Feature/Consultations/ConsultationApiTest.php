@@ -97,6 +97,7 @@ class ConsultationApiTest extends TestCase
         // NER masking from ai-svc replaced the stored question too.
         $this->assertStringContainsString('[PERSON_1]', (string) ConsultationMessage::query()->findOrFail($first['reply_to'])->text_masked);
         $this->assertDatabaseHas('ai_runs', ['run_type' => 'consult', 'status' => 'succeeded', 'subject_id' => $first['id']]);
+        $this->assertDatabaseHas('citations', ['citable_type' => 'consultation_message', 'citable_id' => $first['id'], 'route' => 'consult', 'chunk_id' => 412, 'verified' => true]);
 
         $second = $this->postJson("/api/v1/consultations/{$first['consultation_id']}/messages", ['question' => 'وما الحد المسموح؟'])->assertStatus(202)->json('data');
         $this->answer($second['id']);

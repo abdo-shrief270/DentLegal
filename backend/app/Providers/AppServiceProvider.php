@@ -6,6 +6,7 @@ use App\Modules\Ai\AiService;
 use App\Modules\Ai\HttpAiService;
 use App\Modules\Cases\Models\DentalCase;
 use App\Modules\Cases\Policies\CasePolicy;
+use App\Modules\Citations\Models\Citation;
 use App\Modules\Consultations\Models\Consultation;
 use App\Modules\Consultations\Models\ConsultationMessage;
 use App\Modules\Documents\Models\Document;
@@ -55,6 +56,7 @@ class AppServiceProvider extends ServiceProvider
         Route::model('consultation', Consultation::class);
         Route::model('message', ConsultationMessage::class);
         Route::model('draft', Draft::class);
+        Route::model('citation', Citation::class);
         Route::model('user', User::class);
         Route::model('version', KnowledgeSourceVersion::class);
         Route::pattern('draft', '[0-9a-fA-F-]{36}');
