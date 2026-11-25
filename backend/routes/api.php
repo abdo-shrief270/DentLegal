@@ -1,5 +1,6 @@
 <?php
 
+use App\Modules\Admin\Http\Controllers\AdminAiRunController;
 use App\Modules\Admin\Http\Controllers\AdminKnowledgeController;
 use App\Modules\Admin\Http\Controllers\AdminUserController;
 use App\Modules\Cases\Http\Controllers\CaseController;
@@ -94,6 +95,7 @@ Route::prefix('v1/admin')->middleware(['auth:sanctum', 'two_factor', 'role:admin
     Route::get('feedback', [AdminFeedbackController::class, 'feedback'])->name('admin.feedback');
     Route::patch('feedback/{id}', [AdminFeedbackController::class, 'setStatus'])->whereUuid('id')->name('admin.feedback.status');
     Route::get('stats/overview', [AdminStatsController::class, 'overview'])->name('admin.stats');
+    Route::get('ai-runs', [AdminAiRunController::class, 'index'])->name('admin.ai-runs');
 
     Route::get('knowledge/sources', [AdminKnowledgeController::class, 'sources'])->name('admin.knowledge.sources');
     Route::post('knowledge/sources/{source}/versions', [AdminKnowledgeController::class, 'upload'])->where('source', 'new|[0-9a-fA-F-]{36}')->name('admin.knowledge.upload');

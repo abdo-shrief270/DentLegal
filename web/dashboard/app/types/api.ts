@@ -256,3 +256,48 @@ export interface StatsOverview {
   aiCostUsd: number
   daily: { day: string; questions: number; cases: number }[]
 }
+
+/** One Claude call from `ai_runs` (metadata only; no prompt or output text is stored). */
+export interface AiRunRow {
+  id: string
+  createdAt: string
+  runType: string
+  status: string
+  caseCode: string | null
+  subjectType: string | null
+  promptVersion: string | null
+  modelRequested: string | null
+  modelServed: string | null
+  effort: string | null
+  inferenceGeo: string | null
+  fallbackUsed: boolean
+  stopReason: string | null
+  refusalCategory: string | null
+  errorCode: string | null
+  inputTokens: number
+  outputTokens: number
+  cacheReadTokens: number
+  costUsd: number
+  latencyMs: number | null
+  citationValidity: number | null
+  repaired: boolean
+  sources: number
+  requestId: string | null
+}
+
+export interface AiRunSummary {
+  runs: number
+  shown: number
+  costUsd: number
+  inputTokens: number
+  outputTokens: number
+  cacheReadTokens: number
+  latencyP50Ms: number | null
+  latencyP90Ms: number | null
+  citationValidity: number | null
+  fallbacks: number
+  errors: number
+  runTypes: string[]
+}
+
+export interface AiRunFilters { runType?: string; problems?: boolean; from?: string; to?: string }

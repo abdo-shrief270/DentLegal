@@ -2,9 +2,9 @@
 // (runtimeConfig.public.mockApi = true). It keeps state in memory, so changes last until the page reloads.
 import type { DashboardApi } from '~/types/client'
 import { ApiError } from '~/types/client'
-import type { DentistRow, KnowledgeSource, LawyerRow, ReviewDetail, ReviewListItem, SessionUser, SourceVersion } from '~/types/api'
+import type { AiRunRow, AiRunSummary, DentistRow, KnowledgeSource, LawyerRow, ReviewDetail, ReviewListItem, SessionUser, SourceVersion } from '~/types/api'
 import {
-  buildChunks, buildDaily, buildReviews, CITATION_SAMPLES, DEMO_2FA_CODE, DEMO_INVITES, DEMO_NOW, DEMO_USERS, DENTISTS, FEEDBACK,
+  AI_RUNS, buildChunks, buildDaily, buildReviews, CITATION_SAMPLES, DEMO_2FA_CODE, DEMO_INVITES, DEMO_NOW, DEMO_USERS, DENTISTS, FEEDBACK,
   KNOWLEDGE, LAWYERS, RATINGS,
 } from './data'
 
@@ -325,6 +325,25 @@ export function createMockApi(): DashboardApi {
         await wait(150)
         const row = feedback.find((f) => f.id === id)
         if (row) row.status = status
+      },
+      async listAiRuns(f) {
+        await wait()
+        const problem = (r: AiRunRow) => !!r.errorCode || !!r.refusalCategory || r.fallbackUsed || ['failed', 'refused', 'needs_attention'].includes(r.status)
+        const rows = clone(AI_RUNS).filter((r) => (!f.runType || r.runType === f.runType) && (!f.problems || problem(r))
+          && (!f.from || r.createdAt >= f.from) && (!f.to || r.createdAt.slice(0, 10) <= f.to))
+        const lat = rows.map((r) => r.latencyMs).filter((v): v is number => v !== null).sort((a, b) => a - b)
+        const pct = (q: number) => lat.length ? Math.round(lat[Math.min(lat.length - 1, Math.ceil(q * lat.length) - 1)]!) : null
+        const cv = rows.map((r) => r.citationValidity).filter((v): v is number => v !== null)
+        const sum = (k: 'costUsd' | 'inputTokens' | 'outputTokens' | 'cacheReadTokens') => rows.reduce((t, r) => t + r[k], 0)
+        const summary: AiRunSummary = {
+          runs: rows.length, shown: rows.length, costUsd: Math.round(sum('costUsd') * 10_000) / 10_000,
+          inputTokens: sum('inputTokens'), outputTokens: sum('outputTokens'), cacheReadTokens: sum('cacheReadTokens'),
+          latencyP50Ms: pct(0.5), latencyP90Ms: pct(0.9),
+          citationValidity: cv.length ? Math.round(cv.reduce((a, b) => a + b, 0) / cv.length * 1000) / 1000 : null,
+          fallbacks: rows.filter((r) => r.fallbackUsed).length, errors: rows.filter((r) => r.errorCode).length,
+          runTypes: [...new Set(AI_RUNS.map((r) => r.runType))].sort(),
+        }
+        return { rows, summary }
       },
     },
   }

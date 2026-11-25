@@ -1,7 +1,7 @@
 // Laravel API client (PROJECT1_PLAN.md §4.2). Sanctum SPA cookie mode: the session lives in an httpOnly
 // cookie; $fetch sends it with `credentials: 'include'` and Laravel's XSRF token header.
 // Every call matches the Laravel routes (backend/routes/web.php, backend/routes/api.php).
-import type { CitationRef, CitationSample, DentistRow, FeedbackRow, InternalNote, KnowledgeChunk, KnowledgeSource, LawyerRow, RatingRow, ReviewDetail, ReviewListItem, Role, SessionUser, SourceVersion, StatsOverview } from '~/types/api'
+import type { AiRunRow, AiRunSummary, CitationRef, CitationSample, DentistRow, FeedbackRow, InternalNote, KnowledgeChunk, KnowledgeSource, LawyerRow, RatingRow, ReviewDetail, ReviewListItem, Role, SessionUser, SourceVersion, StatsOverview } from '~/types/api'
 import type { DashboardApi, TwoFactorSetup } from '~/types/client'
 import { ApiError } from '~/types/client'
 
@@ -129,6 +129,15 @@ export function createHttpApi(baseURL: string): DashboardApi {
       listRatings: async () => camel(await unwrap(request<{ data: unknown }>('/api/v1/admin/ratings'))) as RatingRow[],
       listFeedback: async () => camel(await unwrap(request<{ data: unknown }>('/api/v1/admin/feedback'))) as FeedbackRow[],
       setFeedbackStatus: async (id, status) => { await request(`/api/v1/admin/feedback/${id}`, { method: 'PATCH', body: { status } }) },
+      listAiRuns: async (f) => {
+        const query: Record<string, string> = {}
+        if (f.runType) query.run_type = f.runType
+        if (f.problems) query.problems = '1'
+        if (f.from) query.from = f.from
+        if (f.to) query.to = f.to
+        const res = await request<{ data: unknown[]; meta: unknown }>('/api/v1/admin/ai-runs', { query })
+        return { rows: camel(res.data) as AiRunRow[], summary: camel(res.meta) as AiRunSummary }
+      },
     },
   }
 }

@@ -1,6 +1,7 @@
 // The operations the dashboard needs from the backend (PROJECT1_PLAN.md §4.2).
 // Two implementations: the in-browser fake API (app/mocks/api.ts) and the Laravel client (app/services/http.ts).
 import type {
+  AiRunFilters, AiRunRow, AiRunSummary,
   CitationSample, DentistRow, DraftContent, FeedbackRow, FeedbackStatus, InternalNote, KnowledgeChunk, KnowledgeSource,
   LawyerRow, RatingRow, ReviewDetail, ReviewListItem, ReviewTab, Role, SessionUser, SourceVersion, StatsOverview,
 } from './api'
@@ -48,6 +49,7 @@ export interface DashboardApi {
     listRatings(): Promise<RatingRow[]>
     listFeedback(): Promise<FeedbackRow[]>
     setFeedbackStatus(id: string, status: FeedbackStatus): Promise<void>
+    listAiRuns(filters: AiRunFilters): Promise<{ rows: AiRunRow[]; summary: AiRunSummary }>
   }
 }
 

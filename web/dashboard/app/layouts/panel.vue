@@ -21,6 +21,7 @@ const groups = computed<NavGroup[]>(() =>
         { title: 'الجودة', items: [
           { to: '/admin/ratings', label: 'التقييمات', icon: 'checkCircle' },
           { to: '/admin/feedback', label: 'الملاحظات', icon: 'chats' },
+          { to: '/admin/ai-runs', label: 'سجل الذكاء الاصطناعي', icon: 'sparkles' },
         ] },
       ]
     : [

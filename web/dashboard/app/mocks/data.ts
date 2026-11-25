@@ -2,8 +2,7 @@
 // Cases, lawyers and regulation excerpts are taken from the approved prototype (site/prototype/js/data.js).
 import type {
   CaseDocumentRef, CitationSample, DentistRow, DraftContent, DraftVersion, FeedbackRow, InternalNote,
-  KnowledgeChunk, KnowledgeSource, LawyerRow, QualityCheck, RatingRow, RetrievedSource, ReviewDetail, SessionUser,
-} from '~/types/api'
+  KnowledgeChunk, KnowledgeSource, LawyerRow, QualityCheck, RatingRow, RetrievedSource, ReviewDetail, SessionUser, AiRunRow } from '~/types/api'
 
 export const DEMO_NOW = '2026-12-20T09:30:00+03:00'
 
@@ -323,3 +322,42 @@ export function buildDaily(days: number): { day: string; questions: number; case
     return { day: d.toISOString().slice(0, 10), questions: 4 + seed + Math.floor(i / 3), cases: seed % 3 === 0 ? 2 : seed % 4 === 0 ? 1 : 0 }
   })
 }
+
+// Synthetic ai_runs: metadata only, model names are placeholders.
+export const AI_RUNS: AiRunRow[] = Array.from({ length: 36 }, (_, i): AiRunRow => {
+  const kinds = ['consult', 'consult', 'consult', 'case_analysis', 'case_draft'] as const
+  const runType = kinds[i % kinds.length]!
+  const failed = i === 7
+  const refused = i === 12
+  const fallback = i === 4 || i === 21
+  const repaired = i % 9 === 3
+  const isCase = runType !== 'consult'
+  const input = isCase ? 18000 + (i % 7) * 1500 : 4200 + (i % 5) * 300
+  const output = failed ? 0 : isCase ? 2600 + (i % 4) * 400 : 650 + (i % 3) * 120
+  return {
+    id: String(1000 - i),
+    createdAt: new Date(Date.parse(DEMO_NOW) - i * 47 * 60_000).toISOString(),
+    runType,
+    status: failed ? 'failed' : refused ? 'refused' : repaired ? 'needs_attention' : isCase ? 'ok' : 'answered',
+    caseCode: isCase ? `DL-2026-${String(152 - (i % 6)).padStart(4, '0')}` : null,
+    subjectType: runType === 'case_analysis' ? 'Analysis' : runType === 'case_draft' ? 'Draft' : null,
+    promptVersion: runType === 'consult' ? 'consult-v1' : runType === 'case_analysis' ? 'analysis-v1' : 'draft-v1',
+    modelRequested: 'model-primary',
+    modelServed: fallback ? 'model-fallback' : failed ? null : 'model-primary',
+    effort: isCase ? 'medium' : 'low',
+    inferenceGeo: 'us',
+    fallbackUsed: fallback,
+    stopReason: failed ? null : refused ? 'refusal' : 'end_turn',
+    refusalCategory: refused ? 'out_of_scope' : null,
+    errorCode: failed ? 'ai_unavailable' : null,
+    inputTokens: input,
+    outputTokens: output,
+    cacheReadTokens: failed ? 0 : Math.round(input * 0.6),
+    costUsd: failed ? 0 : Math.round((input * 3 + output * 15) / 1e6 * 10_000) / 10_000,
+    latencyMs: failed ? null : isCase ? 42_000 + (i % 5) * 6000 : 6000 + (i % 6) * 1100,
+    citationValidity: failed || refused ? null : repaired ? 0.86 : 1,
+    repaired,
+    sources: failed ? 0 : isCase ? 12 : 8,
+    requestId: failed ? null : `req_demo_${String(i).padStart(4, '0')}`,
+  }
+})
