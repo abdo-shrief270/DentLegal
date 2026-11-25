@@ -3,6 +3,7 @@
     python -m app.eval run --set consult_v1 --route retrieve
     python -m app.eval run --set consult_v1 --route consult --effort low      # calls Claude: staging key, synthetic data
     python -m app.eval run --set pii_v1 --route pii
+    python -m app.eval run --set cases_v1 --route case                          # calls Claude: staging key, synthetic data
 
 Settings come from the environment like the service (`.env`). The report goes to `eval/reports/`; the exit code is 1
 when any item fails, so a CI job can gate on it.
@@ -17,6 +18,7 @@ from pathlib import Path
 from app.core.config import Settings
 from app.core.container import build_container
 from app.eval import datasets, report, runners
+from app.llm.case import CaseService
 from app.llm.consult import ConsultService
 from app.masking.masker import Masker
 from app.masking.ner import CamelNer, Ner, NoNer
@@ -29,7 +31,7 @@ def main(argv: list[str] | None = None) -> int:
     sub = parser.add_subparsers(dest="command", required=True)
     run = sub.add_parser("run", help="run one dataset through one route")
     run.add_argument("--set", required=True, help="dataset name in eval/datasets (e.g. consult_v1)")
-    run.add_argument("--route", required=True, choices=["retrieve", "consult", "pii"])
+    run.add_argument("--route", required=True, choices=["retrieve", "consult", "case", "pii"])
     run.add_argument("--effort", choices=["low", "medium", "high"], help="override the consultant's effort")
     run.add_argument("--limit", type=int, help="first N items only")
     run.add_argument("--out", type=Path, default=datasets.REPO_ROOT / "eval" / "reports")
@@ -37,7 +39,8 @@ def main(argv: list[str] | None = None) -> int:
 
     dataset = datasets.load(args.set)
     items = dataset.items[: args.limit] if args.limit else dataset.items
-    if (args.route == "pii") != (dataset.kind == "pii"):
+    fits = {"pii": "pii", "case": "case", "retrieve": "consult", "consult": "consult"}
+    if fits[args.route] != dataset.kind:
         parser.error(f"route {args.route} does not fit a {dataset.kind} dataset")
 
     settings = Settings()
@@ -47,7 +50,7 @@ def main(argv: list[str] | None = None) -> int:
         # The masker alone: no database, no models beyond NER (CI runs this route on every change).
         ner: Ner = CamelNer() if settings.ner == "camel" else NoNer()
         masker = Masker(ner, settings.masking_secret.get_secret_value().encode() or b"eval-only-masking-key")
-        result = runners.run_pii(items, masker)
+        result = runners.run_pii(items, masker, ner_enabled=settings.ner == "camel")
         path = report.write(dataset, result, [f"NER `{settings.ner}`"], args.out)
         return _finish(path, result)
 
@@ -60,6 +63,11 @@ def main(argv: list[str] | None = None) -> int:
             retriever = HybridRetriever(ChunkRepository(conn), container.embedder, container.reranker, settings.retrieval)
             if args.route == "retrieve":
                 result = runners.run_retrieve(items, retriever, settings.retrieval.top_consult)
+            elif args.route == "case":
+                notes.append(f"model `{settings.anthropic_model}`, effort `{settings.analysis_effort}`")
+                repo = ChunkRepository(conn)
+                service = CaseService(retriever, repo, container.claude, container.masker, settings)
+                result = runners.run_case(items, service)
             else:
                 notes.append(f"model `{settings.anthropic_model}`, effort `{settings.consult_effort}`")
                 result = runners.run_consult(items, ConsultService(retriever, container.claude, container.masker, settings))

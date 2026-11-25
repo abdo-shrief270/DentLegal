@@ -50,6 +50,28 @@ class PiiItem:
     planted: list[tuple[str, str]]  # (type, value)
     keep: list[str] = field(default_factory=list)
     dentist_name: str | None = None
+    ner: bool = False  # the identifier has no label before it, so only the NER layer can find it
+
+
+@dataclass(frozen=True)
+class CaseDoc:
+    kind: str
+    name: str
+    pages: list[str]
+
+
+@dataclass(frozen=True)
+class CaseItem:
+    """A synthetic case with its documents and the lawyer's expected reading of it (gold drafts until verified)."""
+
+    id: str
+    case: dict[str, str]
+    documents: list[CaseDoc]
+    gold: list[Gold]
+    risk: list[str]  # acceptable risk levels (low | medium | high)
+    key_points: list[str] = field(default_factory=list)  # must-mention points; judged by the lawyer (or an LLM judge)
+    must_not_say: list[str] = field(default_factory=list)  # phrases that must not appear, incl. injection canaries
+    injection: bool = False  # a document carries an injection attempt
 
 
 @dataclass(frozen=True)
@@ -82,6 +104,21 @@ def load(name: str, root: Path = DATASETS) -> Dataset:
                 planted=[(p["type"], str(p["value"])) for p in i.get("planted", [])],
                 keep=[str(k) for k in i.get("keep", [])],
                 dentist_name=i.get("dentist_name"),
+                ner=bool(i.get("ner", False)),
+            )
+            for i in raw["items"]
+        ]
+    elif kind == "case":
+        items = [
+            CaseItem(
+                id=str(i["id"]),
+                case={k: str(v) for k, v in i["case"].items()},
+                documents=[CaseDoc(d["kind"], d["name"], [str(p) for p in d["pages"]]) for d in i["documents"]],
+                gold=[Gold(g["source"], g.get("article"), g.get("paragraph")) for g in i.get("gold", [])],
+                risk=[str(r) for r in i["risk"]],
+                key_points=[str(k) for k in i.get("key_points", [])],
+                must_not_say=[str(k) for k in i.get("must_not_say", [])],
+                injection=bool(i.get("injection", False)),
             )
             for i in raw["items"]
         ]

@@ -1,6 +1,7 @@
 # Masking eval set (PROJECT1_PLAN.md §5.10, §5.14). Synthetic texts in the style of complaint letters and records.
 # `planted`: values that must not survive masking. `keep`: terms that must survive (no over-masking of the facts the
-# analysis needs). Draft seed of 10 of the planned 30; span-level annotations come with S8.2.
+# analysis needs). 30 texts. Items marked `ner: true` hold a name with no label
+# before it, so only the NER layer (CAMeL) can catch it; with `NER=none` they are expected to fail.
 kind: pii
 verified: false
 items:
@@ -45,3 +46,87 @@ items:
     text: تُحفظ إفادة الممارس وفق المادة 21 من نظام مزاولة المهن الصحية، ويُرفق تقرير الأشعة المقطعية بتاريخ 21/08/2026م.
     planted: []
     keep: ["المادة 21", "نظام مزاولة المهن الصحية", "21/08/2026"]
+  - id: p11
+    text: رقم إقامة المريض 2456789012، ورقم هاتف العيادة 0114567890 للاستفسار.
+    planted: [{type: ID, value: "2456789012"}, {type: PHONE, value: "0114567890"}]
+    keep: []
+  - id: p12
+    text: يمكن التواصل مع ذوي المريض على الرقم 055-123-4567 أو 00966561234567.
+    planted: [{type: PHONE, value: "055-123-4567"}, {type: PHONE, value: "00966561234567"}]
+    keep: []
+  - id: p13
+    text: "يرجى إيداع المبلغ في الآيبان SA03 8000 0000 6080 1016 7519 باسم صاحب الشكوى."
+    planted: [{type: IBAN, value: "SA03 8000 0000 6080 1016 7519"}]
+    keep: []
+  - id: p14
+    text: "المريض/ فهد ناصر الدوسري، تاريخ الميلاد: 1410/05/14هـ، رقم السجل الطبي: 0045123"
+    planted: [{type: PATIENT, value: "فهد ناصر الدوسري"}, {type: DOB, value: "1410/05/14"}, {type: MRN, value: "0045123"}]
+    keep: []
+  - id: p15
+    text: أرسل المريض صور الأشعة من البريد NOURA.ALSUBAIE@EXAMPLE.ORG وطلب تقريرًا مفصلًا عن علاج العصب في السن 26.
+    planted: [{type: EMAIL, value: "NOURA.ALSUBAIE@EXAMPLE.ORG"}]
+    keep: ["علاج العصب", "26"]
+  - id: p16
+    text: "المرافق: عبدالرحمن سعد الغامدي (ابن المريضة)، ويطلب نسخة من ملف العلاج."
+    planted: [{type: PERSON, value: "عبدالرحمن سعد الغامدي"}]
+    keep: ["ملف العلاج"]
+  - id: p17
+    text: "Guardian: Layla Hassan Mansour. Contact +966 55 987 6543. Treatment: pulpotomy on tooth 75."
+    planted: [{type: PERSON, value: "Layla Hassan Mansour"}, {type: PHONE, value: "55 987 6543"}]
+    keep: ["pulpotomy", "75"]
+  - id: p18
+    text: "Passport No: P87654321 — the patient is a visitor and paid 1,850 SAR for the crown."
+    planted: [{type: PASSPORT, value: "P87654321"}]
+    keep: ["1,850", "crown"]
+  - id: p19
+    text: "العنوان: الرياض، حي النرجس، شارع الأمير محمد بن سلمان، فيلا 12"
+    planted: [{type: ADDRESS, value: "حي النرجس"}, {type: ADDRESS, value: "فيلا 12"}]
+    keep: []
+  - id: p20
+    text: تقرر الهيئة الصحية الشرعية بالرياض النظر في القضية رقم 1447/233 بتاريخ 03/02/1447هـ وفق المادة 34.
+    planted: []
+    keep: ["الهيئة الصحية الشرعية بالرياض", "1447/233", "03/02/1447", "المادة 34"]
+  - id: p21
+    text: بلغت تكلفة الزراعتين 14500 ريال، وتمت الأولى في 10/06/2026م والثانية بعد ثلاثة أشهر.
+    planted: []
+    keep: ["14500", "10/06/2026", "ثلاثة أشهر"]
+  - id: p22
+    text: أفاد د. ماجد الحربي بأن المريض لم يلتزم بتعليمات ما بعد الخلع رغم تنبيهه في الزيارة الأولى.
+    planted: [{type: DENTIST, value: "د. ماجد الحربي"}]
+    keep: ["تعليمات ما بعد الخلع", "الزيارة الأولى"]
+    dentist_name: د. ماجد الحربي
+  - id: p23
+    text: "اسم المريض: Ahmed Yousef Al-Zahrani، هوية وطنية ١١٢٣٤٥٦٧٨٩"
+    planted: [{type: PATIENT, value: "Ahmed Yousef Al-Zahrani"}, {type: ID, value: "١١٢٣٤٥٦٧٨٩"}, {type: ID, value: "1123456789"}]
+    keep: []
+  - id: p24
+    text: "رقم الملف: DC/2026/0912 — شكوى بخصوص تقويم أسنان مدته 18 شهرًا."
+    planted: [{type: MRN, value: "DC/2026/0912"}]
+    keep: ["تقويم أسنان", "18 شهرًا"]
+  - id: p25
+    text: تحويل من مستشفى الملك فهد العام بجدة بخطاب رقم 5521 للمراجع صاحب الجوال 0533334444.
+    planted: [{type: PHONE, value: "0533334444"}]
+    keep: ["مستشفى الملك فهد العام بجدة", "5521"]
+  - id: p26
+    text: حضرت منيرة سالم العنزي إلى العيادة تشتكي من ألم في الضرس 47 بعد الحشو.
+    planted: [{type: PERSON, value: "منيرة سالم العنزي"}]
+    keep: ["47", "الحشو"]
+    ner: true
+  - id: p27
+    text: يذكر الشاكي أن الطبيب أبلغ زوجته هند محمد الشمري بتفاصيل العلاج دون إذنه.
+    planted: [{type: PERSON, value: "هند محمد الشمري"}]
+    keep: ["تفاصيل العلاج"]
+    ner: true
+  - id: p28
+    text: The complainant, Khalid Omar Basha, says the bridge on 14-16 failed within two months.
+    planted: [{type: PERSON, value: "Khalid Omar Basha"}]
+    keep: ["14-16", "two months"]
+    ner: true
+  - id: p29
+    text: "بيانات التواصل: الجوال 0549998877، البريد m.otaibi85@example.net، الهاتف الثابت 0126543210."
+    planted: [{type: PHONE, value: "0549998877"}, {type: EMAIL, value: "m.otaibi85@example.net"}, {type: PHONE, value: "0126543210"}]
+    keep: []
+  - id: p30
+    text: وفق المادة 27 من نظام مزاولة المهن الصحية يلتزم من ارتكب الخطأ بالتعويض، ولا يعد عدم نجاح الزراعة خطأً بذاته.
+    planted: []
+    keep: ["المادة 27", "نظام مزاولة المهن الصحية", "الزراعة"]

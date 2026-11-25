@@ -1,6 +1,6 @@
 """Runs a dataset through one route and computes the §5.14 metrics. Each runner returns per-item results plus a
 metrics dict; the report renders both. Routes: `retrieve` (no LLM: recall@k and the refusal gate), `consult` (the full
-consultant with Claude), `pii` (the masker)."""
+consultant with Claude), `case` (case analysis with Claude), `pii` (the masker)."""
 
 from __future__ import annotations
 
@@ -9,8 +9,10 @@ import time
 from dataclasses import dataclass, field
 from typing import Any
 
-from app.eval.datasets import ConsultItem, PiiItem
+from app.eval.datasets import CaseItem, ConsultItem, PiiItem
+from app.llm.case import CaseFacts, CaseService
 from app.llm.consult import ConsultService
+from app.llm.context import DocPage, DocumentEntry
 from app.masking.masker import DentistIdentity, Masker
 from app.retrieval.hybrid import HybridRetriever
 
@@ -135,12 +137,17 @@ def run_consult(items: list[ConsultItem], service: ConsultService) -> RunResult:
     )
 
 
-def run_pii(items: list[PiiItem], masker: Masker) -> RunResult:
-    """Every planted value must be gone after masking (recall per type); `keep` terms must survive (no over-masking)."""
+def run_pii(items: list[PiiItem], masker: Masker, ner_enabled: bool = True) -> RunResult:
+    """Every planted value must be gone after masking (recall per type); `keep` terms must survive (no over-masking).
+    Items that only the NER layer can pass are skipped, not failed, when NER is off (CI)."""
     out: list[ItemResult] = []
     per_type: dict[str, list[int]] = {}
-    kept = keep_total = 0
+    kept = keep_total = skipped = 0
     for item in items:
+        if item.ner and not ner_enabled:
+            skipped += 1
+            out.append(ItemResult(item.id, True, "skipped: needs NER"))
+            continue
         dentist = DentistIdentity(name=item.dentist_name, license_no=None) if item.dentist_name else None
         masked = masker.mask([item.text], dentist=dentist).texts[0]
         leaks = [(t, v) for t, v in item.planted if v in masked]
@@ -159,4 +166,93 @@ def run_pii(items: list[PiiItem], masker: Masker) -> RunResult:
     planted = sum(d for _, d in per_type.values())
     metrics["recall_all"] = _pct(found, planted)
     metrics["keep_rate"] = _pct(kept, keep_total)
+    metrics["skipped_needs_ner"] = skipped
     return RunResult("pii", metrics, out)
+
+
+def _case_inputs(item: CaseItem) -> tuple[CaseFacts, list[DocumentEntry]]:
+    docs = [
+        DocumentEntry(
+            ref=f"D{n}",
+            document_id=f"{item.id}-d{n}",
+            kind=d.kind,
+            name=d.name,
+            pages=tuple(DocPage(p, f"{item.id}-d{n}-p{p}", text) for p, text in enumerate(d.pages, start=1)),
+        )
+        for n, d in enumerate(item.documents, start=1)
+    ]
+    return CaseFacts(**item.case), docs  # the service masks everything before the call (layer 7)
+
+
+def _analysis_text(a: dict[str, Any]) -> str:
+    parts = [a["summary"], *a["missing_information"]]
+    parts += [i["text"] for k in ("strengths", "weaknesses", "recommended_actions") for i in a[k]]
+    return "\n".join(parts)
+
+
+def run_case(items: list[CaseItem], service: CaseService) -> RunResult:
+    """Case analysis: schema validity, citation validity, whether a gold article is cited, risk level within the gold
+    range, must-not-say phrases (injection canaries among them), latency and cost. The key points are listed in the
+    report for the lawyer to judge."""
+    out: list[ItemResult] = []
+    valid_cites = total_cites = gold_hit_n = risk_ok = schema_ok = violations = injected = 0
+    latencies: list[float] = []
+    costs: list[float] = []
+    for item in items:
+        case, docs = _case_inputs(item)
+        started = time.perf_counter()
+        try:
+            res = service.analyze(case, docs)
+        except Exception as exc:  # an eval records failures instead of stopping
+            out.append(ItemResult(item.id, False, f"error: {type(exc).__name__}: {exc}"))
+            continue
+        latencies.append(time.perf_counter() - started)
+        costs.append(sum(float(c.get("cost_usd") or 0) for c in res["run"].get("llm", [])))
+        a = res.get("analysis")
+        if a is None:
+            out.append(ItemResult(item.id, False, f"no analysis ({res['status']})"))
+            continue
+        schema_ok += 1
+        citations = [c for k in ("strengths", "weaknesses", "recommended_actions") for i in a[k] for c in i["citations"]]
+        valid = [c for c in citations if c.get("verified")]
+        total_cites += len(citations)
+        valid_cites += len(valid)
+        by_chunk = {s["chunk_id"]: s for s in res["sources"]}
+        cited = {by_chunk[c["chunk_id"]]["label"] for c in valid if c.get("chunk_id") in by_chunk}
+        gold_labels = {f"اللائحة {g.paragraph}" if g.paragraph else f"المادة {g.article}" for g in item.gold}
+        hit = bool(gold_labels & cited)
+        gold_hit_n += hit
+        in_range = a["risk_level"] in item.risk
+        risk_ok += in_range
+        said = _analysis_text(a)
+        bad = [p for p in item.must_not_say if p in said]
+        violations += len(bad)
+        injected += bool(bad) and item.injection
+        problems = [
+            *([] if hit else [f"gold {', '.join(map(str, item.gold))} not cited (cited: {sorted(cited)})"]),
+            *([] if in_range else [f"risk {a['risk_level']}, acceptable {'/'.join(item.risk)}"]),
+            *(f"said: {p}" for p in bad),
+        ]
+        out.append(
+            ItemResult(
+                item.id,
+                not problems,
+                "; ".join(problems) or "ok",
+                {"status": res["status"], "citations": len(citations), "valid": len(valid), "key_points": item.key_points},
+            )
+        )
+    return RunResult(
+        "case",
+        {
+            "schema_validity": _pct(schema_ok, len(items)),
+            "citation_validity": _pct(valid_cites, total_cites),
+            "gold_cited_rate": _pct(gold_hit_n, len(items)),
+            "risk_in_range": _pct(risk_ok, len(items)),
+            "must_not_say_violations": violations,
+            "injection_success": injected,
+            "latency_p50_s": _p(latencies, 0.5),
+            "latency_p90_s": _p(latencies, 0.9),
+            "cost_per_case_usd": round(statistics.mean(costs), 4) if costs else None,
+        },
+        out,
+    )

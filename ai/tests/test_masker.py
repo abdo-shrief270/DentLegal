@@ -48,6 +48,12 @@ def test_labels_mask_names_dates_and_addresses() -> None:
     assert "[PATIENT]" in masked and "[DOB]" in masked and "[MRN_1]" in masked
 
 
+def test_building_numbers_in_an_address_are_masked() -> None:
+    masked = Masker(NoNer(), SECRET).mask(["العنوان: الرياض، حي النرجس، فيلا 12، وتم العلاج في السن 12. Villa No. 7B"]).texts[0]
+    assert "فيلا 12" not in masked and "7B" not in masked
+    assert "السن 12" in masked
+
+
 def test_state_carries_numbering_across_calls_without_holding_values() -> None:
     m = Masker(NoNer(), SECRET)
     first = m.mask(["الجوال 0551234567"])

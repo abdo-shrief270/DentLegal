@@ -49,7 +49,7 @@ Logs are JSON and never contain questions, sources, prompts or answers (a redact
 
 `python -m app.eval run --set <set> --route retrieve|consult|pii` runs a dataset from `../eval/datasets/` and writes a markdown report to `../eval/reports/` with each metric beside its §5.14 target (recall@8, refusal accuracy, false refusals, citation validity, gold-cited rate, schema validity, latency, cost per answer, PII recall per type, over-masking). See [`../eval/README.md`](../eval/README.md). CI runs the `pii_v1` set on every change.
 
-The first runs (23 Nov, stand-in models, the current law indexed locally): `pii_v1` found a real gap, mobile numbers written in groups (`+966 50 111 2233`, `055-123-4567`) leaked, now fixed in ai-svc and in Laravel's pattern masker; `consult_v1` retrieval recall@8 0.83, refusals 4/4, one false refusal, with the misses listed in the report. Production numbers need the BGE models and the lawyer-verified sets (S8.2).
+The first runs (23 Nov, stand-in models, the current law indexed locally): `pii_v1` found a real gap, mobile numbers written in groups (`+966 50 111 2233`, `055-123-4567`) leaked, now fixed in ai-svc and in Laravel's pattern masker; `consult_v1` retrieval recall@8 0.83, refusals 4/4, one false refusal, with the misses listed in the report. Production numbers need the BGE models and the lawyer-verified sets (S8.2). With the sets at full size (25 Nov, same stand-in models): `consult_v1` 50 questions, recall@8 0.71, refusals 10/12, 5 false refusals; `pii_v1` 30 texts, every planted identifier masked after adding building and villa numbers to the address patterns (3 NER-only items skipped without NER).
 
 ## Layout
 

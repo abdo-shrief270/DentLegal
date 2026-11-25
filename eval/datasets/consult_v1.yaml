@@ -1,6 +1,7 @@
 # Consultant eval set (PROJECT1_PLAN.md §5.14). Synthetic questions; gold = the article that answers it in
-# نظام مزاولة المهن الصحية (HPPL, current edition). Draft seed of 16 of the planned 50: the lawyer verifies the gold
-# labels and the set grows to 50 in S8.2, then `verified` becomes true.
+# نظام مزاولة المهن الصحية (HPPL, current edition). 50 questions (38 answerable, 12 out of scope). Gold articles were
+# read from the official text (law + executive regulation, MOH edition); the lawyer verifies them in S8.2, then `verified`
+# becomes true.
 kind: consult
 verified: false
 items:
@@ -79,4 +80,166 @@ items:
   - id: r04
     topic: out of scope (unrelated)
     question: ما أفضل نوع من الحشوات التجميلية من حيث المتانة؟
+    answerable: false
+  - id: c13
+    topic: licensing
+    question: هل يجوز لي البدء في العمل بالعيادة قبل صدور ترخيص مزاولة المهنة؟
+    answerable: true
+    gold: [{source: HPPL, article: 2}]
+  - id: c14
+    topic: licensing
+    question: انقطعت عن ممارسة طب الأسنان سنتين متتاليتين، هل أحتاج لتجديد الترخيص قبل العودة؟
+    answerable: true
+    gold: [{source: HPPL, article: 3}]
+  - id: c15
+    topic: professional development
+    question: هل يلزمني النظام بحضور دورات وندوات لتحديث معلوماتي المهنية؟
+    answerable: true
+    gold: [{source: HPPL, article: 7}]
+  - id: c16
+    topic: emergency duty
+    question: حضر إلى العيادة مريض بنزيف شديد بعد خلع في مكان آخر، هل يجب علي إسعافه قبل دفع الرسوم؟
+    answerable: true
+    gold: [{source: HPPL, article: 8}]
+  - id: c17
+    topic: scope of practice
+    question: هل يجوز لطبيب أسنان عام إجراء عملية تتجاوز اختصاصه إذا طلب المريض ذلك؟
+    answerable: true
+    gold: [{source: HPPL, article: 9}]
+  - id: c18
+    topic: scope of practice
+    question: هل يحاسب الطبيب على طلب أشعة وفحوصات لا حاجة لها للمريض؟
+    answerable: true
+    gold: [{source: HPPL, article: 9}]
+  - id: c19
+    topic: advertising
+    question: هل يجوز كتابة لقب استشاري تقويم على لوحة العيادة وأنا لم أحصل على هذا التصنيف؟
+    answerable: true
+    gold: [{source: HPPL, article: 10}]
+  - id: c20
+    topic: reporting
+    question: ماذا يجب علي إذا لاحظت على مريض إصابة في الفك يشتبه أنها ناتجة عن اعتداء؟
+    answerable: true
+    gold: [{source: HPPL, article: 11}]
+  - id: c21
+    topic: commissions
+    question: عرض علي مختبر أسنان نسبة مالية مقابل تحويل المرضى إليه، هل يجوز قبولها؟
+    answerable: true
+    gold: [{source: HPPL, article: 12}]
+  - id: c22
+    topic: unlicensed staff
+    question: هل يجوز الاستعانة بمساعدة غير مرخصة في تنظيف الأسنان داخل العيادة؟
+    answerable: true
+    gold: [{source: HPPL, article: 14}]
+  - id: c23
+    topic: medical reports
+    question: طلب المريض تقريرًا عن حالته ونتائج الأشعة، هل ألتزم بإعطائه ذلك؟
+    answerable: true
+    gold: [{source: HPPL, article: 15}]
+  - id: c24
+    topic: refusing treatment
+    question: هل يحق لي الاعتذار عن علاج مريض لأسباب شخصية؟
+    answerable: true
+    gold: [{source: HPPL, article: 16}]
+  - id: c25
+    topic: second opinion
+    question: طلب المريض رأي طبيب أسنان آخر في خطة العلاج، هل يجب علي الموافقة؟
+    answerable: true
+    gold: [{source: HPPL, article: 17}]
+  - id: c26
+    topic: patient instructions
+    question: هل علي تنبيه المريض كتابيًا إلى تعليمات ما بعد الخلع ومخاطر عدم الالتزام بها؟
+    answerable: true
+    gold: [{source: HPPL, article: 18}]
+  - id: c27
+    topic: consent
+    question: من يوقع الموافقة على علاج عصب لطفل عمره عشر سنوات؟
+    answerable: true
+    gold: [{source: HPPL, article: 19}]
+  - id: c28
+    topic: colleagues
+    question: هل يعد التحدث بسوء عن زميل لجذب مرضاه مخالفة نظامية؟
+    answerable: true
+    gold: [{source: HPPL, article: 24}]
+  - id: c29
+    topic: colleagues
+    question: أعمل بدلًا من زميل في إجازته، ما الذي يجب علي تجاه مرضاه؟
+    answerable: true
+    gold: [{source: HPPL, article: 25}]
+  - id: c30
+    topic: standard of care
+    question: هل التزام طبيب الأسنان التزام بتحقيق نتيجة أم ببذل عناية؟
+    answerable: true
+    gold: [{source: HPPL, article: 26}]
+  - id: c31
+    topic: penalties
+    question: ما عقوبة مزاولة طب الأسنان دون ترخيص؟
+    answerable: true
+    gold: [{source: HPPL, article: 28}]
+  - id: c32
+    topic: penalties
+    question: ما الغرامة المقررة على مخالفة أحكام الإعلان عن الممارس الصحي؟
+    answerable: true
+    gold: [{source: HPPL, article: 29}]
+  - id: c33
+    topic: discipline
+    question: ما العقوبات التأديبية التي يمكن توقيعها على الممارس الصحي؟
+    answerable: true
+    gold: [{source: HPPL, article: 32}]
+  - id: c34
+    topic: health sharia board
+    question: ممن تتكون الهيئة الصحية الشرعية؟
+    answerable: true
+    gold: [{source: HPPL, article: 33}]
+  - id: c35
+    topic: health sharia board
+    question: هل تنظر الهيئة الصحية الشرعية في خطأ أدى إلى فقد سن حتى لو لم يطالب المريض بتعويض؟
+    answerable: true
+    gold: [{source: HPPL, article: 34}]
+  - id: c36
+    topic: limitation
+    question: هل تسقط الدعوى في الحق العام عن خطأ مهني بمرور مدة معينة؟
+    answerable: true
+    gold: [{source: HPPL, article: 37}]
+  - id: c37
+    topic: suspension
+    question: هل يجوز إيقافي مؤقتًا عن العمل قبل صدور قرار في الشكوى المقدمة ضدي؟
+    answerable: true
+    gold: [{source: HPPL, article: 39}]
+  - id: c38
+    topic: complaints
+    question: أين يقدم المريض مطالبته بالحق الخاص عن خطأ مهني وقع في العيادة؟
+    answerable: true
+    gold: [{source: HPPL, article: 40}]
+  - id: r05
+    topic: out of scope (commercial lease)
+    question: ما حقوقي إذا رفع مالك العقار إيجار العيادة قبل انتهاء العقد؟
+    answerable: false
+  - id: r06
+    topic: out of scope (social insurance)
+    question: هل يلزم تسجيل موظفي الاستقبال في التأمينات الاجتماعية؟
+    answerable: false
+  - id: r07
+    topic: out of scope (finance)
+    question: ما شروط الحصول على تمويل بنكي لشراء أجهزة عيادة أسنان؟
+    answerable: false
+  - id: r08
+    topic: out of scope (clinical)
+    question: ما الجرعة المناسبة من المضاد الحيوي بعد خلع ضرس العقل؟
+    answerable: false
+  - id: r09
+    topic: out of scope (inheritance)
+    question: كيف تقسم حصص عيادة أسنان مملوكة لطبيب متوفى بين ورثته؟
+    answerable: false
+  - id: r10
+    topic: out of scope (traffic)
+    question: كيف أعترض على مخالفة مرورية سجلت على سيارة العيادة؟
+    answerable: false
+  - id: r11
+    topic: out of scope (trademark)
+    question: كيف أسجل علامة تجارية لمعجون أسنان أنتجه؟
+    answerable: false
+  - id: r12
+    topic: out of scope (zakat)
+    question: كيف تحسب الزكاة على دخل عيادة أسنان خاصة؟
     answerable: false

@@ -38,6 +38,13 @@ LABELS: list[tuple[str, re.Pattern[str]]] = [
     ("PERSON", re.compile(r"(?:ولي الأمر|ولي امر|المرافق|Guardian)\s*[:：]?\s*" + _NAME_VALUE, re.IGNORECASE)),
     ("DOB", re.compile(r"(?:تاريخ الميلاد|تاريخ ميلاد|DOB|Date of birth)\s*[:：]?\s*([0-9/\-\.\s]{6,12}(?:هـ|م)?)", re.IGNORECASE)),
     ("ADDRESS", re.compile(r"((?:حي|شارع|طريق)\s+[^\n،,.؛;]{2,40})")),
+    (
+        "ADDRESS",
+        re.compile(
+            r"((?:فيلا|فيلّا|مبنى|عمارة|بناية|شقة|منزل|Villa|Building|Bldg\.?|Apt\.?|Flat)\s*(?:رقم|No\.?)?\s*\d{1,5}[A-Za-z]?)",
+            re.IGNORECASE,
+        ),
+    ),
     ("ADDRESS", re.compile(r"(?:العنوان|Address)\s*[:：]?\s*([^\n؛;]{3,80})", re.IGNORECASE)),
 ]
 
