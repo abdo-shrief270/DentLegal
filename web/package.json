@@ -9,6 +9,7 @@
     "site:build": "pnpm --filter @dentlegal/site generate",
     "preview": "pnpm --filter @dentlegal/dashboard preview",
     "typecheck": "pnpm --filter @dentlegal/dashboard typecheck && pnpm --filter @dentlegal/site typecheck",
-    "test": "pnpm -r --if-present test"
+    "test": "pnpm -r --if-present test",
+    "e2e": "pnpm --filter @dentlegal/dashboard e2e"
   }
 }

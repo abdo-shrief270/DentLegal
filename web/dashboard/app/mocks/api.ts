@@ -12,7 +12,8 @@ const SESSION_KEY = 'dl-mock-session'
 const LATENCY_MS = 250
 
 const wait = (ms = LATENCY_MS) => new Promise<void>((resolve) => setTimeout(resolve, ms))
-const clone = <T>(value: T): T => structuredClone(value)
+// Values from the pages can be Vue reactive proxies, which structuredClone rejects; the data is plain JSON, as over HTTP.
+const clone = <T>(value: T): T => (value === undefined ? value : JSON.parse(JSON.stringify(value)) as T)
 
 const ISO = /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}(:\d{2}(\.\d+)?)?([+-]\d{2}:\d{2}|Z)?)?$/
 

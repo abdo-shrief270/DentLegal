@@ -42,3 +42,13 @@ jobs:
       - run: pnpm site:build
       # After the builds: the site tests read the pre-rendered HTML.
       - run: pnpm test
+      # Dashboard smoke test (S9.4) on the generated build with the fake API: sign-in + 2FA → claim → edit → approve,
+      # and every admin page. The same test runs against staging with E2E_BASE_URL (dashboard/e2e/README.md).
+      - run: pnpm --filter @dentlegal/dashboard exec playwright install --with-deps chromium
+      - run: pnpm e2e
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dashboard-smoke-report
+          path: web/dashboard/playwright-report
+          retention-days: 7
