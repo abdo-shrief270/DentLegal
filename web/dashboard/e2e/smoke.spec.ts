@@ -57,15 +57,18 @@ test('lawyer: claim → edit → save a version → approve', async ({ page }) =
   const errors = watchErrors(page)
   await signIn(page, 'lawyer')
 
+  const approvedCount = async () => Number((await page.getByRole('tab', { name: /^معتمدة/ }).textContent())?.match(/\d+/)?.[0] ?? NaN)
   // Claim the first case waiting in the queue.
   await page.getByRole('tab', { name: /^بانتظار الاستلام/ }).click()
   const row = page.locator('tbody tr').filter({ has: page.getByRole('button', { name: 'استلام' }) }).first()
   await expect(row, 'the queue needs one unclaimed case (staging: run the smoke-test seeder)').toBeVisible()
+  const approvedBefore = await approvedCount() // the counts load with the list
   const caseCode = (await row.locator('.mono').first().textContent())?.trim() ?? ''
   expect(caseCode).toMatch(/^DL-\d{4}-\d{4}$/)
   await row.getByRole('button', { name: 'استلام' }).click()
   await page.getByRole('alertdialog').getByRole('button', { name: 'استلام' }).click()
   await page.waitForURL('**/lawyer/reviews/**')
+  await expect(page.getByText(caseCode).first()).toBeVisible() // the workspace is the claimed case
   await expect(page.getByText('قيد المراجعة').first()).toBeVisible()
 
   // Edit the intro and save it as a new version.
@@ -90,10 +93,11 @@ test('lawyer: claim → edit → save a version → approve', async ({ page }) =
   await expect(page.getByText('الإصدار المعتمد مقفل', { exact: false })).toBeVisible()
   await expect(page.getByText('معتمد', { exact: true }).first()).toBeVisible()
 
-  // The case moves to the approved tab.
+  // The case moves to the approved tab (it may sit on a later page, so check the count and the case's own page).
   await page.getByRole('button', { name: 'القائمة' }).click()
+  await expect.poll(approvedCount).toBe(approvedBefore + 1)
   await page.getByRole('tab', { name: /^معتمدة/ }).click()
-  await expect(page.locator('tbody').getByText(caseCode)).toBeVisible()
+  await expect(page.locator('tbody tr').first()).toBeVisible()
 
   expect(errors).toEqual([])
 })

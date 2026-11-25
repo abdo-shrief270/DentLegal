@@ -25,14 +25,26 @@ const filtered = computed(() => {
   return q ? rows.value.filter((r) => r.caseCode.includes(q) || r.title.includes(q) || r.dentistName.includes(q)) : rows.value
 })
 
+// The tab the shown rows belong to. Actions follow it, not the selected tab, so a row from the previous tab never
+// shows the next tab's button (e.g. «استلام» on an approved case) while the new list loads.
+const rowsTab = ref<ReviewTab>(tab.value)
+let requestNo = 0
+
 async function refresh() {
+  const requested = tab.value
+  const no = ++requestNo
+  if (requested !== rowsTab.value) rows.value = []
   loading.value = true
   try {
-    ;[rows.value, counts.value] = await Promise.all([api.lawyer.listReviews(tab.value), api.lawyer.counts()])
+    const [list, tabCounts] = await Promise.all([api.lawyer.listReviews(requested), api.lawyer.counts()])
+    if (no !== requestNo) return // a newer tab switch is in flight
+    rows.value = list
+    counts.value = tabCounts
+    rowsTab.value = requested
   } catch (e) {
     toast.add({ severity: 'error', summary: errorMessage(e), life: 4000 })
   } finally {
-    loading.value = false
+    if (no === requestNo) loading.value = false
   }
 }
 
@@ -85,10 +97,10 @@ watch(tab, refresh, { immediate: true })
         </div>
 
         <DataTable :value="filtered" :loading="loading" data-key="draftId" row-hover class="text-[13px]"
-          @row-click="(e) => tab !== 'unclaimed' && navigateTo(`/lawyer/reviews/${e.data.draftId}`)">
+          @row-click="(e) => rowsTab !== 'unclaimed' && navigateTo(`/lawyer/reviews/${e.data.draftId}`)">
           <template #empty>
             <div class="py-10 text-center muted">
-              {{ tab === 'unclaimed' ? 'لا توجد قضايا بانتظار الاستلام.' : tab === 'mine' ? 'لا توجد قضايا قيد مراجعتك.' : 'لا توجد ردود معتمدة بعد.' }}
+              {{ rowsTab === 'unclaimed' ? 'لا توجد قضايا بانتظار الاستلام.' : rowsTab === 'mine' ? 'لا توجد قضايا قيد مراجعتك.' : 'لا توجد ردود معتمدة بعد.' }}
             </div>
           </template>
           <Column header="رقم القضية"><template #body="{ data }"><span class="mono">{{ data.caseCode }}</span></template></Column>
@@ -101,8 +113,8 @@ watch(tab, refresh, { immediate: true })
           <Column field="dentistName" header="الطبيب" />
           <Column header="المخاطر"><template #body="{ data }"><RiskBadge :risk="data.risk" /></template></Column>
           <Column header="قوة الموقف"><template #body="{ data }"><b>{{ data.positionStrength }}%</b></template></Column>
-          <Column :header="tab === 'approved' ? 'تاريخ الاعتماد' : 'أُرسلت للمراجعة'">
-            <template #body="{ data }"><DualDate :value="tab === 'approved' ? data.approvedAt : data.submittedAt" with-time /></template>
+          <Column :header="rowsTab === 'approved' ? 'تاريخ الاعتماد' : 'أُرسلت للمراجعة'">
+            <template #body="{ data }"><DualDate :value="rowsTab === 'approved' ? data.approvedAt : data.submittedAt" with-time /></template>
           </Column>
           <Column header="الفحوصات">
             <template #body="{ data }">
@@ -112,8 +124,8 @@ watch(tab, refresh, { immediate: true })
           </Column>
           <Column header="" class="w-px whitespace-nowrap">
             <template #body="{ data }">
-              <Button v-if="tab === 'unclaimed'" size="small" label="استلام" @click.stop="claim(data)" />
-              <Button v-else size="small" severity="secondary" outlined :label="tab === 'approved' ? 'عرض' : 'فتح المراجعة'"
+              <Button v-if="rowsTab === 'unclaimed'" size="small" label="استلام" @click.stop="claim(data)" />
+              <Button v-else size="small" severity="secondary" outlined :label="rowsTab === 'approved' ? 'عرض' : 'فتح المراجعة'"
                 @click.stop="navigateTo(`/lawyer/reviews/${data.draftId}`)" />
             </template>
           </Column>
