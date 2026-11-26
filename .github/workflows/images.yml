@@ -1,0 +1,80 @@
+# Builds the three production images without pushing whenever their inputs change, so a broken Dockerfile shows
+# up on the branch, not in the deploy from main. The edge image is built with placeholder static files.
+name: Images
+
+on:
+  push:
+    paths:
+      - "backend/Dockerfile"
+      - "backend/docker/**"
+      - "backend/.dockerignore"
+      - "backend/composer.lock"
+      - "ai/Dockerfile"
+      - "ai/pyproject.toml"
+      - "infra/prod/**"
+      - ".github/workflows/images.yml"
+      - ".github/workflows/deploy*.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: images-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: api
+            context: backend
+            file: backend/Dockerfile
+            target: prod
+          - name: ai
+            context: ai
+            file: ai/Dockerfile
+            target: prod
+          - name: web
+            context: infra/prod
+            file: infra/prod/web.Dockerfile
+            target: ""
+    steps:
+      - uses: actions/checkout@v4
+      - name: Free disk space
+        if: matrix.name == 'ai'
+        run: sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL && df -h /
+      - name: Placeholder static builds
+        if: matrix.name == 'web'
+        run: |
+          mkdir -p infra/prod/portal infra/prod/site
+          echo '<!doctype html><title>portal</title>' > infra/prod/portal/200.html
+          echo '<!doctype html><title>site</title>' > infra/prod/site/index.html
+          echo '<!doctype html><title>404</title>' > infra/prod/site/404.html
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.file }}
+          target: ${{ matrix.target }}
+          push: false
+          load: ${{ matrix.name == 'api' }}
+          tags: dentlegal-${{ matrix.name }}:check
+      # The API image starts, caches its config and answers /up with a minimal environment (no database needed).
+      - name: Smoke-run the API image
+        if: matrix.name == 'api'
+        run: |
+          docker run -d --name api -p 8080:8080 \
+            -e APP_KEY="base64:$(openssl rand -base64 32)" -e APP_URL=http://localhost -e DB_HOST=127.0.0.1 \
+            -e SESSION_DRIVER=array -e CACHE_STORE=array -e QUEUE_CONNECTION=sync dentlegal-api:check
+          for i in $(seq 1 30); do curl -fsS http://localhost:8080/up > /dev/null && break; sleep 2; done
+          curl -fsS http://localhost:8080/up > /dev/null
+          docker exec api php -v | head -1
+          docker exec api php -m | grep -E '^(pdo_pgsql|redis|intl|sodium|pcntl)$'
+          docker exec api sh -c 'id -un'
+      - name: API logs on failure
+        if: failure() && matrix.name == 'api'
+        run: docker logs api || true

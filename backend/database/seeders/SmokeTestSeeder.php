@@ -2,7 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Modules\Cases\Actions\NextCaseCode;
 use App\Modules\Cases\Enums\CaseStatus;
+use App\Modules\Cases\Enums\CaseType;
+use App\Modules\Cases\Enums\ClaimType;
 use App\Modules\Cases\Models\DentalCase;
 use App\Modules\Documents\Models\Document;
 use App\Modules\Identity\Enums\Role;
@@ -75,8 +78,17 @@ class SmokeTestSeeder extends Seeder
                 [$version->id, $source->id, self::ARTICLE, self::ARTICLE],
             )->id;
 
-        $case = DentalCase::factory()->status(CaseStatus::LawyerReview)
-            ->create(['title' => 'حالة اختبار آلي: ادعاء إفشاء معلومات', 'patient_code' => 'P-TEST', 'submitted_for_review_at' => now()]);
+        // No factories: staging runs the production image, which has no Faker (dev dependency).
+        $dentist = User::query()->firstOrCreate(['phone_e164' => '+966500000417'], ['name' => 'طبيب الاختبار الآلي', 'status' => 'active']);
+        $dentist->syncRoles([Role::Dentist->value]);
+        $case = new DentalCase;
+        $case->forceFill([
+            'code' => app(NextCaseCode::class)(), 'dentist_id' => $dentist->id, 'case_type' => CaseType::Complaint,
+            'authority' => 'الشؤون الصحية (اختبار آلي)', 'complaint_no' => 'TEST/1448', 'received_on' => now()->subDays(3)->toDateString(),
+            'title' => 'حالة اختبار آلي: ادعاء إفشاء معلومات', 'procedure' => 'تبييض أسنان', 'procedure_date' => now()->subMonth()->toDateString(),
+            'patient_code' => 'P-TEST', 'claim_type' => ClaimType::Disciplinary, 'facts_masked' => 'يدّعي [PATIENT] أن الطبيب أفشى تفاصيل علاجه.',
+            'facts_entity_counts' => [], 'status' => CaseStatus::LawyerReview, 'submitted_for_review_at' => now(),
+        ])->save();
         $doc = (new Document)->forceFill([
             'case_id' => $case->id, 'kind' => 'complaint_letter', 'original_name' => 'test-letter.pdf', 'mime' => 'application/pdf', 'size_bytes' => 100,
             'storage_key' => 'smoke-test/missing', 'wrapped_key' => 'x', 'sha256' => str_repeat('0', 64), 'page_count' => 1, 'ocr_status' => 'done', 'ocr_confidence' => 0.95,

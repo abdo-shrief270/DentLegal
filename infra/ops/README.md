@@ -1,7 +1,7 @@
 # Operations scripts (S0.5)
 
 Backups, restore checks and the host alarm from PROJECT1_PLAN.md §9.6. They need `bash`, `age`, `curl`, `python3`,
-the Postgres client tools (or `PG_EXEC` into the Postgres container) and, for the off-site bucket, `rclone`.
+the Postgres client tools and, for the off-site bucket, `rclone`.
 
 | Script | What it does | When |
 |---|---|---|
@@ -22,15 +22,20 @@ The off-site bucket is decision **D29** (Backblaze B2 or Cloudflare R2, EU regio
 
 ## Server setup
 
-`/etc/dentlegal/ops.env` (mode 600, owner root):
+`/etc/dentlegal/ops.env` (mode 600, owner root). Postgres is published on the server's loopback address only
+(`infra/prod/compose.yaml`), so the scripts use the host's client tools (`postgresql-client-17`, `age`, `rclone`):
 
 ```bash
 DEST=b2:dentlegal-backups/prod
 AGE_RECIPIENTS_FILE=/etc/dentlegal/backup-recipients.txt
-DOCUMENTS_ROOT=/srv/dentlegal/storage/documents
-PG_EXEC="docker compose -f /srv/dentlegal/compose.yaml exec -T postgres"
+DOCUMENTS_ROOT=/srv/dentlegal/documents
+PGHOST=127.0.0.1
+PGPORT=5432
 PGDATABASE=dentlegal
 PGUSER=dentlegal
+PGPASSWORD=<POSTGRES_APP_PASSWORD from /srv/dentlegal/.env>
+PG_ADMIN_USER=postgres
+PG_ADMIN_PASSWORD=<POSTGRES_ADMIN_PASSWORD, for restores only>
 PROD_DATABASE=dentlegal
 ALERT_WEBHOOK_URL=https://…
 ```

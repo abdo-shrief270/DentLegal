@@ -1,0 +1,105 @@
+# One environment's deploy, called by deploy.yml: build the edge image (Caddy + dashboard + site, which need the
+# environment's hosts at build time), then copy the Compose files to the VPS and run infra/prod/deploy.sh there.
+# GitHub environment settings: variables API_HOST, PORTAL_HOST, SITE_HOST (and optional site texts); secrets
+# DEPLOY_HOST, DEPLOY_USER, DEPLOY_SSH_KEY, DEPLOY_KNOWN_HOSTS; `production` also has required reviewers.
+name: Deploy environment
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        type: string
+        required: true
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+    environment: ${{ inputs.environment }}
+    env:
+      API_HOST: ${{ vars.API_HOST }}
+      PORTAL_HOST: ${{ vars.PORTAL_HOST }}
+      SITE_HOST: ${{ vars.SITE_HOST }}
+      HAS_SERVER: ${{ secrets.DEPLOY_HOST != '' }}
+    steps:
+      - name: Check configuration
+        id: config
+        run: |
+          if [ -z "$API_HOST" ] || [ -z "$PORTAL_HOST" ] || [ -z "$SITE_HOST" ]; then
+            echo "::notice::${{ inputs.environment }}: API_HOST, PORTAL_HOST and SITE_HOST are not set yet; nothing to deploy."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/checkout@v4
+        if: steps.config.outputs.ready == 'true'
+      - uses: pnpm/action-setup@v4
+        if: steps.config.outputs.ready == 'true'
+        with:
+          package_json_file: web/package.json
+      - uses: actions/setup-node@v4
+        if: steps.config.outputs.ready == 'true'
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: web/pnpm-lock.yaml
+      - name: Build the dashboard and the site
+        if: steps.config.outputs.ready == 'true'
+        working-directory: web
+        env:
+          NUXT_PUBLIC_API_BASE: https://${{ vars.API_HOST }}
+          NUXT_PUBLIC_MOCK_API: "false"
+          NUXT_PUBLIC_SITE_URL: https://${{ vars.SITE_HOST }}
+          NUXT_PUBLIC_CONTACT_EMAIL: ${{ vars.CONTACT_EMAIL }}
+          NUXT_PUBLIC_WHATSAPP: ${{ vars.WHATSAPP }}
+          NUXT_PUBLIC_APP_STORE_URL: ${{ vars.APP_STORE_URL }}
+          NUXT_PUBLIC_PLAY_STORE_URL: ${{ vars.PLAY_STORE_URL }}
+          NUXT_PUBLIC_LEGAL_APPROVED: ${{ vars.LEGAL_APPROVED || 'false' }}
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm build
+          pnpm site:build
+          cp -r dashboard/.output/public ../infra/prod/portal
+          cp -r site/.output/public ../infra/prod/site
+      - uses: docker/setup-buildx-action@v3
+        if: steps.config.outputs.ready == 'true'
+      - uses: docker/login-action@v3
+        if: steps.config.outputs.ready == 'true'
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Image names
+        if: steps.config.outputs.ready == 'true'
+        id: name
+        run: |
+          echo "registry=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_OUTPUT"
+          echo "web_tag=${GITHUB_SHA}-${{ inputs.environment }}" >> "$GITHUB_OUTPUT"
+      - uses: docker/build-push-action@v6
+        if: steps.config.outputs.ready == 'true'
+        with:
+          context: infra/prod
+          file: infra/prod/web.Dockerfile
+          push: true
+          tags: ${{ steps.name.outputs.registry }}/dentlegal-web:${{ steps.name.outputs.web_tag }}
+      - name: Deploy over SSH
+        if: steps.config.outputs.ready == 'true' && env.HAS_SERVER == 'true'
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/id_ed25519 && chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          target="$DEPLOY_USER@$DEPLOY_HOST"
+          scp infra/prod/compose.yaml infra/prod/deploy.sh infra/prod/postgres-init.sh "$target:/srv/dentlegal/"
+          ssh "$target" "bash /srv/dentlegal/deploy.sh ${{ inputs.environment }} $GITHUB_SHA ${{ steps.name.outputs.web_tag }}"
+      - name: No server yet
+        if: steps.config.outputs.ready == 'true' && env.HAS_SERVER != 'true'
+        run: |
+          echo "::notice::${{ inputs.environment }} - images are built; set the DEPLOY_* secrets to deploy to the VPS."

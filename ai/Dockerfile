@@ -26,7 +26,9 @@ FROM base AS prod
 COPY pyproject.toml ./
 COPY app ./app
 COPY config ./config
-RUN pip install ".[models]"
+# CPU-only PyTorch first: the default wheel pulls ~3 GB of CUDA libraries the VPS can't use.
+RUN pip install torch --index-url https://download.pytorch.org/whl/cpu \
+ && pip install ".[models]"
 
 # Weights: bge-m3 (~2.3 GB), bge-reranker-v2-m3 (~2.3 GB), CAMeL Arabic NER.
 RUN python -c "from FlagEmbedding import BGEM3FlagModel, FlagReranker; BGEM3FlagModel('BAAI/bge-m3'); FlagReranker('BAAI/bge-reranker-v2-m3')" \

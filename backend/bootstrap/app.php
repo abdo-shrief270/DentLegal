@@ -3,6 +3,7 @@
 use App\Http\Middleware\RequireAppVersion;
 use App\Http\Middleware\RequireTwoFactor;
 use App\Http\Middleware\SecurityHeaders;
+use App\Modules\Admin\Console\InviteAdmin;
 use App\Modules\Citations\Console\BackfillCitations;
 use App\Modules\Compliance\Console\PurgeExpiredData;
 use App\Modules\Compliance\Console\SecurityCheck;
@@ -43,6 +44,7 @@ return Application::configure(basePath: dirname(__DIR__))
         PurgeExpiredData::class,
         SecurityCheck::class,
         BackfillCitations::class,
+        InviteAdmin::class,
     ])
     ->withExceptions(function (Exceptions $exceptions): void {
         ErrorRenderer::register($exceptions);
