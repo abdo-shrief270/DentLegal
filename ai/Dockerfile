@@ -31,8 +31,9 @@ RUN pip install torch --index-url https://download.pytorch.org/whl/cpu \
  && pip install ".[models]"
 
 # Weights: bge-m3 (~2.3 GB), bge-reranker-v2-m3 (~2.3 GB), CAMeL Arabic NER.
-RUN python -c "from FlagEmbedding import BGEM3FlagModel, FlagReranker; BGEM3FlagModel('BAAI/bge-m3'); FlagReranker('BAAI/bge-reranker-v2-m3')" \
- && camel_data -i ner-arabert
+RUN python -c "from FlagEmbedding import BGEM3FlagModel, FlagReranker; BGEM3FlagModel('BAAI/bge-m3'); FlagReranker('BAAI/bge-reranker-v2-m3')"
+# camel_data writes its catalogue into CAMELTOOLS_DATA and expects the folder to exist.
+RUN mkdir -p "$CAMELTOOLS_DATA" && camel_data -i ner-arabert
 
 RUN useradd --system --uid 10001 aisvc && chown -R aisvc /srv/ai
 USER aisvc
