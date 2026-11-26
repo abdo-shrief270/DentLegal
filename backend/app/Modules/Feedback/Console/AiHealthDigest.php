@@ -30,7 +30,7 @@ final class AiHealthDigest extends Command
         $m = self::measure($from, $to);
 
         $flags = [];
-        if ($m['answers'] + $m['refusals'] >= (int) $c['min_answers'] && $m['refusal_rate'] !== null && $m['refusal_rate'] > (float) $c['refusal_rate_max']) {
+        if ((int) $c['min_answers'] <= $m['answers'] + $m['refusals'] && $m['refusal_rate'] !== null && $m['refusal_rate'] > (float) $c['refusal_rate_max']) {
             $flags[] = sprintf('نسبة الاعتذار %s%% أعلى من الحد %s%%', self::pct($m['refusal_rate']), self::pct((float) $c['refusal_rate_max']));
         }
         if ($m['citation_validity'] !== null && $m['validated_runs'] >= 3 && $m['citation_validity'] < (float) $c['citation_validity_min']) {

@@ -5,10 +5,13 @@ import 'package:flutter/foundation.dart';
 import 'package:screen_protector/screen_protector.dart';
 
 import 'app.dart';
+import 'core/monitoring/error_tracking.dart';
 import 'core/security/app_lock.dart';
 import 'features/auth/presentation/auth_controller.dart';
 
-Future<void> main() async {
+Future<void> main() => runWithErrorTracking(_start);
+
+Future<void> _start() async {
   WidgetsFlutterBinding.ensureInitialized();
   final container = ProviderContainer();
   // Restore a signed-in session before the first frame, so the router starts on the right screen.

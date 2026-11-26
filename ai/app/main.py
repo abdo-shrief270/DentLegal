@@ -10,6 +10,7 @@ from fastapi import FastAPI
 
 from app.core.config import Settings, get_settings
 from app.core.container import Container, build_container
+from app.core.error_tracking import init_error_tracking
 from app.core.errors import register_error_handlers
 from app.core.logging import configure_logging
 from app.routes.v1 import router
@@ -18,6 +19,7 @@ from app.routes.v1 import router
 def create_app(settings: Settings | None = None, container: Container | None = None, anthropic_client: Any | None = None) -> FastAPI:
     settings = settings or get_settings()
     configure_logging()
+    init_error_tracking(settings)
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:

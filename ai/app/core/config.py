@@ -58,6 +58,9 @@ class Settings(BaseSettings):
     service_token: SecretStr = SecretStr("")
     # Key for the hashes in the masking placeholder state. Same value on every ai-svc worker.
     masking_secret: SecretStr = SecretStr("")
+    # Error tracking (§8.6, D14): a Sentry or GlitchTip DSN; empty turns it off. `release` is set by the deploy.
+    error_tracking_dsn: SecretStr = SecretStr("")
+    release: str = ""
     database_url: str = "postgresql://dentlegal:dentlegal@127.0.0.1:5432/dentlegal"
 
     # Models (§5.4). "hashing"/"lexical" are deterministic stand-ins for tests and local work without the weights.

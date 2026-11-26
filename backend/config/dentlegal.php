@@ -98,6 +98,12 @@ return [
         'max_mb' => 50,
     ],
 
+    // Error tracking (§8.6, D14): a Sentry or GlitchTip DSN; empty turns it off. RELEASE is set by the deploy.
+    'error_tracking' => [
+        'dsn' => env('ERROR_TRACKING_DSN'),
+        'release' => env('APP_RELEASE'),
+    ],
+
     // Daily AI health digest (PROJECT1_PLAN.md §8.6): thresholds that flag a day, and who gets the email.
     'ai_health' => [
         'recipients' => array_values(array_filter(array_map('trim', explode(',', (string) env('AI_HEALTH_RECIPIENTS', ''))))),

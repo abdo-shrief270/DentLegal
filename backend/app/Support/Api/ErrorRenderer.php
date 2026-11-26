@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support\Api;
 
+use App\Support\ErrorTracking\ErrorReporter;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -23,6 +24,10 @@ final class ErrorRenderer
     public static function register(Exceptions $exceptions): void
     {
         $exceptions->dontReport([ApiException::class]);
+        // Unexpected errors also go to error tracking (Laravel has already skipped validation, auth, 404 and the like).
+        $exceptions->report(function (Throwable $e): void {
+            app(ErrorReporter::class)->capture($e);
+        });
 
         $exceptions->render(function (Throwable $e, Request $request): ?JsonResponse {
             if (! $request->is('api/*') && ! $request->expectsJson()) {

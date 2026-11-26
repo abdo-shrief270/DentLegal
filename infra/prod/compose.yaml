@@ -19,6 +19,7 @@ x-app: &app
     REDIS_PASSWORD: ${REDIS_PASSWORD:?}
     AI_SERVICE_URL: http://ai:8000
     DOCUMENTS_ROOT: /srv/documents
+    APP_RELEASE: ${IMAGE_TAG:?}
     # Only Caddy, on this network, may set X-Forwarded-For (rate limits and HSTS see the real client).
     TRUSTED_PROXIES: 172.30.0.0/24
   volumes:
@@ -66,6 +67,7 @@ services:
     env_file: [ai.env]
     environment:
       AI_DATABASE_URL: postgresql://dentlegal:${POSTGRES_APP_PASSWORD:?}@postgres:5432/dentlegal
+      AI_RELEASE: ${IMAGE_TAG:?}
     depends_on:
       postgres: { condition: service_healthy }
 
