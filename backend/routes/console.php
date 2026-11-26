@@ -13,3 +13,6 @@ Schedule::command('stats:roll-up')->dailyAt('00:20')->timezone('Asia/Riyadh')->o
 
 // Retention (§9.7, S9.2): nightly, after the stats roll-up.
 Schedule::command('retention:purge')->dailyAt('01:10')->timezone('Asia/Riyadh')->onOneServer()->withoutOverlapping();
+
+// Daily AI health digest (§8.6): the last 24 hours, emailed before the working day starts.
+Schedule::command('ai:health-digest')->dailyAt('07:40')->timezone('Asia/Riyadh')->onOneServer()->withoutOverlapping();

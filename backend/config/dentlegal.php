@@ -98,6 +98,17 @@ return [
         'max_mb' => 50,
     ],
 
+    // Daily AI health digest (PROJECT1_PLAN.md §8.6): thresholds that flag a day, and who gets the email.
+    'ai_health' => [
+        'recipients' => array_values(array_filter(array_map('trim', explode(',', (string) env('AI_HEALTH_RECIPIENTS', ''))))),
+        'webhook_url' => env('ALERT_WEBHOOK_URL'),
+        'refusal_rate_max' => 0.10,
+        'citation_validity_min' => 0.95,
+        'daily_cost_max_usd' => (float) env('AI_DAILY_COST_ALERT_USD', 20),
+        // Rates on fewer questions (answered + refused) than this are reported but not flagged (one in three is noise).
+        'min_answers' => 10,
+    ],
+
     // §9.7 (proposal; D18 to confirm). The grace period lets support undo a mistaken deletion; it stays under 30 days.
     'retention' => [
         'otp_hours' => 24,

@@ -55,6 +55,7 @@ and the portal login page every minute.
 | Every 5 min | host alarm | `infra/ops/host-alert.sh` from cron |
 | Nightly 02:30 | encrypted backup off the server | `infra/ops/backup.sh` from cron; failures post to the alert channel |
 | Nightly | stats roll-up, retention purge | scheduler container |
+| Daily 07:40 | AI health digest email (refusals, citation validity, cost, failures; flagged days also go to the alert channel) | scheduler: `ai:health-digest` |
 | Weekly | eval run, AI cost and refusal review | `python -m app.eval run …` on staging; admin page «سجل الذكاء الاصطناعي» |
 | Weekly | citation sample | the lawyer judges the sample in «عينة الاستشهادات»; accuracy shows on the admin overview |
 | Monthly | restore test into staging | `infra/ops/restore.sh`, recorded in `infra/ops/README.md` |

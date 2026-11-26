@@ -7,6 +7,7 @@ use App\Modules\Admin\Console\InviteAdmin;
 use App\Modules\Citations\Console\BackfillCitations;
 use App\Modules\Compliance\Console\PurgeExpiredData;
 use App\Modules\Compliance\Console\SecurityCheck;
+use App\Modules\Feedback\Console\AiHealthDigest;
 use App\Modules\Feedback\Console\RollUpUsageStats;
 use App\Support\Api\ErrorRenderer;
 use Illuminate\Foundation\Application;
@@ -45,6 +46,7 @@ return Application::configure(basePath: dirname(__DIR__))
         SecurityCheck::class,
         BackfillCitations::class,
         InviteAdmin::class,
+        AiHealthDigest::class,
     ])
     ->withExceptions(function (Exceptions $exceptions): void {
         ErrorRenderer::register($exceptions);
