@@ -73,6 +73,45 @@ Demo sign-in:
 The OTP is always `123456`. The analysis pipeline runs in about seven seconds.
 
 
+## Release builds
+
+Two flavors (Android): `staging` (`sa.dentlegal.dentlegal.staging`, «DentLegal تجريبي», installs next to production)
+and `prod` (`sa.dentlegal.dentlegal`). Always build releases with the script; it turns fake data off and sets the API
+host, the `X-App-Version` from `pubspec.yaml` and the environment:
+
+```bash
+API_BASE_URL=https://api.<domain> tool/build_release.sh prod appbundle
+```
+
+```bash
+API_BASE_URL=https://api-staging.<domain> tool/build_release.sh staging apk
+```
+
+`ERROR_TRACKING_DSN=…` adds crash reporting (§8.6). Debug symbols go to `build/symbols/<flavor>`; keep them with each
+release to read obfuscated stack traces.
+
+**Android upload key** (once, kept by the client and Abdelrahman in the password manager, never in git):
+
+```bash
+keytool -genkey -v -keystore dentlegal-upload.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload
+```
+
+Then `android/key.properties` (ignored by git):
+
+```properties
+storeFile=/path/to/dentlegal-upload.jks
+storePassword=…
+keyAlias=upload
+keyPassword=…
+```
+
+In CI the same values come from `ANDROID_KEYSTORE_PATH`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS` and
+`ANDROID_KEY_PASSWORD`. Without a key, release builds are signed with the debug key so they run locally; Google Play
+rejects those, so an unsigned store build can't go out by mistake. Enrol in Play App Signing when creating the app.
+
+**iOS:** the IPA is built on macOS with Xcode (Codemagic or a macOS runner, D15); the staging/prod schemes and the
+signing profiles are set up there.
+
 ## Commands
 
 ```bash
