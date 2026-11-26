@@ -1,5 +1,6 @@
 # Builds the three production images without pushing whenever their inputs change, so a broken Dockerfile shows
 # up on the branch, not in the deploy from main. The edge image is built with placeholder static files.
+# `dev-stack` runs `make up` (S0.1) and checks every service is healthy.
 name: Images
 
 on:
@@ -12,6 +13,10 @@ on:
       - "ai/Dockerfile"
       - "ai/pyproject.toml"
       - "infra/prod/**"
+      - "infra/dev/**"
+      - "compose.yaml"
+      - "Makefile"
+      - "backend/docker/**"
       - ".github/workflows/images.yml"
       - ".github/workflows/deploy*.yml"
   workflow_dispatch:
@@ -78,3 +83,22 @@ jobs:
       - name: API logs on failure
         if: failure() && matrix.name == 'api'
         run: docker logs api || true
+
+  dev-stack:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: make up
+        run: make up
+      - name: Health
+        run: |
+          curl -fsS http://localhost:8000/up > /dev/null && echo "api ok"
+          curl -fsS http://localhost:8001/v1/health && echo
+          curl -fsS http://localhost:8025 > /dev/null && echo "mailpit ok"
+          docker compose ps --format '{{.Service}} {{.State}} {{.Health}}'
+          test -z "$(docker compose ps --format '{{.Service}} {{.Health}}' | grep -v -E ' (healthy|)$')"
+      - name: Seeded demo data
+        run: docker compose exec -T api php artisan tinker --execute="echo App\\Modules\\Cases\\Models\\DentalCase::count().PHP_EOL;"
+      - name: Logs on failure
+        if: failure()
+        run: docker compose logs --tail 80

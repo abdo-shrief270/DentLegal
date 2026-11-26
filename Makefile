@@ -3,8 +3,8 @@
 
 up: ## start the stack, migrate and seed the synthetic demo data
 	docker compose up -d --build --wait
-	docker compose exec api php artisan migrate --seed --force
-	docker compose exec api php artisan db:seed --class=DemoSeeder --force
+	docker compose exec -T api php artisan migrate --seed --force
+	docker compose exec -T api php artisan db:seed --class=DemoSeeder --force
 	@echo "API http://localhost:8000 · ai-svc http://localhost:8001/v1/health · Mailpit http://localhost:8025"
 
 down:
@@ -14,10 +14,10 @@ reset: ## drop the database volume too
 	docker compose down -v
 
 migrate:
-	docker compose exec api php artisan migrate
+	docker compose exec -T api php artisan migrate
 
 seed:
-	docker compose exec api php artisan db:seed --class=DemoSeeder --force
+	docker compose exec -T api php artisan db:seed --class=DemoSeeder --force
 
 test: ## backend and ai-svc tests against the stack's Postgres
 	docker compose exec -e DB_DATABASE=dentlegal_test api php artisan test
